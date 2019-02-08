@@ -43,16 +43,20 @@ else: # POSIX
 # end of if-else
 """
 
-DIR_ROOT = os.path.dirname(__file__)
+DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 # Extension of libjpeg
-
 DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "libjpeg", "include")
 DIR_LIBJPEG_SOURCE = pjoin(DIR_ROOT, "libjpeg", "src")
 
+print(DIR_ROOT)
+print(DIR_LIBJPEG_HEADER)
+
 incs_libjpeg = []
 incs_libjpeg.append(DIR_LIBJPEG_HEADER)
+incs_libjpeg.append(DIR_ROOT)
+
 
 srcs_libjpeg = []
 srcs_libjpeg.append("libjpeg.pyx")
@@ -60,12 +64,12 @@ for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
     print(fpath)
     srcs_libjpeg.append(fpath)
 
+srcs_libjpeg.append("read.c")
 ext = cythonize(Extension("libjpeg",
                           sources=srcs_libjpeg,
                           language='c',
                           include_dirs=incs_libjpeg))
-                          #extra_compile_args=cargs,
-                          #include_dirs=inc_dirs,
+                          #extra_compile_args=cargs,                          
                           #extra_link_args=largs,
                           #library_dirs=lib_dirs,
                           #libraries=libs))

@@ -240,6 +240,9 @@ struct jpeg_decompress_struct {
 
 
 """
+
+
+"""
 cdef extern from "jconfig.h":
 
     ctypedef unsigned int JDIMENSION
@@ -248,7 +251,7 @@ cdef extern from "jconfig.h":
     ctypedef unsigned char JSAMPLE
     #ctypedef JSAMPLE * JSAMPROW
     #ctypedef JSAMPROW * JSAMPARRAY 
-  
+"""
 cdef extern from "jpeglib.h":
     cdef struct jpeg_decompress_struct:
         pass
@@ -287,3 +290,7 @@ cdef extern from "jpeglib.h":
     ctypedef JCOEF* JCOEFPTR  # useful in a couple of places
 
     
+cdef extern from "read.h":    
+    int read_jpeg_decompress_struct(char* fname,
+                                    jpeg_decompress_struct* cinfo)
+
