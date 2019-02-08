@@ -40,6 +40,26 @@ cdef struct __error_mgr:
     jmp_buf setjmp_buffer  # for return to caller
 
 ctypedef __error_mgr error_mgr
+ctypedef __error_mgr* error_ptr
+
+cdef output_message(j_common_ptr cinfo):
+    char buffer[JMSG_LENGTH_MAX]
+    # Create the message
+    (*cinfo->err->format_message)(cinfo, buffer)
+    # mexWarnMsgTxt(buffer);
+
+cdef error_exit(j_common_ptr cinfo):
+    char buffer[JMSG_LENGTH_MAX]
+    # cinfo->err really points to a error_mgr struct, so coerce pointer
+    error_ptr err_ptr = (error_ptr) cinfo->err
+    
+    # Create the message
+    (*cinfo->err->format_message)(cinfo, buffer)
+    printf("Error: %s\n",buffer)
+    
+    # Return control to the setjmp point
+    longjmp(myerr->setjmp_buffer, 1);
+
     
 cpdef read_jpeg(char* filename):
     cdef FILE *infile
@@ -127,7 +147,7 @@ cpdef read_jpeg(char* filename):
     jerr.pub.error_exit = my_error_exit
     jerr.pub.output_message = my_output_message
 
-    # Establish the setjmp return context for my_error_exit to use. 
+    # Establish the setjmp return context for error_exit to use. 
     if setjmp(jerr.setjmp_buffer):
         jpeg_destroy_decompress(&cinfo)
         fclose(infile)

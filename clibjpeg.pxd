@@ -277,6 +277,7 @@ cdef extern from "jpeglib.h":
     DEF NUM_QUANT_TBLS  = 4   # Quantization tables are numbered 0..3
     DEF NUM_HUFF_TBLS   = 4   # Huffman tables are numbered 0..3
     DEF NUM_ARITH_TBLS  = 16  # Arith-coding tables are numbered 0..15
+    DEF JMSG_LENGTH_MAX  = 200  # recommended size of format_message buffer
     
     ctypedef short JCOEF
     ctypedef JCOEF JBLOCK[DCTSIZE2]  # one block of coefficients
