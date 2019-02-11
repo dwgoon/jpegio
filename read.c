@@ -217,16 +217,30 @@ void _get_quant_tables(UINT16 tables[],
 	}
 }
 
-void _get_dct_array_size(int ci,
+void _get_size_dct_array(int ci,
                          struct DctArraySize* arr_size,
                          const struct jpeg_decompress_struct* cinfo)
 {
-	// JDIMENSION c_width, c_height;
+	jpeg_component_info *compptr;
+           
+    compptr = cinfo->comp_info + ci; 
+    
+    struct DctBlockArraySize blkarr_size;
+    
+    _get_size_dct_block(ci, &blkarr_size, cinfo);
+    arr_size->nrows = blkarr_size.nrows * DCTSIZE;
+	arr_size->ncols = blkarr_size.ncols * DCTSIZE;
+}
+
+void _get_size_dct_block(int ci,
+                         struct DctBlockArraySize* blkarr_size,
+                         const struct jpeg_decompress_struct* cinfo)
+{
 	jpeg_component_info *compptr;
            
     compptr = cinfo->comp_info + ci;    
-    arr_size->nrows = compptr->height_in_blocks * DCTSIZE;
-	arr_size->ncols = compptr->width_in_blocks * DCTSIZE;
+    blkarr_size->nrows = compptr->height_in_blocks;
+	blkarr_size->ncols = compptr->width_in_blocks;
 }
 
 void _get_dct_coefficients(JCOEF arr[],
@@ -238,9 +252,9 @@ void _get_dct_coefficients(JCOEF arr[],
 	JCOEFPTR bufptr;
 	JDIMENSION nrows, ncols;
 	JDIMENSION blk_x, blk_y;
-	const JDIMENSION BLKSIZE = DCTSIZE*DCTSIZE;
-	const JDIMENSION WIDTH_BLK = compptr->width_in_blocks;
-	const JDIMENSION HEIGHT_BLK = compptr->height_in_blocks;
+	//const JDIMENSION BLKSIZE = DCTSIZE*DCTSIZE;
+	//const JDIMENSION WIDTH_BLK = compptr->width_in_blocks;
+	//const JDIMENSION HEIGHT_BLK = compptr->height_in_blocks;
 	
 	JDIMENSION num_processed = 0;
 	

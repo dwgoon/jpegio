@@ -21,6 +21,7 @@ cdef extern from "dctarraysize.h":
         JDIMENSION ncols
  
 
+
 cdef extern from "read.h":
 
     int _read_jpeg_decompress_struct(FILE* infile,
@@ -29,10 +30,14 @@ cdef extern from "read.h":
     void _get_quant_tables(UINT16 tables[],
                            jpeg_decompress_struct* obj)
         
-    void _get_dct_array_size(int ci,
+    void _get_size_dct_array(int ci,
                              DctArraySize* arr_size,
                              const jpeg_decompress_struct* cinfo)
-    
+        
+    void _get_size_dct_block(int ci,
+                             DctBlockArraySize* arr_size,
+                             const jpeg_decompress_struct* cinfo)
+        
     void _get_dct_coefficients(JCOEF arr[],
                                jpeg_decompress_struct* cinfo)
     
@@ -116,7 +121,7 @@ cdef class DecompressedJpeg:
         cdef list list_arr_sizes = list()
         cdef int num_total_coef = 0
         for i in range(nch):
-            _get_dct_array_size(i, &dct_arr_size, &self._cinfo)
+            _get_size_dct_array(i, &dct_arr_size, &self._cinfo)
             list_arr_sizes.append((dct_arr_size.nrows, dct_arr_size.ncols))
             print("DCT ARR SIZE: ", dct_arr_size.nrows, dct_arr_size.ncols)
             num_total_coef += (dct_arr_size.nrows * dct_arr_size.ncols)
@@ -142,6 +147,9 @@ cdef class DecompressedJpeg:
         cdef Py_ssize_t idx_beg = 0
         cdef JDIMENSION nrows
         cdef JDIMENSION ncols
+        cdef DctBlockArraySize blkarr_size
+        cdef np.ndarray block_array
+
         for i in range(nch):
             nrows, ncols = list_arr_sizes[i]  
             print("nrows, ncols = %d, %d"%(nrows, ncols))
@@ -149,6 +157,33 @@ cdef class DecompressedJpeg:
             print("idx_beg, idx_end = %d, %d"%(idx_beg, idx_end))
             subarr = arr[idx_beg:idx_end]
             print("size of subarr:", np.size(subarr))
-            self.dct_coefficients.append(subarr.reshape(nrows, ncols))
+            #self.dct_coefficients.append(subarr.reshape(nrows, ncols))
+            _get_size_dct_block(i, &blkarr_size, &self._cinfo)
+            block_array = self._arrange_blocks(subarr, blkarr_size)
+            self.dct_coefficients.append(block_array)
             idx_beg = idx_end
+        # end of for
+        
+    cdef _arrange_blocks(self,
+                         np.ndarray subarr,
+                         DctBlockArraySize blkarr_size):
+        print(np.shape(subarr))
+        print(subarr[:10])
+        
+        cdef JDIMENSION i, j
+        cdef JDIMENSION idx_beg, idx_end
+        cdef list rows = list()
+        cdef list row
+        for i in range(blkarr_size.nrows):
+            row = list()
+            for j in range(blkarr_size.ncols):
+                idx_beg = blkarr_size.ncols*DCTSIZE2*i + DCTSIZE2*j
+                idx_end = idx_beg + DCTSIZE2
+                blk = subarr[idx_beg:idx_end]                
+                row.append(blk.reshape(DCTSIZE, DCTSIZE))
+            # end of for
+            rows.append(row)
+        # end of for
+        return np.block(rows)
+        
         
