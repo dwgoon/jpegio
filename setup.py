@@ -44,7 +44,7 @@ else: # POSIX
 """
 
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
-
+cargs = ["/DNPY_NO_DEPRECATED_API"]
 
 # Extension of libjpeg
 DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "libjpeg", "include")
@@ -56,6 +56,7 @@ print(DIR_LIBJPEG_HEADER)
 incs_libjpeg = []
 incs_libjpeg.append(DIR_LIBJPEG_HEADER)
 incs_libjpeg.append(DIR_ROOT)
+incs_libjpeg.append(numpy.get_include())
 
 
 srcs_libjpeg = []
@@ -68,8 +69,8 @@ srcs_libjpeg.append("read.c")
 ext = cythonize(Extension("libjpeg",
                           sources=srcs_libjpeg,
                           language='c',
-                          include_dirs=incs_libjpeg))
-                          #extra_compile_args=cargs,                          
+                          include_dirs=incs_libjpeg,
+                          extra_compile_args=cargs))                    
                           #extra_link_args=largs,
                           #library_dirs=lib_dirs,
                           #libraries=libs))
@@ -86,7 +87,8 @@ incs_jpegio.append(DIR_LIBJPEG_HEADER)
 ext = cythonize(Extension("jpegio",
                           sources=['jpegio.pyx'],
                           language='c',
-                          include_dirs=incs_jpegio))
+                          include_dirs=incs_jpegio,
+                          extra_compile_args=cargs))
                           #extra_compile_args=cargs,
                           #extra_link_args=largs,
                           #library_dirs=lib_dirs,

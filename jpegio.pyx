@@ -24,7 +24,7 @@ def test(n, dtype):
     return arr
     
 def test_jpeg_decompress():
-    cdef libjpeg.JpegDecompress obj = libjpeg.JpegDecompress()
+    cdef libjpeg.DecompressedJpeg obj = libjpeg.DecompressedJpeg()
     return obj
     
 #cpdef test_read_jpeg_decompress_struct(s):

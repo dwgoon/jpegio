@@ -242,55 +242,26 @@ struct jpeg_decompress_struct {
 """
 
 
-"""
-cdef extern from "jconfig.h":
+cdef extern from "jpeglib.h":      
 
-    ctypedef unsigned int JDIMENSION
-    ctypedef int boolean
-    ctypedef char JOCTET
-    ctypedef unsigned char JSAMPLE
-    #ctypedef JSAMPLE * JSAMPROW
-    #ctypedef JSAMPROW * JSAMPARRAY 
-"""
-cdef extern from "jpeglib.h":
+    cdef const int DCTSIZE          = 8   # The basic DCT block is 8x8 coefficients
+    cdef const int DCTSIZE2         = 64  # DCTSIZE squared; # of elements in a block
+    cdef const int NUM_QUANT_TBLS   = 4   # Quantization tables are numbered 0..3
+    cdef const int NUM_HUFF_TBLS    = 4   # Huffman tables are numbered 0..3
+    cdef const int NUM_ARITH_TBLS   = 16  # Arith-coding tables are numbered 0..15
+
+
     cdef struct jpeg_decompress_struct:
-        pass
-        
-    cdef struct jpeg_error_mgr:
-        pass
-    
-    cdef struct jpeg_component_info:
-        pass
-        
-    cdef struct jvirt_barray_ptr:
-        pass
-        
-    cdef struct jpeg_saved_marker_ptr:
-        pass
-    
-    cdef struct JQUANT_TBL:
-        pass
-    
-    cdef struct JHUFF_TBL:
-        pass
-    
-    
-    DEF DCTSIZE         = 8   # The basic DCT block is 8x8 coefficients
-    DEF DCTSIZE2        = 64  # DCTSIZE squared; # of elements in a block
-    DEF NUM_QUANT_TBLS  = 4   # Quantization tables are numbered 0..3
-    DEF NUM_HUFF_TBLS   = 4   # Huffman tables are numbered 0..3
-    DEF NUM_ARITH_TBLS  = 16  # Arith-coding tables are numbered 0..15
-    DEF JMSG_LENGTH_MAX  = 200  # recommended size of format_message buffer
-    
+        int num_components
+        pass    
+
+cdef extern from "jmorecfg.h":
+    ctypedef unsigned short UINT16
+    ctypedef unsigned int JDIMENSION
     ctypedef short JCOEF
-    ctypedef JCOEF JBLOCK[DCTSIZE2]  # one block of coefficients
-    ctypedef JBLOCK* JBLOCKROW  # pointer to one row of coefficient blocks
-    ctypedef JBLOCKROW* JBLOCKARRAY  # a 2-D array of coefficient blocks
-    ctypedef JBLOCKARRAY* JBLOCKIMAGE  # a 3-D array of coefficient blocks
-    ctypedef JCOEF* JCOEFPTR  # useful in a couple of places
 
     
-cdef extern from "read.h":    
-    int read_jpeg_decompress_struct(char* fname,
-                                    jpeg_decompress_struct* cinfo)
+#cdef extern from "read.h":    
+#    int read_jpeg_decompress_struct(struct jpeg_decompress_struct* out,
+#                                    char* fname)
 
