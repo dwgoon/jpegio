@@ -3,7 +3,6 @@
 #include <setjmp.h>
 #include "jerror.h"
 #include "jpeglib.h"
-//#include "jmorecfg.h"
 
 #include "read.h"
 
@@ -217,20 +216,20 @@ void _get_quant_tables(UINT16 tables[],
 	}
 }
 
-void _get_size_dct_array(int ci,
-                         struct DctArraySize* arr_size,
-                         const struct jpeg_decompress_struct* cinfo)
-{
-	jpeg_component_info *compptr;
-           
-    compptr = cinfo->comp_info + ci; 
-    
-    struct DctBlockArraySize blkarr_size;
-    
-    _get_size_dct_block(ci, &blkarr_size, cinfo);
-    arr_size->nrows = blkarr_size.nrows * DCTSIZE;
-	arr_size->ncols = blkarr_size.ncols * DCTSIZE;
-}
+//void _get_size_dct_array(int ci,
+//                         struct DctArraySize* arr_size,
+//                         const struct jpeg_decompress_struct* cinfo)
+//{
+//	jpeg_component_info *compptr;
+//           
+//    compptr = cinfo->comp_info + ci; 
+//    
+//    struct DctBlockArraySize blkarr_size;
+//    
+//    _get_size_dct_block(ci, &blkarr_size, cinfo);
+//    arr_size->nrows = blkarr_size.nrows * DCTSIZE;
+//	arr_size->ncols = blkarr_size.ncols * DCTSIZE;
+//}
 
 void _get_size_dct_block(int ci,
                          struct DctBlockArraySize* blkarr_size,

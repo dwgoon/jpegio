@@ -1,7 +1,6 @@
 #pragma once
 
 #include "jpeglib.h"
-#include "dctarraysize.h"
 #include "dctblockarraysize.h"
 
 int _read_jpeg_decompress_struct(FILE* infile,
@@ -10,9 +9,9 @@ int _read_jpeg_decompress_struct(FILE* infile,
 void _get_quant_tables(UINT16 tables[],
                        const struct jpeg_decompress_struct* cinfo);
 
-void _get_size_dct_array(int ci,
-                         struct DctArraySize* arr_size,
-                         const struct jpeg_decompress_struct* cinfo);
+//void _get_size_dct_array(int ci,
+//                         struct DctArraySize* arr_size,
+//                         const struct jpeg_decompress_struct* cinfo);
     
 void _get_size_dct_block(int ci,
                          struct DctBlockArraySize* arr_size,

@@ -1,18 +1,18 @@
 
 import os
-import libjpeg
+import jpegio
 
 DIR_ROOT = os.path.abspath('.')
-obj = libjpeg.DecompressedJpeg()
+obj = jpegio.DecompressedJpeg()
 
 print("Test 1.jpg")
-obj.read(os.path.join(DIR_ROOT, "testimg.jpg"))
+obj.read(os.path.join(DIR_ROOT, "1.jpg"))
 
 #print("Quant. table:")
 #print(obj.quant_tables)
 #print(obj.dct_coefficients.shape)
 
-for coef in obj.dct_coefficients:
+for coef in obj.coef_arrays:
     print(coef.shape)
     print(coef[:16, :16])
     print()
