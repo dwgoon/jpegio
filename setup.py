@@ -73,7 +73,7 @@ ext_modules = [
               extra_compile_args=cargs)
 ]
 
-requirements = ['cython>=0.x',
+requirements = ['cython>=0.29',
                 'numpy>=1.13',]
 
 file_formats = ['*.pxd', '*.pyx', '*.h', '*.c']
@@ -88,8 +88,7 @@ setup(name='jpegio',
       author='Daewon Lee',
       author_email='daewon4you@gmail.com',
       license='MIT',
-      packages=find_packages(),
-      #packages=['jpegio'],
+      packages=find_packages(exclude=['tests']),
       package_data=package_data,
       setup_requires=requirements,
       ext_modules=cythonize(ext_modules, include_path=incs),
