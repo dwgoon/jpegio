@@ -1,8 +1,8 @@
 # setup.py
-from distutils.core import setup
-from distutils.extension import Extension
-#from setuptools import setup, find_packages
-#from setuptools.extension import Extension
+#from distutils.core import setup
+#from distutils.extension import Extension
+from setuptools import setup, find_packages
+from setuptools.extension import Extension
 from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
@@ -14,6 +14,21 @@ import glob
 
 import numpy
 
+def find_pyx(dir, files=None):
+    if not files:
+        files = []
+        
+    for file in os.listdir(dir):
+        path = os.path.join(dir, file)
+        if os.path.isfile(path) and path.endswith(".pyx"):
+            files.append(path.replace(os.path.sep, ".")[:-4])
+        elif os.path.isdir(path):
+            find_pyx(path, files)
+    return files
+
+
+ext_names = find_pyx("jpegio")
+print(ext_names)
 
 cargs = []
 #cargs.append("/DNPY_NO_DEPRECATED_API")
@@ -28,12 +43,13 @@ else: # POSIX
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "jpegio", "libjpeg", "include")
-DIR_LIBJPEG_SOURCE = pjoin(DIR_ROOT, "jpegio", "libjpeg", "src")
+DIR_LIBJPEG_SOURCE = pjoin("jpegio", "libjpeg", "src")#pjoin(DIR_ROOT, "jpegio", "libjpeg", "src")
 
 DIR_JPEGIO_HEADER = pjoin(DIR_ROOT, "jpegio")
-DIR_JPEGIO_SOURCE = pjoin(DIR_ROOT, "jpegio")
+DIR_JPEGIO_SOURCE = pjoin("jpegio") #pjoin(DIR_ROOT, "jpegio")
 
-incs = []
+incs = ["."]
+incs.append(DIR_ROOT)
 incs.append(DIR_LIBJPEG_HEADER)
 incs.append(DIR_JPEGIO_HEADER)
 incs.append(numpy.get_include())
@@ -49,16 +65,16 @@ srcs.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
 print("include:", incs)
 print("sources", srcs)
 
-extensions = [
-    Extension("decompressedjpeg",
+ext_modules = [
+    Extension("jpegio.decompressedjpeg",
               sources=srcs,
               language='c',
               include_dirs=incs,
               extra_compile_args=cargs)
 ]
 
-dependency = ['cython>=0.x',
-              'numpy>=0.12',]
+requirements = ['cython>=0.x',
+                'numpy>=1.13',]
 
 file_formats = ['*.pxd', '*.pyx', '*.h', '*.c']
 package_data = {
@@ -72,12 +88,13 @@ setup(name='jpegio',
       author='Daewon Lee',
       author_email='daewon4you@gmail.com',
       license='MIT',
-      #packages=find_packages(),
+      packages=find_packages(),
+      #packages=['jpegio'],
       package_data=package_data,
-      setup_requires=dependency,
-      ext_modules=cythonize(extensions),
-      cmdclass={'build_ext':build_ext},)
-      #zip_safe=False) 
+      setup_requires=requirements,
+      ext_modules=cythonize(ext_modules, include_path=incs),
+      cmdclass={'build_ext':build_ext},
+      zip_safe=False) 
 
 """
 # Extension of jpegio

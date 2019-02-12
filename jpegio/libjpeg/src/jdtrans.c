@@ -50,35 +50,33 @@ jpeg_read_coefficients(j_decompress_ptr cinfo)
 		transdecode_master_selection(cinfo);
 		cinfo->global_state = DSTATE_RDCOEFS;
 	}
-
-	printf("[#1] cinfo->global_state: %d\n", cinfo->global_state);
 	
 	if (cinfo->global_state == DSTATE_RDCOEFS) {
 		/* Absorb whole file into the coef buffer */
 		int i = 0;
 		for (;;) {
 			i += 1;
-			printf("[iter #%d]\n", i);
+			//printf("[iter #%d]\n", i);
 			int retcode;
 			/* Call progress monitor hook if present */
 			if (cinfo->progress != NULL)
 				(*cinfo->progress->progress_monitor) ((j_common_ptr)cinfo);
 			/* Absorb some more input */
 			retcode = (*cinfo->inputctl->consume_input) (cinfo);
-			printf("retcode: %d\n", retcode);
+			//printf("retcode: %d\n", retcode);
 			if (retcode == JPEG_SUSPENDED) {
-				printf("JPEG_SUSPENDED\n");
+				//printf("JPEG_SUSPENDED\n");
 				return NULL;
 			}
 			if (retcode == JPEG_REACHED_EOI) {
-				printf("JPEG_REACHED_EOI\n");
+				//printf("JPEG_REACHED_EOI\n");
 				break;
 			}
 			/* Advance progress counter if appropriate */
 			if (cinfo->progress != NULL &&
 				(retcode == JPEG_ROW_COMPLETED || retcode == JPEG_REACHED_SOS)) {
 				if (++cinfo->progress->pass_counter >= cinfo->progress->pass_limit) {
-                    printf("pass_counter: %d\n", cinfo->progress->pass_counter);
+                    //printf("pass_counter: %d\n", cinfo->progress->pass_counter);
 					/* startup underestimated number of scans; ratchet up one scan */
 					cinfo->progress->pass_limit += (long)cinfo->total_iMCU_rows;
 				}
@@ -87,8 +85,6 @@ jpeg_read_coefficients(j_decompress_ptr cinfo)
 		/* Set state so that jpeg_finish_decompress does the right thing */
 		cinfo->global_state = DSTATE_STOPPING;
 	}
-
-	printf("[#2] cinfo->global_state: %d\n", cinfo->global_state);
 	/* At this point we should be in state DSTATE_STOPPING if being used
 	 * standalone, or in state DSTATE_BUFIMAGE if being invoked to get access
 	 * to the coefficients during a full buffered-image-mode decompression.

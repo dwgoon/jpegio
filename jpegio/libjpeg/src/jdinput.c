@@ -576,7 +576,7 @@ finish_input_pass(j_decompress_ptr cinfo)
 METHODDEF(int)
 consume_markers(j_decompress_ptr cinfo)
 {
-	printf("[jpegio] consume_markers entered...\n");
+	// printf("[jpegio] consume_markers entered...\n");
 	my_inputctl_ptr inputctl = (my_inputctl_ptr)cinfo->inputctl;
 	int val;
 
@@ -586,7 +586,7 @@ consume_markers(j_decompress_ptr cinfo)
 	for (;;) {			/* Loop to pass pseudo SOS marker */
 		val = (*cinfo->marker->read_markers) (cinfo);
         
-        printf("[consume_markers] val: %d\n", val);
+        // printf("[consume_markers] val: %d\n", val);
 		switch (val) {
 		case JPEG_REACHED_SOS:	/* Found SOS */
 			if (inputctl->inheaders) { /* 1st SOS */

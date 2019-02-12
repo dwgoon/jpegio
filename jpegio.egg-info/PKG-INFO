@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: jpegio
+Version: 0.0.1
+Summary: A library to to read and write the parameters of JPEG compression
+Home-page: http://github.com/dwgoon/jpegio
+Author: Daewon Lee
+Author-email: daewon4you@gmail.com
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
