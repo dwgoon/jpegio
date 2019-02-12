@@ -4,7 +4,8 @@
 *.exp
 *.pyc
 *.whl
-build/*
-dist/*
-jpegio.egg-info/
+
+build/
+dist/
+
 jpegio.egg-info/
