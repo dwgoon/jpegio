@@ -12,6 +12,8 @@ cdef extern from "jpeglib.h":
         int num_components
         pass    
 
+    ctypedef jpeg_decompress_struct* j_decompress_ptr
+
 cdef extern from "jmorecfg.h":
     ctypedef unsigned short UINT16
     ctypedef unsigned int JDIMENSION

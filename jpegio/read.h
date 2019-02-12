@@ -19,21 +19,21 @@ struct my_error_mgr {
   jmp_buf setjmp_buffer;	/* for return to caller */
 };
 
+typedef struct my_error_mgr* my_error_ptr;
+
 
 int _read_jpeg_decompress_struct(FILE* infile,
-                                 struct jpeg_decompress_struct* cinfo,
-                                 struct my_error_mgr* jerr);
+                                 j_decompress_ptr cinfo,
+                                 my_error_ptr jerr);
 
 void _get_quant_tables(UINT16 tables[],
-                       const struct jpeg_decompress_struct* cinfo);
+                       const j_decompress_ptr cinfo);
 
-//void _get_size_dct_array(int ci,
-//                         struct DctArraySize* arr_size,
-//                         const struct jpeg_decompress_struct* cinfo);
-    
 void _get_size_dct_block(int ci,
                          struct DctBlockArraySize* arr_size,
-                         const struct jpeg_decompress_struct* cinfo);    
+                         const j_decompress_ptr cinfo);    
                          
 void _get_dct_coefficients(JCOEF arr[],
-                           struct jpeg_decompress_struct* cinfo);
+                           j_decompress_ptr cinfo);
+                           
+void _finalize(j_decompress_ptr cinfo);

@@ -13,8 +13,8 @@ from clibjpeg cimport *
 cdef class DecompressedJpeg:
 
     def __cinit__(self):
-        self._cinfo = <jpeg_decompress_struct*> malloc(sizeof(jpeg_decompress_struct))
-        self._jerr = <my_error_mgr*> malloc(sizeof(my_error_mgr))
+        self._cinfo = <j_decompress_ptr> malloc(sizeof(jpeg_decompress_struct))
+        self._jerr = <my_error_ptr> malloc(sizeof(my_error_mgr))
         
         if self._cinfo is NULL:
             raise MemoryError("jpeg_decompress_struct")
@@ -55,7 +55,6 @@ cdef class DecompressedJpeg:
         
         self._get_quant_tables()
         self._get_dct_coefficients()
-        
         
         fclose(self._infile)
         
@@ -127,4 +126,6 @@ cdef class DecompressedJpeg:
         # end of for
         return np.block(rows)
         
+    cdef _finalize(self):
+        _finalize(self._cinfo)
         
