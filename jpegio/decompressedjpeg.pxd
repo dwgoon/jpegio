@@ -19,6 +19,8 @@ cdef extern from "read.h":
                                      j_decompress_ptr cinfo,
                                      my_error_ptr jerr)
 
+    int _get_num_quant_tables(const j_decompress_ptr cinfo)
+    
     void _get_quant_tables(UINT16 tables[],
                            const j_decompress_ptr cinfo)
 

@@ -62,12 +62,13 @@ cdef class DecompressedJpeg:
     cdef _get_quant_tables(self):
         """Get the quantization tables.
         """
-        cdef np.ndarray arr = np.zeros((NUM_QUANT_TBLS*DCTSIZE*DCTSIZE),
+        cdef int num_tables = _get_num_quant_tables(self._cinfo)
+        cdef np.ndarray arr = np.zeros((num_tables*DCTSIZE2),
                                        dtype=np.uint16)
         cdef UINT16[::1] arr_memview = arr
-        
+                
         _get_quant_tables(&arr_memview[0], self._cinfo)
-        self.quant_tables = arr.reshape(NUM_QUANT_TBLS, DCTSIZE, DCTSIZE)
+        self.quant_tables = arr.reshape(num_tables, DCTSIZE, DCTSIZE)
     
     
     

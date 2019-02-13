@@ -99,6 +99,22 @@ int _read_jpeg_decompress_struct(
 }
 
 
+int _get_num_quant_tables(const j_decompress_ptr cinfo)
+{
+    int n;
+    int num_tables = 0;
+    
+    // Count the number of tables.
+    for (n = 0; n < NUM_QUANT_TBLS; n++)
+    {
+        if (cinfo->quant_tbl_ptrs[n] != NULL)
+        {
+            num_tables++;
+        }
+    }
+    return num_tables;    
+}
+
 void _get_quant_tables(UINT16 tables[], const j_decompress_ptr cinfo)
 {
     size_t n, i, j;
@@ -106,6 +122,7 @@ void _get_quant_tables(UINT16 tables[], const j_decompress_ptr cinfo)
     UINT16* vals;
     UINT16* table;
 
+    
     for (n = 0; n < NUM_QUANT_TBLS; n++)
     {
         if (cinfo->quant_tbl_ptrs[n] != NULL)
@@ -122,6 +139,7 @@ void _get_quant_tables(UINT16 tables[], const j_decompress_ptr cinfo)
             }
         }
     }
+    
 }
 
 void _get_size_dct_block(
@@ -142,7 +160,7 @@ void _get_dct_coefficients(JCOEF arr[], j_decompress_ptr cinfo)
     jvirt_barray_ptr *coef_arrays;
     JBLOCKARRAY buffer;
     JCOEFPTR bufptr;
-    JDIMENSION nrows, ncols;
+    //JDIMENSION nrows, ncols;
     JDIMENSION blk_x, blk_y;
     JDIMENSION num_processed = 0;
     int ci, i, j, idx;
@@ -152,13 +170,14 @@ void _get_dct_coefficients(JCOEF arr[], j_decompress_ptr cinfo)
     if (coef_arrays == NULL)
     {
         printf("[LIBJPEG ERROR] Failed to read coefficients.\n");
+        return;
     }
 
     for (ci = 0; ci < cinfo->num_components; ci++)
     {
         compptr = cinfo->comp_info + ci;
-        nrows = compptr->height_in_blocks * DCTSIZE;
-        ncols = compptr->width_in_blocks * DCTSIZE;
+        //nrows = compptr->height_in_blocks * DCTSIZE;
+        //ncols = compptr->width_in_blocks * DCTSIZE;
 
         // Copy coefficients from virtual block arrays
         for (blk_y = 0; blk_y < compptr->height_in_blocks; blk_y++)
