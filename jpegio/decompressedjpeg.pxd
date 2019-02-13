@@ -21,15 +21,17 @@ cdef extern from "read.h":
 
     int _get_num_quant_tables(const j_decompress_ptr cinfo)
     
-    void _get_quant_tables(UINT16 tables[],
-                           const j_decompress_ptr cinfo)
+    void _read_quant_tables(UINT16 tables[],
+                            const j_decompress_ptr cinfo)
 
-    void _get_size_dct_block(int ci,
-                             DctBlockArraySize* arr_size,
-                             const j_decompress_ptr cinfo) 
-                             
-    void _get_dct_coefficients(JCOEF arr[],
-                               j_decompress_ptr cinfo)
+    void _get_size_dct_block(DctBlockArraySize* blkarr_size,
+                             const j_decompress_ptr cinfo,
+                             int ci)
+    
+    void _read_coef_array(JCOEF* arr,
+                          j_decompress_ptr cinfo,
+                          jvirt_barray_ptr coef_array,
+                          DctBlockArraySize blkarr_size)                       
 
     void _finalize(j_decompress_ptr cinfo)
 
@@ -43,7 +45,4 @@ cdef class DecompressedJpeg:
     cpdef read(self, fname)
     cdef _get_quant_tables(self)
     cdef _get_dct_coefficients(self)
-    cdef _arrange_blocks(self,
-                         np.ndarray subarr,
-                         DctBlockArraySize blkarr_size)
     cdef _finalize(self)

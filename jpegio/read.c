@@ -115,7 +115,7 @@ int _get_num_quant_tables(const j_decompress_ptr cinfo)
     return num_tables;    
 }
 
-void _get_quant_tables(UINT16 tables[], const j_decompress_ptr cinfo)
+void _read_quant_tables(UINT16 tables[], const j_decompress_ptr cinfo)
 {
     size_t n, i, j;
     JQUANT_TBL* quant_ptr;
@@ -142,10 +142,9 @@ void _get_quant_tables(UINT16 tables[], const j_decompress_ptr cinfo)
     
 }
 
-void _get_size_dct_block(
-    int ci,
-    struct DctBlockArraySize* blkarr_size,
-    const j_decompress_ptr cinfo)
+void _get_size_dct_block(struct DctBlockArraySize* blkarr_size,
+                         const j_decompress_ptr cinfo,
+                         int ci)
 {
     jpeg_component_info *compptr;
 
@@ -154,47 +153,38 @@ void _get_size_dct_block(
     blkarr_size->ncols = compptr->width_in_blocks;
 }
 
-void _get_dct_coefficients(JCOEF arr[], j_decompress_ptr cinfo)
+
+void _read_coef_array(JCOEF* arr,
+                      j_decompress_ptr cinfo,
+                      jvirt_barray_ptr coef_array,
+                      struct DctBlockArraySize blkarr_size)
 {
-    jpeg_component_info *compptr;
-    jvirt_barray_ptr *coef_arrays;
     JBLOCKARRAY buffer;
     JCOEFPTR bufptr;
-    //JDIMENSION nrows, ncols;
-    JDIMENSION blk_x, blk_y;
-    JDIMENSION num_processed = 0;
-    int ci, i, j, idx;
+    JDIMENSION ir_blk, ic_blk;
+    JDIMENSION ir_arr, ic_arr;
+    int i, j;
 
-    // Create and populate the DCT coefficient arrays
-    coef_arrays = jpeg_read_coefficients(&(*cinfo));
-    if (coef_arrays == NULL)
+    // Copy coefficients from virtual block arrays
+    for (ir_blk = 0; ir_blk < blkarr_size.nrows; ir_blk++)
     {
-        printf("[LIBJPEG ERROR] Failed to read coefficients.\n");
-        return;
-    }
-
-    for (ci = 0; ci < cinfo->num_components; ci++)
-    {
-        compptr = cinfo->comp_info + ci;
-        //nrows = compptr->height_in_blocks * DCTSIZE;
-        //ncols = compptr->width_in_blocks * DCTSIZE;
-
-        // Copy coefficients from virtual block arrays
-        for (blk_y = 0; blk_y < compptr->height_in_blocks; blk_y++)
+        buffer = (cinfo->mem->access_virt_barray) ((j_common_ptr)cinfo, coef_array, ir_blk, 1, FALSE);
+        for (ic_blk = 0; ic_blk < blkarr_size.ncols; ic_blk++)
         {
-            buffer = (cinfo->mem->access_virt_barray) ((j_common_ptr)cinfo, coef_arrays[ci], blk_y, 1, FALSE);
-            for (blk_x = 0; blk_x < compptr->width_in_blocks; blk_x++)
-            {
-                bufptr = buffer[0][blk_x];
-                for (i = 0; i < DCTSIZE; i++) // for each row in block
+            bufptr = buffer[0][ic_blk];            
+            ir_arr = DCTSIZE2*blkarr_size.ncols*ir_blk;
+            
+            // Read a single block of DCT coefficients
+            for (i = 0; i < DCTSIZE; i++) // for each row in block
+            {                
+                ic_arr = DCTSIZE*ic_blk;
+                for (j = 0; j < DCTSIZE; j++) // for each column in block
                 {
-                    for (j = 0; j < DCTSIZE; j++) // for each column in block
-                    {
-                        idx = num_processed;
-                        arr[idx] = bufptr[i*DCTSIZE + j];
-                        num_processed++;
-                    }
+                    *(arr + ir_arr + ic_arr) = bufptr[i*DCTSIZE + j];
+                    ic_arr++;
+                    
                 }
+                ir_arr += DCTSIZE*blkarr_size.ncols;
             }
         }
     }

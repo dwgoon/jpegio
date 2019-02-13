@@ -12,7 +12,17 @@ cdef extern from "jpeglib.h":
         int num_components
         pass    
 
-    ctypedef jpeg_decompress_struct* j_decompress_ptr
+    ctypedef jpeg_decompress_struct* j_decompress_ptr    
+    
+    
+    struct jvirt_barray_control:
+        pass
+    
+    ctypedef jvirt_barray_control* jvirt_barray_ptr
+    
+    jvirt_barray_ptr* jpeg_read_coefficients(j_decompress_ptr cinfo)
+
+
 
 cdef extern from "jmorecfg.h":
     ctypedef unsigned short UINT16

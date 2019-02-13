@@ -1,6 +1,8 @@
 # cython: language_level=3
-# cython: boundscheck=False, wraparound=False
 
+# _cython: boundscheck=False, wraparound=False
+
+from libc.stdio cimport printf
 from libc.stdio cimport FILE, fopen, fclose
 from libc.stdlib cimport malloc, free
 
@@ -43,7 +45,7 @@ cdef class DecompressedJpeg:
         
         self._infile = fopen(fname_cstr, "rb")
         if self._infile == NULL:
-            print("Can't open the given JPEG file.")
+            printf("Can't open the given JPEG file.\n")
             return
         
         self._infile = fopen(fname_cstr, "rb")
@@ -67,66 +69,48 @@ cdef class DecompressedJpeg:
                                        dtype=np.uint16)
         cdef UINT16[::1] arr_memview = arr
                 
-        _get_quant_tables(&arr_memview[0], self._cinfo)
+        _read_quant_tables(&arr_memview[0], self._cinfo)
         self.quant_tables = arr.reshape(num_tables, DCTSIZE, DCTSIZE)
     
-    
-    
+        
     cdef _get_dct_coefficients(self):
         """Get the DCT coefficients.
         """        
+        self.coef_arrays = list()
         cdef int nch = self._cinfo.num_components
         cdef DctBlockArraySize blkarr_size
         cdef list list_blkarr_sizes = list()
         cdef int num_total_coef = 0
-        for i in range(nch):
-            _get_size_dct_block(i, &blkarr_size, self._cinfo)
-            list_blkarr_sizes.append((blkarr_size.nrows, blkarr_size.ncols))
-            num_total_coef += (blkarr_size.nrows*blkarr_size.ncols*DCTSIZE2)
-        # end of for
-                    
-        cdef np.ndarray arr = np.zeros((num_total_coef),
-                                       dtype=np.int16)
-        cdef JCOEF[::1] arr_memview = arr        
-        _get_dct_coefficients(&arr_memview[0], self._cinfo)
-        
-        self.coef_arrays = list()
+        cdef np.ndarray arr
+        cdef JCOEF[:, ::1] arr_mv  # Memory view
+        cdef jvirt_barray_ptr* coef_arrays      
+                
         cdef Py_ssize_t idx_beg = 0
         cdef Py_ssize_t idx_end = 0
         cdef JDIMENSION nrows, ncols
         cdef np.ndarray block_array
         cdef np.ndarray subarr
 
+                
+        # Create and populate the DCT coefficient arrays
+        coef_arrays = jpeg_read_coefficients(self._cinfo)
+        if coef_arrays == NULL:
+            printf("[LIBJPEG ERROR] Failed to read coefficients.\n")
+            return
+        
         for i in range(nch):
-            nrows, ncols = list_blkarr_sizes[i]  
-            idx_end = idx_beg + nrows*ncols*DCTSIZE2
-            subarr = arr[idx_beg:idx_end]
-            _get_size_dct_block(i, &blkarr_size, self._cinfo)
-            block_array = self._arrange_blocks(subarr, blkarr_size)
-            self.coef_arrays.append(block_array)
-            idx_beg = idx_end
+            _get_size_dct_block(&blkarr_size, self._cinfo, i)
+            arr = np.zeros((blkarr_size.nrows*DCTSIZE,
+                            blkarr_size.ncols*DCTSIZE), dtype=np.int16)
+            arr_mv = arr
+            _read_coef_array(<JCOEF*> &arr_mv[0, 0],
+                             self._cinfo,
+                             coef_arrays[i],
+                             blkarr_size)
+            
+            self.coef_arrays.append(arr)
         # end of for
-        
-    cdef _arrange_blocks(self,
-                         np.ndarray subarr,
-                         DctBlockArraySize blkarr_size):
-        
-        cdef JDIMENSION i, j
-        cdef JDIMENSION idx_beg, idx_end
-        cdef list rows = list()
-        cdef list row
-        for i in range(blkarr_size.nrows):
-            row = list()
-            for j in range(blkarr_size.ncols):
-                idx_beg = blkarr_size.ncols*DCTSIZE2*i + DCTSIZE2*j
-                idx_end = idx_beg + DCTSIZE2
-                blk = subarr[idx_beg:idx_end]
-                blk = blk.reshape(DCTSIZE, DCTSIZE)
-                row.append(blk)
-            # end of for
-            rows.append(row)
-        # end of for
-        return np.block(rows)
+
         
     cdef _finalize(self):
         _finalize(self._cinfo)

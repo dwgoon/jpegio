@@ -28,14 +28,16 @@ int _read_jpeg_decompress_struct(FILE* infile,
 
 int _get_num_quant_tables(const j_decompress_ptr cinfo);
 
-void _get_quant_tables(UINT16 tables[],
-                       const j_decompress_ptr cinfo);
+void _read_quant_tables(UINT16 tables[],
+                        const j_decompress_ptr cinfo);
 
-void _get_size_dct_block(int ci,
-                         struct DctBlockArraySize* arr_size,
-                         const j_decompress_ptr cinfo);    
+void _get_size_dct_block(struct DctBlockArraySize* blkarr_size,
+                         const j_decompress_ptr cinfo,
+                         int ci);   
                          
-void _get_dct_coefficients(JCOEF arr[],
-                           j_decompress_ptr cinfo);
-                           
+void _read_coef_array(JCOEF* arr,
+                      j_decompress_ptr cinfo,
+                      jvirt_barray_ptr coef_array,
+                      struct DctBlockArraySize blkarr_size);
+
 void _finalize(j_decompress_ptr cinfo);
