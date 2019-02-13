@@ -1,4 +1,5 @@
-# cython: language_level=3, boundscheck=False
+# cython: language_level=3
+# cython: boundscheck=False, wraparound=False
 
 from libc.stdio cimport FILE, fopen, fclose
 from libc.stdlib cimport malloc, free
