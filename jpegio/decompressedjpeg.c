@@ -6,17 +6,18 @@
         "depends": [
             "C:\\anaconda3\\envs\\jpeg-py37\\lib\\site-packages\\numpy\\core\\include\\numpy\\arrayobject.h",
             "C:\\anaconda3\\envs\\jpeg-py37\\lib\\site-packages\\numpy\\core\\include\\numpy\\ufuncobject.h",
-            "d:\\repos\\jpegio\\jpegio\\libjpeg\\include\\jmorecfg.h",
-            "d:\\repos\\jpegio\\jpegio\\libjpeg\\include\\jpeglib.h",
+            "D:\\repos\\jpegio\\jpegio\\libjpeg\\include\\jconfig.h",
+            "D:\\repos\\jpegio\\jpegio\\libjpeg\\include\\jmorecfg.h",
+            "D:\\repos\\jpegio\\jpegio\\libjpeg\\include\\jpeglib.h",
             "jpegio\\dctblockarraysize.h",
             "jpegio\\read.h"
         ],
         "include_dirs": [
             "jpegio",
             ".",
-            "d:\\repos\\jpegio",
-            "d:\\repos\\jpegio\\jpegio\\libjpeg\\include",
-            "d:\\repos\\jpegio\\jpegio",
+            "D:\\repos\\jpegio",
+            "D:\\repos\\jpegio\\jpegio\\libjpeg\\include",
+            "D:\\repos\\jpegio\\jpegio",
             "C:\\anaconda3\\envs\\jpeg-py37\\lib\\site-packages\\numpy\\core\\include"
         ],
         "language": "c",
@@ -668,8 +669,9 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include <stdio.h>
 #include "numpy/arrayobject.h"
 #include "numpy/ufuncobject.h"
-#include "jpeglib.h"
+#include "jconfig.h"
 #include "jmorecfg.h"
+#include "jpeglib.h"
 #include "dctblockarraysize.h"
 #include "read.h"
 #include <stdlib.h>
@@ -1380,10 +1382,10 @@ struct __pyx_memoryviewslice_obj {
  */
 
 struct __pyx_vtabstruct_6jpegio_16decompressedjpeg_DecompressedJpeg {
-  PyObject *(*read)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *, PyObject *, int __pyx_skip_dispatch);
   PyObject *(*_get_quant_tables)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *);
   PyObject *(*_get_dct_coefficients)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *);
   PyObject *(*_finalize)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *);
+  PyObject *(*read)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *, PyObject *, int __pyx_skip_dispatch);
 };
 static struct __pyx_vtabstruct_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_vtabptr_6jpegio_16decompressedjpeg_DecompressedJpeg;
 
@@ -2029,6 +2031,12 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_JDIMENSION(JDIMENSION value);
 
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_J_COLOR_SPACE(J_COLOR_SPACE value);
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_boolean(boolean value);
+
 /* RealImag.proto */
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
@@ -2517,6 +2525,13 @@ static PyObject *__pyx_n_s_zeros;
 static int __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg___cinit__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
 static void __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_2__dealloc__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_4read(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self, PyObject *__pyx_v_fname); /* proto */
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_11image_width___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_12image_height___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_15out_color_space___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_20out_color_components___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_16jpeg_color_space___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_14num_components___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_16progressive_mode___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_12quant_tables___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
 static int __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_12quant_tables_2__set__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static int __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_12quant_tables_4__del__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self); /* proto */
@@ -2763,8 +2778,8 @@ static int __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg___cinit__(stru
  * 
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         if self._cinfo:
- *             free(self._cinfo)
+ *         if self._cinfo != NULL:
+ *             _finalize(self._cinfo)
  */
 
 /* Python wrapper */
@@ -2786,33 +2801,33 @@ static void __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_2__dealloc__(
   /* "jpegio/decompressedjpeg.pyx":32
  * 
  *     def __dealloc__(self):
- *         if self._cinfo:             # <<<<<<<<<<<<<<
- *             free(self._cinfo)
+ *         if self._cinfo != NULL:             # <<<<<<<<<<<<<<
+ *             _finalize(self._cinfo)
  * 
  */
-  __pyx_t_1 = (__pyx_v_self->_cinfo != 0);
+  __pyx_t_1 = ((__pyx_v_self->_cinfo != NULL) != 0);
   if (__pyx_t_1) {
 
     /* "jpegio/decompressedjpeg.pyx":33
  *     def __dealloc__(self):
- *         if self._cinfo:
- *             free(self._cinfo)             # <<<<<<<<<<<<<<
+ *         if self._cinfo != NULL:
+ *             _finalize(self._cinfo)             # <<<<<<<<<<<<<<
  * 
- *         if self._jerr:
+ *         #if self._cinfo:
  */
-    free(__pyx_v_self->_cinfo);
+    _finalize(__pyx_v_self->_cinfo);
 
     /* "jpegio/decompressedjpeg.pyx":32
  * 
  *     def __dealloc__(self):
- *         if self._cinfo:             # <<<<<<<<<<<<<<
- *             free(self._cinfo)
+ *         if self._cinfo != NULL:             # <<<<<<<<<<<<<<
+ *             _finalize(self._cinfo)
  * 
  */
   }
 
-  /* "jpegio/decompressedjpeg.pyx":35
- *             free(self._cinfo)
+  /* "jpegio/decompressedjpeg.pyx":38
+ *         #    free(self._cinfo)
  * 
  *         if self._jerr:             # <<<<<<<<<<<<<<
  *             free(self._jerr)
@@ -2821,7 +2836,7 @@ static void __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_2__dealloc__(
   __pyx_t_1 = (__pyx_v_self->_jerr != 0);
   if (__pyx_t_1) {
 
-    /* "jpegio/decompressedjpeg.pyx":36
+    /* "jpegio/decompressedjpeg.pyx":39
  * 
  *         if self._jerr:
  *             free(self._jerr)             # <<<<<<<<<<<<<<
@@ -2830,8 +2845,8 @@ static void __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_2__dealloc__(
  */
     free(__pyx_v_self->_jerr);
 
-    /* "jpegio/decompressedjpeg.pyx":35
- *             free(self._cinfo)
+    /* "jpegio/decompressedjpeg.pyx":38
+ *         #    free(self._cinfo)
  * 
  *         if self._jerr:             # <<<<<<<<<<<<<<
  *             free(self._jerr)
@@ -2839,7 +2854,7 @@ static void __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_2__dealloc__(
  */
   }
 
-  /* "jpegio/decompressedjpeg.pyx":38
+  /* "jpegio/decompressedjpeg.pyx":41
  *             free(self._jerr)
  * 
  *         if self._infile:             # <<<<<<<<<<<<<<
@@ -2849,7 +2864,7 @@ static void __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_2__dealloc__(
   __pyx_t_1 = (__pyx_v_self->_infile != 0);
   if (__pyx_t_1) {
 
-    /* "jpegio/decompressedjpeg.pyx":39
+    /* "jpegio/decompressedjpeg.pyx":42
  * 
  *         if self._infile:
  *             fclose(self._infile)             # <<<<<<<<<<<<<<
@@ -2858,7 +2873,7 @@ static void __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_2__dealloc__(
  */
     (void)(fclose(__pyx_v_self->_infile));
 
-    /* "jpegio/decompressedjpeg.pyx":38
+    /* "jpegio/decompressedjpeg.pyx":41
  *             free(self._jerr)
  * 
  *         if self._infile:             # <<<<<<<<<<<<<<
@@ -2871,15 +2886,15 @@ static void __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_2__dealloc__(
  * 
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         if self._cinfo:
- *             free(self._cinfo)
+ *         if self._cinfo != NULL:
+ *             _finalize(self._cinfo)
  */
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-/* "jpegio/decompressedjpeg.pyx":41
+/* "jpegio/decompressedjpeg.pyx":44
  *             fclose(self._infile)
  * 
  *     cpdef read(self, fname):             # <<<<<<<<<<<<<<
@@ -2910,7 +2925,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_read); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_read); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_5read)) {
         __Pyx_XDECREF(__pyx_r);
@@ -2927,7 +2942,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
         }
         __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_v_fname) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_fname);
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
+        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 44, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __pyx_r = __pyx_t_2;
@@ -2948,14 +2963,14 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
     #endif
   }
 
-  /* "jpegio/decompressedjpeg.pyx":42
+  /* "jpegio/decompressedjpeg.pyx":45
  * 
  *     cpdef read(self, fname):
  *         cdef bytes py_bytes = fname.encode()             # <<<<<<<<<<<<<<
  *         cdef char* fname_cstr = py_bytes
  *         cdef int res
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_fname, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_fname, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -2969,14 +2984,14 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 42, __pyx_L1_error)
+  if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 45, __pyx_L1_error)
   __pyx_v_py_bytes = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":43
+  /* "jpegio/decompressedjpeg.pyx":46
  *     cpdef read(self, fname):
  *         cdef bytes py_bytes = fname.encode()
  *         cdef char* fname_cstr = py_bytes             # <<<<<<<<<<<<<<
@@ -2985,12 +3000,12 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
  */
   if (unlikely(__pyx_v_py_bytes == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-    __PYX_ERR(0, 43, __pyx_L1_error)
+    __PYX_ERR(0, 46, __pyx_L1_error)
   }
-  __pyx_t_5 = __Pyx_PyBytes_AsWritableString(__pyx_v_py_bytes); if (unlikely((!__pyx_t_5) && PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyBytes_AsWritableString(__pyx_v_py_bytes); if (unlikely((!__pyx_t_5) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L1_error)
   __pyx_v_fname_cstr = __pyx_t_5;
 
-  /* "jpegio/decompressedjpeg.pyx":46
+  /* "jpegio/decompressedjpeg.pyx":49
  *         cdef int res
  * 
  *         self._infile = fopen(fname_cstr, "rb")             # <<<<<<<<<<<<<<
@@ -2999,7 +3014,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
  */
   __pyx_v_self->_infile = fopen(__pyx_v_fname_cstr, ((char const *)"rb"));
 
-  /* "jpegio/decompressedjpeg.pyx":47
+  /* "jpegio/decompressedjpeg.pyx":50
  * 
  *         self._infile = fopen(fname_cstr, "rb")
  *         if self._infile == NULL:             # <<<<<<<<<<<<<<
@@ -3009,7 +3024,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
   __pyx_t_6 = ((__pyx_v_self->_infile == NULL) != 0);
   if (__pyx_t_6) {
 
-    /* "jpegio/decompressedjpeg.pyx":48
+    /* "jpegio/decompressedjpeg.pyx":51
  *         self._infile = fopen(fname_cstr, "rb")
  *         if self._infile == NULL:
  *             printf("Can't open the given JPEG file.\n")             # <<<<<<<<<<<<<<
@@ -3018,7 +3033,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
  */
     (void)(printf(((char const *)"Can't open the given JPEG file.\n")));
 
-    /* "jpegio/decompressedjpeg.pyx":49
+    /* "jpegio/decompressedjpeg.pyx":52
  *         if self._infile == NULL:
  *             printf("Can't open the given JPEG file.\n")
  *             return             # <<<<<<<<<<<<<<
@@ -3029,7 +3044,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "jpegio/decompressedjpeg.pyx":47
+    /* "jpegio/decompressedjpeg.pyx":50
  * 
  *         self._infile = fopen(fname_cstr, "rb")
  *         if self._infile == NULL:             # <<<<<<<<<<<<<<
@@ -3038,7 +3053,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
  */
   }
 
-  /* "jpegio/decompressedjpeg.pyx":51
+  /* "jpegio/decompressedjpeg.pyx":54
  *             return
  * 
  *         self._infile = fopen(fname_cstr, "rb")             # <<<<<<<<<<<<<<
@@ -3047,7 +3062,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
  */
   __pyx_v_self->_infile = fopen(__pyx_v_fname_cstr, ((char const *)"rb"));
 
-  /* "jpegio/decompressedjpeg.pyx":53
+  /* "jpegio/decompressedjpeg.pyx":56
  *         self._infile = fopen(fname_cstr, "rb")
  * 
  *         res = _read_jpeg_decompress_struct(self._infile,             # <<<<<<<<<<<<<<
@@ -3056,7 +3071,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
  */
   __pyx_v_res = _read_jpeg_decompress_struct(__pyx_v_self->_infile, __pyx_v_self->_cinfo, __pyx_v_self->_jerr);
 
-  /* "jpegio/decompressedjpeg.pyx":56
+  /* "jpegio/decompressedjpeg.pyx":59
  *                                            self._cinfo,
  *                                            self._jerr)
  *         if res < 0:             # <<<<<<<<<<<<<<
@@ -3066,20 +3081,20 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
   __pyx_t_6 = ((__pyx_v_res < 0) != 0);
   if (unlikely(__pyx_t_6)) {
 
-    /* "jpegio/decompressedjpeg.pyx":57
+    /* "jpegio/decompressedjpeg.pyx":60
  *                                            self._jerr)
  *         if res < 0:
  *             raise IOError("An error has occurs in reading the file.")             # <<<<<<<<<<<<<<
  * 
  *         self._get_quant_tables()
  */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_IOError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_IOError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(0, 57, __pyx_L1_error)
+    __PYX_ERR(0, 60, __pyx_L1_error)
 
-    /* "jpegio/decompressedjpeg.pyx":56
+    /* "jpegio/decompressedjpeg.pyx":59
  *                                            self._cinfo,
  *                                            self._jerr)
  *         if res < 0:             # <<<<<<<<<<<<<<
@@ -3088,38 +3103,47 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(stru
  */
   }
 
-  /* "jpegio/decompressedjpeg.pyx":59
+  /* "jpegio/decompressedjpeg.pyx":62
  *             raise IOError("An error has occurs in reading the file.")
  * 
  *         self._get_quant_tables()             # <<<<<<<<<<<<<<
  *         self._get_dct_coefficients()
  * 
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self->__pyx_vtab)->_get_quant_tables(__pyx_v_self); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self->__pyx_vtab)->_get_quant_tables(__pyx_v_self); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":60
+  /* "jpegio/decompressedjpeg.pyx":63
  * 
  *         self._get_quant_tables()
  *         self._get_dct_coefficients()             # <<<<<<<<<<<<<<
  * 
  *         fclose(self._infile)
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self->__pyx_vtab)->_get_dct_coefficients(__pyx_v_self); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self->__pyx_vtab)->_get_dct_coefficients(__pyx_v_self); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":62
+  /* "jpegio/decompressedjpeg.pyx":65
  *         self._get_dct_coefficients()
  * 
  *         fclose(self._infile)             # <<<<<<<<<<<<<<
+ *         self._infile = NULL
  * 
- *     cdef _get_quant_tables(self):
  */
   (void)(fclose(__pyx_v_self->_infile));
 
-  /* "jpegio/decompressedjpeg.pyx":41
+  /* "jpegio/decompressedjpeg.pyx":66
+ * 
+ *         fclose(self._infile)
+ *         self._infile = NULL             # <<<<<<<<<<<<<<
+ * 
+ *     cdef _get_quant_tables(self):
+ */
+  __pyx_v_self->_infile = NULL;
+
+  /* "jpegio/decompressedjpeg.pyx":44
  *             fclose(self._infile)
  * 
  *     cpdef read(self, fname):             # <<<<<<<<<<<<<<
@@ -3163,7 +3187,7 @@ static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_4read(st
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("read", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(__pyx_v_self, __pyx_v_fname, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read(__pyx_v_self, __pyx_v_fname, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3180,8 +3204,8 @@ static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_4read(st
   return __pyx_r;
 }
 
-/* "jpegio/decompressedjpeg.pyx":64
- *         fclose(self._infile)
+/* "jpegio/decompressedjpeg.pyx":68
+ *         self._infile = NULL
  * 
  *     cdef _get_quant_tables(self):             # <<<<<<<<<<<<<<
  *         """Get the quantization tables.
@@ -3206,7 +3230,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quan
   PyObject *__pyx_t_10 = NULL;
   __Pyx_RefNannySetupContext("_get_quant_tables", 0);
 
-  /* "jpegio/decompressedjpeg.pyx":67
+  /* "jpegio/decompressedjpeg.pyx":71
  *         """Get the quantization tables.
  *         """
  *         cdef int num_tables = _get_num_quant_tables(self._cinfo)             # <<<<<<<<<<<<<<
@@ -3215,72 +3239,72 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quan
  */
   __pyx_v_num_tables = _get_num_quant_tables(__pyx_v_self->_cinfo);
 
-  /* "jpegio/decompressedjpeg.pyx":68
+  /* "jpegio/decompressedjpeg.pyx":72
  *         """
  *         cdef int num_tables = _get_num_quant_tables(self._cinfo)
  *         cdef np.ndarray arr = np.zeros((num_tables*DCTSIZE2),             # <<<<<<<<<<<<<<
  *                                        dtype=np.uint16)
  *         cdef UINT16[::1] arr_memview = arr
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_num_tables * DCTSIZE2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_num_tables * DCTSIZE2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":69
+  /* "jpegio/decompressedjpeg.pyx":73
  *         cdef int num_tables = _get_num_quant_tables(self._cinfo)
  *         cdef np.ndarray arr = np.zeros((num_tables*DCTSIZE2),
  *                                        dtype=np.uint16)             # <<<<<<<<<<<<<<
  *         cdef UINT16[::1] arr_memview = arr
  * 
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_uint16); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_uint16); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 69, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":68
+  /* "jpegio/decompressedjpeg.pyx":72
  *         """
  *         cdef int num_tables = _get_num_quant_tables(self._cinfo)
  *         cdef np.ndarray arr = np.zeros((num_tables*DCTSIZE2),             # <<<<<<<<<<<<<<
  *                                        dtype=np.uint16)
  *         cdef UINT16[::1] arr_memview = arr
  */
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 68, __pyx_L1_error)
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 72, __pyx_L1_error)
   __pyx_v_arr = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":70
+  /* "jpegio/decompressedjpeg.pyx":74
  *         cdef np.ndarray arr = np.zeros((num_tables*DCTSIZE2),
  *                                        dtype=np.uint16)
  *         cdef UINT16[::1] arr_memview = arr             # <<<<<<<<<<<<<<
  * 
  *         _read_quant_tables(&arr_memview[0], self._cinfo)
  */
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn_UINT16(((PyObject *)__pyx_v_arr), PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dc_nn_UINT16(((PyObject *)__pyx_v_arr), PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 74, __pyx_L1_error)
   __pyx_v_arr_memview = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "jpegio/decompressedjpeg.pyx":72
+  /* "jpegio/decompressedjpeg.pyx":76
  *         cdef UINT16[::1] arr_memview = arr
  * 
  *         _read_quant_tables(&arr_memview[0], self._cinfo)             # <<<<<<<<<<<<<<
@@ -3295,24 +3319,24 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quan
   } else if (unlikely(__pyx_t_7 >= __pyx_v_arr_memview.shape[0])) __pyx_t_8 = 0;
   if (unlikely(__pyx_t_8 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_8);
-    __PYX_ERR(0, 72, __pyx_L1_error)
+    __PYX_ERR(0, 76, __pyx_L1_error)
   }
   _read_quant_tables((&(*((UINT16 *) ( /* dim=0 */ ((char *) (((UINT16 *) __pyx_v_arr_memview.data) + __pyx_t_7)) )))), __pyx_v_self->_cinfo);
 
-  /* "jpegio/decompressedjpeg.pyx":73
+  /* "jpegio/decompressedjpeg.pyx":77
  * 
  *         _read_quant_tables(&arr_memview[0], self._cinfo)
  *         self.quant_tables = arr.reshape(num_tables, DCTSIZE, DCTSIZE)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_arr), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_arr), __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_num_tables); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_num_tables); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyInt_From_int(DCTSIZE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(DCTSIZE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyInt_From_int(DCTSIZE); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(DCTSIZE); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_9 = NULL;
   __pyx_t_8 = 0;
@@ -3329,7 +3353,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quan
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_1)) {
     PyObject *__pyx_temp[4] = {__pyx_t_9, __pyx_t_3, __pyx_t_2, __pyx_t_4};
-    __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 77, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -3340,7 +3364,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quan
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
     PyObject *__pyx_temp[4] = {__pyx_t_9, __pyx_t_3, __pyx_t_2, __pyx_t_4};
-    __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 77, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -3349,7 +3373,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quan
   } else
   #endif
   {
-    __pyx_t_10 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 73, __pyx_L1_error)
+    __pyx_t_10 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 77, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     if (__pyx_t_9) {
       __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_9); __pyx_t_9 = NULL;
@@ -3363,20 +3387,20 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quan
     __pyx_t_3 = 0;
     __pyx_t_2 = 0;
     __pyx_t_4 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_10, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_10, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 77, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 73, __pyx_L1_error)
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GIVEREF(__pyx_t_5);
   __Pyx_GOTREF(__pyx_v_self->quant_tables);
   __Pyx_DECREF(((PyObject *)__pyx_v_self->quant_tables));
   __pyx_v_self->quant_tables = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":64
- *         fclose(self._infile)
+  /* "jpegio/decompressedjpeg.pyx":68
+ *         self._infile = NULL
  * 
  *     cdef _get_quant_tables(self):             # <<<<<<<<<<<<<<
  *         """Get the quantization tables.
@@ -3405,7 +3429,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quan
   return __pyx_r;
 }
 
-/* "jpegio/decompressedjpeg.pyx":76
+/* "jpegio/decompressedjpeg.pyx":81
  * 
  * 
  *     cdef _get_dct_coefficients(self):             # <<<<<<<<<<<<<<
@@ -3442,14 +3466,14 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
   int __pyx_t_14;
   __Pyx_RefNannySetupContext("_get_dct_coefficients", 0);
 
-  /* "jpegio/decompressedjpeg.pyx":79
+  /* "jpegio/decompressedjpeg.pyx":84
  *         """Get the DCT coefficients.
  *         """
  *         self.coef_arrays = list()             # <<<<<<<<<<<<<<
  *         cdef int nch = self._cinfo.num_components
  *         cdef DctBlockArraySize blkarr_size
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_self->coef_arrays);
@@ -3457,7 +3481,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
   __pyx_v_self->coef_arrays = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":80
+  /* "jpegio/decompressedjpeg.pyx":85
  *         """
  *         self.coef_arrays = list()
  *         cdef int nch = self._cinfo.num_components             # <<<<<<<<<<<<<<
@@ -3467,19 +3491,19 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
   __pyx_t_2 = __pyx_v_self->_cinfo->num_components;
   __pyx_v_nch = __pyx_t_2;
 
-  /* "jpegio/decompressedjpeg.pyx":82
+  /* "jpegio/decompressedjpeg.pyx":87
  *         cdef int nch = self._cinfo.num_components
  *         cdef DctBlockArraySize blkarr_size
  *         cdef list list_blkarr_sizes = list()             # <<<<<<<<<<<<<<
  *         cdef int num_total_coef = 0
  *         cdef np.ndarray arr
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_list_blkarr_sizes = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":83
+  /* "jpegio/decompressedjpeg.pyx":88
  *         cdef DctBlockArraySize blkarr_size
  *         cdef list list_blkarr_sizes = list()
  *         cdef int num_total_coef = 0             # <<<<<<<<<<<<<<
@@ -3488,7 +3512,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
   __pyx_v_num_total_coef = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":88
+  /* "jpegio/decompressedjpeg.pyx":93
  *         cdef jvirt_barray_ptr* coef_arrays
  * 
  *         cdef Py_ssize_t idx_beg = 0             # <<<<<<<<<<<<<<
@@ -3497,7 +3521,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
   __pyx_v_idx_beg = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":89
+  /* "jpegio/decompressedjpeg.pyx":94
  * 
  *         cdef Py_ssize_t idx_beg = 0
  *         cdef Py_ssize_t idx_end = 0             # <<<<<<<<<<<<<<
@@ -3506,7 +3530,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
   __pyx_v_idx_end = 0;
 
-  /* "jpegio/decompressedjpeg.pyx":96
+  /* "jpegio/decompressedjpeg.pyx":101
  * 
  *         # Create and populate the DCT coefficient arrays
  *         coef_arrays = jpeg_read_coefficients(self._cinfo)             # <<<<<<<<<<<<<<
@@ -3515,7 +3539,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
   __pyx_v_coef_arrays = jpeg_read_coefficients(__pyx_v_self->_cinfo);
 
-  /* "jpegio/decompressedjpeg.pyx":97
+  /* "jpegio/decompressedjpeg.pyx":102
  *         # Create and populate the DCT coefficient arrays
  *         coef_arrays = jpeg_read_coefficients(self._cinfo)
  *         if coef_arrays == NULL:             # <<<<<<<<<<<<<<
@@ -3525,7 +3549,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
   __pyx_t_3 = ((__pyx_v_coef_arrays == NULL) != 0);
   if (__pyx_t_3) {
 
-    /* "jpegio/decompressedjpeg.pyx":98
+    /* "jpegio/decompressedjpeg.pyx":103
  *         coef_arrays = jpeg_read_coefficients(self._cinfo)
  *         if coef_arrays == NULL:
  *             printf("[LIBJPEG ERROR] Failed to read coefficients.\n")             # <<<<<<<<<<<<<<
@@ -3534,7 +3558,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
     (void)(printf(((char const *)"[LIBJPEG ERROR] Failed to read coefficients.\n")));
 
-    /* "jpegio/decompressedjpeg.pyx":99
+    /* "jpegio/decompressedjpeg.pyx":104
  *         if coef_arrays == NULL:
  *             printf("[LIBJPEG ERROR] Failed to read coefficients.\n")
  *             return             # <<<<<<<<<<<<<<
@@ -3545,7 +3569,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "jpegio/decompressedjpeg.pyx":97
+    /* "jpegio/decompressedjpeg.pyx":102
  *         # Create and populate the DCT coefficient arrays
  *         coef_arrays = jpeg_read_coefficients(self._cinfo)
  *         if coef_arrays == NULL:             # <<<<<<<<<<<<<<
@@ -3554,7 +3578,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
   }
 
-  /* "jpegio/decompressedjpeg.pyx":101
+  /* "jpegio/decompressedjpeg.pyx":106
  *             return
  * 
  *         for i in range(nch):             # <<<<<<<<<<<<<<
@@ -3566,7 +3590,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
   for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
     __pyx_v_i = __pyx_t_5;
 
-    /* "jpegio/decompressedjpeg.pyx":102
+    /* "jpegio/decompressedjpeg.pyx":107
  * 
  *         for i in range(nch):
  *             _get_size_dct_block(&blkarr_size, self._cinfo, i)             # <<<<<<<<<<<<<<
@@ -3575,39 +3599,39 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
     _get_size_dct_block((&__pyx_v_blkarr_size), __pyx_v_self->_cinfo, __pyx_v_i);
 
-    /* "jpegio/decompressedjpeg.pyx":103
+    /* "jpegio/decompressedjpeg.pyx":108
  *         for i in range(nch):
  *             _get_size_dct_block(&blkarr_size, self._cinfo, i)
  *             arr = np.zeros((blkarr_size.nrows*DCTSIZE,             # <<<<<<<<<<<<<<
  *                             blkarr_size.ncols*DCTSIZE), dtype=np.int16)
  *             arr_mv = arr
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyInt_From_JDIMENSION((__pyx_v_blkarr_size.nrows * DCTSIZE)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_JDIMENSION((__pyx_v_blkarr_size.nrows * DCTSIZE)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
 
-    /* "jpegio/decompressedjpeg.pyx":104
+    /* "jpegio/decompressedjpeg.pyx":109
  *             _get_size_dct_block(&blkarr_size, self._cinfo, i)
  *             arr = np.zeros((blkarr_size.nrows*DCTSIZE,
  *                             blkarr_size.ncols*DCTSIZE), dtype=np.int16)             # <<<<<<<<<<<<<<
  *             arr_mv = arr
  *             _read_coef_array(<JCOEF*> &arr_mv[0, 0],
  */
-    __pyx_t_7 = __Pyx_PyInt_From_JDIMENSION((__pyx_v_blkarr_size.ncols * DCTSIZE)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_From_JDIMENSION((__pyx_v_blkarr_size.ncols * DCTSIZE)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
 
-    /* "jpegio/decompressedjpeg.pyx":103
+    /* "jpegio/decompressedjpeg.pyx":108
  *         for i in range(nch):
  *             _get_size_dct_block(&blkarr_size, self._cinfo, i)
  *             arr = np.zeros((blkarr_size.nrows*DCTSIZE,             # <<<<<<<<<<<<<<
  *                             blkarr_size.ncols*DCTSIZE), dtype=np.int16)
  *             arr_mv = arr
  */
-    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_1);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_1);
@@ -3615,59 +3639,59 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
     PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_7);
     __pyx_t_1 = 0;
     __pyx_t_7 = 0;
-    __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_GIVEREF(__pyx_t_8);
     PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_8);
     __pyx_t_8 = 0;
 
-    /* "jpegio/decompressedjpeg.pyx":104
+    /* "jpegio/decompressedjpeg.pyx":109
  *             _get_size_dct_block(&blkarr_size, self._cinfo, i)
  *             arr = np.zeros((blkarr_size.nrows*DCTSIZE,
  *                             blkarr_size.ncols*DCTSIZE), dtype=np.int16)             # <<<<<<<<<<<<<<
  *             arr_mv = arr
  *             _read_coef_array(<JCOEF*> &arr_mv[0, 0],
  */
-    __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_int16); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_int16); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 104, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "jpegio/decompressedjpeg.pyx":103
+    /* "jpegio/decompressedjpeg.pyx":108
  *         for i in range(nch):
  *             _get_size_dct_block(&blkarr_size, self._cinfo, i)
  *             arr = np.zeros((blkarr_size.nrows*DCTSIZE,             # <<<<<<<<<<<<<<
  *                             blkarr_size.ncols*DCTSIZE), dtype=np.int16)
  *             arr_mv = arr
  */
-    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 103, __pyx_L1_error)
+    if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_XDECREF_SET(__pyx_v_arr, ((PyArrayObject *)__pyx_t_9));
     __pyx_t_9 = 0;
 
-    /* "jpegio/decompressedjpeg.pyx":105
+    /* "jpegio/decompressedjpeg.pyx":110
  *             arr = np.zeros((blkarr_size.nrows*DCTSIZE,
  *                             blkarr_size.ncols*DCTSIZE), dtype=np.int16)
  *             arr_mv = arr             # <<<<<<<<<<<<<<
  *             _read_coef_array(<JCOEF*> &arr_mv[0, 0],
  *                              self._cinfo,
  */
-    __pyx_t_10 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn_JCOEF(((PyObject *)__pyx_v_arr), PyBUF_WRITABLE); if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 105, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyObject_to_MemoryviewSlice_d_dc_nn_JCOEF(((PyObject *)__pyx_v_arr), PyBUF_WRITABLE); if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 110, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_arr_mv, 1);
     __pyx_v_arr_mv = __pyx_t_10;
     __pyx_t_10.memview = NULL;
     __pyx_t_10.data = NULL;
 
-    /* "jpegio/decompressedjpeg.pyx":106
+    /* "jpegio/decompressedjpeg.pyx":111
  *                             blkarr_size.ncols*DCTSIZE), dtype=np.int16)
  *             arr_mv = arr
  *             _read_coef_array(<JCOEF*> &arr_mv[0, 0],             # <<<<<<<<<<<<<<
@@ -3687,10 +3711,10 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
     } else if (unlikely(__pyx_t_12 >= __pyx_v_arr_mv.shape[1])) __pyx_t_13 = 1;
     if (unlikely(__pyx_t_13 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_13);
-      __PYX_ERR(0, 106, __pyx_L1_error)
+      __PYX_ERR(0, 111, __pyx_L1_error)
     }
 
-    /* "jpegio/decompressedjpeg.pyx":109
+    /* "jpegio/decompressedjpeg.pyx":114
  *                              self._cinfo,
  *                              coef_arrays[i],
  *                              blkarr_size)             # <<<<<<<<<<<<<<
@@ -3699,7 +3723,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
     _read_coef_array(((JCOEF *)(&(*((JCOEF *) ( /* dim=1 */ ((char *) (((JCOEF *) ( /* dim=0 */ (__pyx_v_arr_mv.data + __pyx_t_11 * __pyx_v_arr_mv.strides[0]) )) + __pyx_t_12)) ))))), __pyx_v_self->_cinfo, (__pyx_v_coef_arrays[__pyx_v_i]), __pyx_v_blkarr_size);
 
-    /* "jpegio/decompressedjpeg.pyx":111
+    /* "jpegio/decompressedjpeg.pyx":116
  *                              blkarr_size)
  * 
  *             self.coef_arrays.append(arr)             # <<<<<<<<<<<<<<
@@ -3708,12 +3732,12 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
  */
     if (unlikely(__pyx_v_self->coef_arrays == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "append");
-      __PYX_ERR(0, 111, __pyx_L1_error)
+      __PYX_ERR(0, 116, __pyx_L1_error)
     }
-    __pyx_t_14 = __Pyx_PyList_Append(__pyx_v_self->coef_arrays, ((PyObject *)__pyx_v_arr)); if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 111, __pyx_L1_error)
+    __pyx_t_14 = __Pyx_PyList_Append(__pyx_v_self->coef_arrays, ((PyObject *)__pyx_v_arr)); if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 116, __pyx_L1_error)
   }
 
-  /* "jpegio/decompressedjpeg.pyx":76
+  /* "jpegio/decompressedjpeg.pyx":81
  * 
  * 
  *     cdef _get_dct_coefficients(self):             # <<<<<<<<<<<<<<
@@ -3742,7 +3766,7 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_
   return __pyx_r;
 }
 
-/* "jpegio/decompressedjpeg.pyx":115
+/* "jpegio/decompressedjpeg.pyx":120
  * 
  * 
  *     cdef _finalize(self):             # <<<<<<<<<<<<<<
@@ -3755,15 +3779,16 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__finalize
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_finalize", 0);
 
-  /* "jpegio/decompressedjpeg.pyx":116
+  /* "jpegio/decompressedjpeg.pyx":121
  * 
  *     cdef _finalize(self):
  *         _finalize(self._cinfo)             # <<<<<<<<<<<<<<
  * 
+ *     @property
  */
   _finalize(__pyx_v_self->_cinfo);
 
-  /* "jpegio/decompressedjpeg.pyx":115
+  /* "jpegio/decompressedjpeg.pyx":120
  * 
  * 
  *     cdef _finalize(self):             # <<<<<<<<<<<<<<
@@ -3773,6 +3798,422 @@ static PyObject *__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__finalize
 
   /* function exit code */
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "jpegio/decompressedjpeg.pyx":124
+ * 
+ *     @property
+ *     def image_width(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.image_width
+ *     @property
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_11image_width_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_11image_width_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_11image_width___get__(((struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_11image_width___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+
+  /* "jpegio/decompressedjpeg.pyx":125
+ *     @property
+ *     def image_width(self):
+ *         return self._cinfo.image_width             # <<<<<<<<<<<<<<
+ *     @property
+ *     def image_height(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_JDIMENSION(__pyx_v_self->_cinfo->image_width); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "jpegio/decompressedjpeg.pyx":124
+ * 
+ *     @property
+ *     def image_width(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.image_width
+ *     @property
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("jpegio.decompressedjpeg.DecompressedJpeg.image_width.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "jpegio/decompressedjpeg.pyx":127
+ *         return self._cinfo.image_width
+ *     @property
+ *     def image_height(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.image_height
+ *     @property
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_12image_height_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_12image_height_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_12image_height___get__(((struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_12image_height___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+
+  /* "jpegio/decompressedjpeg.pyx":128
+ *     @property
+ *     def image_height(self):
+ *         return self._cinfo.image_height             # <<<<<<<<<<<<<<
+ *     @property
+ *     def out_color_space(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_JDIMENSION(__pyx_v_self->_cinfo->image_height); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "jpegio/decompressedjpeg.pyx":127
+ *         return self._cinfo.image_width
+ *     @property
+ *     def image_height(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.image_height
+ *     @property
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("jpegio.decompressedjpeg.DecompressedJpeg.image_height.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "jpegio/decompressedjpeg.pyx":130
+ *         return self._cinfo.image_height
+ *     @property
+ *     def out_color_space(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.out_color_space
+ *     @property
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_15out_color_space_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_15out_color_space_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_15out_color_space___get__(((struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_15out_color_space___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+
+  /* "jpegio/decompressedjpeg.pyx":131
+ *     @property
+ *     def out_color_space(self):
+ *         return self._cinfo.out_color_space             # <<<<<<<<<<<<<<
+ *     @property
+ *     def out_color_components(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_J_COLOR_SPACE(__pyx_v_self->_cinfo->out_color_space); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "jpegio/decompressedjpeg.pyx":130
+ *         return self._cinfo.image_height
+ *     @property
+ *     def out_color_space(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.out_color_space
+ *     @property
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("jpegio.decompressedjpeg.DecompressedJpeg.out_color_space.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "jpegio/decompressedjpeg.pyx":133
+ *         return self._cinfo.out_color_space
+ *     @property
+ *     def out_color_components(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.out_color_components
+ *     @property
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_20out_color_components_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_20out_color_components_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_20out_color_components___get__(((struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_20out_color_components___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+
+  /* "jpegio/decompressedjpeg.pyx":134
+ *     @property
+ *     def out_color_components(self):
+ *         return self._cinfo.out_color_components             # <<<<<<<<<<<<<<
+ *     @property
+ *     def jpeg_color_space(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->_cinfo->out_color_components); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "jpegio/decompressedjpeg.pyx":133
+ *         return self._cinfo.out_color_space
+ *     @property
+ *     def out_color_components(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.out_color_components
+ *     @property
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("jpegio.decompressedjpeg.DecompressedJpeg.out_color_components.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "jpegio/decompressedjpeg.pyx":136
+ *         return self._cinfo.out_color_components
+ *     @property
+ *     def jpeg_color_space(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.jpeg_color_space
+ *     @property
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_16jpeg_color_space_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_16jpeg_color_space_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_16jpeg_color_space___get__(((struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_16jpeg_color_space___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+
+  /* "jpegio/decompressedjpeg.pyx":137
+ *     @property
+ *     def jpeg_color_space(self):
+ *         return self._cinfo.jpeg_color_space             # <<<<<<<<<<<<<<
+ *     @property
+ *     def num_components(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_J_COLOR_SPACE(__pyx_v_self->_cinfo->jpeg_color_space); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "jpegio/decompressedjpeg.pyx":136
+ *         return self._cinfo.out_color_components
+ *     @property
+ *     def jpeg_color_space(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.jpeg_color_space
+ *     @property
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("jpegio.decompressedjpeg.DecompressedJpeg.jpeg_color_space.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "jpegio/decompressedjpeg.pyx":139
+ *         return self._cinfo.jpeg_color_space
+ *     @property
+ *     def num_components(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.num_components
+ *     @property
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_14num_components_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_14num_components_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_14num_components___get__(((struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_14num_components___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+
+  /* "jpegio/decompressedjpeg.pyx":140
+ *     @property
+ *     def num_components(self):
+ *         return self._cinfo.num_components             # <<<<<<<<<<<<<<
+ *     @property
+ *     def progressive_mode(self):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->_cinfo->num_components); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "jpegio/decompressedjpeg.pyx":139
+ *         return self._cinfo.jpeg_color_space
+ *     @property
+ *     def num_components(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.num_components
+ *     @property
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("jpegio.decompressedjpeg.DecompressedJpeg.num_components.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "jpegio/decompressedjpeg.pyx":142
+ *         return self._cinfo.num_components
+ *     @property
+ *     def progressive_mode(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.progressive_mode
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_16progressive_mode_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_16progressive_mode_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_16progressive_mode___get__(((struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_16progressive_mode___get__(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+
+  /* "jpegio/decompressedjpeg.pyx":143
+ *     @property
+ *     def progressive_mode(self):
+ *         return self._cinfo.progressive_mode             # <<<<<<<<<<<<<<
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_boolean(__pyx_v_self->_cinfo->progressive_mode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 143, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "jpegio/decompressedjpeg.pyx":142
+ *         return self._cinfo.num_components
+ *     @property
+ *     def progressive_mode(self):             # <<<<<<<<<<<<<<
+ *         return self._cinfo.progressive_mode
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("jpegio.decompressedjpeg.DecompressedJpeg.progressive_mode.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -3888,7 +4329,7 @@ static int __pyx_pf_6jpegio_16decompressedjpeg_16DecompressedJpeg_12quant_tables
  *     cdef public np.ndarray quant_tables
  *     cdef public list coef_arrays             # <<<<<<<<<<<<<<
  * 
- *     cpdef read(self, fname)
+ *     cdef _get_quant_tables(self)
  */
 
 /* Python wrapper */
@@ -19353,6 +19794,34 @@ static int __pyx_tp_clear_6jpegio_16decompressedjpeg_DecompressedJpeg(PyObject *
   return 0;
 }
 
+static PyObject *__pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_image_width(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_11image_width_1__get__(o);
+}
+
+static PyObject *__pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_image_height(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_12image_height_1__get__(o);
+}
+
+static PyObject *__pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_out_color_space(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_15out_color_space_1__get__(o);
+}
+
+static PyObject *__pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_out_color_components(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_20out_color_components_1__get__(o);
+}
+
+static PyObject *__pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_jpeg_color_space(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_16jpeg_color_space_1__get__(o);
+}
+
+static PyObject *__pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_num_components(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_14num_components_1__get__(o);
+}
+
+static PyObject *__pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_progressive_mode(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_16progressive_mode_1__get__(o);
+}
+
 static PyObject *__pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_quant_tables(PyObject *o, CYTHON_UNUSED void *x) {
   return __pyx_pw_6jpegio_16decompressedjpeg_16DecompressedJpeg_12quant_tables_1__get__(o);
 }
@@ -19387,6 +19856,13 @@ static PyMethodDef __pyx_methods_6jpegio_16decompressedjpeg_DecompressedJpeg[] =
 };
 
 static struct PyGetSetDef __pyx_getsets_6jpegio_16decompressedjpeg_DecompressedJpeg[] = {
+  {(char *)"image_width", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_image_width, 0, (char *)0, 0},
+  {(char *)"image_height", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_image_height, 0, (char *)0, 0},
+  {(char *)"out_color_space", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_out_color_space, 0, (char *)0, 0},
+  {(char *)"out_color_components", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_out_color_components, 0, (char *)0, 0},
+  {(char *)"jpeg_color_space", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_jpeg_color_space, 0, (char *)0, 0},
+  {(char *)"num_components", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_num_components, 0, (char *)0, 0},
+  {(char *)"progressive_mode", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_progressive_mode, 0, (char *)0, 0},
   {(char *)"quant_tables", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_quant_tables, __pyx_setprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_quant_tables, (char *)0, 0},
   {(char *)"coef_arrays", __pyx_getprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_coef_arrays, __pyx_setprop_6jpegio_16decompressedjpeg_16DecompressedJpeg_coef_arrays, (char *)0, 0},
   {0, 0, 0, 0, 0}
@@ -20280,8 +20756,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 23, __pyx_L1_error)
-  __pyx_builtin_IOError = __Pyx_GetBuiltinName(__pyx_n_s_IOError); if (!__pyx_builtin_IOError) __PYX_ERR(0, 57, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 101, __pyx_L1_error)
+  __pyx_builtin_IOError = __Pyx_GetBuiltinName(__pyx_n_s_IOError); if (!__pyx_builtin_IOError) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 106, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(3, 272, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(3, 856, __pyx_L1_error)
@@ -20321,14 +20797,14 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "jpegio/decompressedjpeg.pyx":57
+  /* "jpegio/decompressedjpeg.pyx":60
  *                                            self._jerr)
  *         if res < 0:
  *             raise IOError("An error has occurs in reading the file.")             # <<<<<<<<<<<<<<
  * 
  *         self._get_quant_tables()
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_An_error_has_occurs_in_reading_t); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_An_error_has_occurs_in_reading_t); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
@@ -20744,10 +21220,10 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
   __pyx_vtabptr_6jpegio_16decompressedjpeg_DecompressedJpeg = &__pyx_vtable_6jpegio_16decompressedjpeg_DecompressedJpeg;
-  __pyx_vtable_6jpegio_16decompressedjpeg_DecompressedJpeg.read = (PyObject *(*)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *, PyObject *, int __pyx_skip_dispatch))__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read;
   __pyx_vtable_6jpegio_16decompressedjpeg_DecompressedJpeg._get_quant_tables = (PyObject *(*)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *))__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_quant_tables;
   __pyx_vtable_6jpegio_16decompressedjpeg_DecompressedJpeg._get_dct_coefficients = (PyObject *(*)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *))__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__get_dct_coefficients;
   __pyx_vtable_6jpegio_16decompressedjpeg_DecompressedJpeg._finalize = (PyObject *(*)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *))__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg__finalize;
+  __pyx_vtable_6jpegio_16decompressedjpeg_DecompressedJpeg.read = (PyObject *(*)(struct __pyx_obj_6jpegio_16decompressedjpeg_DecompressedJpeg *, PyObject *, int __pyx_skip_dispatch))__pyx_f_6jpegio_16decompressedjpeg_16DecompressedJpeg_read;
   if (PyType_Ready(&__pyx_type_6jpegio_16decompressedjpeg_DecompressedJpeg) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
   __pyx_type_6jpegio_16decompressedjpeg_DecompressedJpeg.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_6jpegio_16decompressedjpeg_DecompressedJpeg.tp_dictoffset && __pyx_type_6jpegio_16decompressedjpeg_DecompressedJpeg.tp_getattro == PyObject_GenericGetAttr)) {
@@ -23702,6 +24178,68 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_JDIMENSION(JDIMENSION value) {
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
         return _PyLong_FromByteArray(bytes, sizeof(JDIMENSION),
+                                     little, !is_unsigned);
+    }
+}
+
+/* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_J_COLOR_SPACE(J_COLOR_SPACE value) {
+    const J_COLOR_SPACE neg_one = (J_COLOR_SPACE) ((J_COLOR_SPACE) 0 - (J_COLOR_SPACE) 1), const_zero = (J_COLOR_SPACE) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(J_COLOR_SPACE) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(J_COLOR_SPACE) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(J_COLOR_SPACE) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(J_COLOR_SPACE) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(J_COLOR_SPACE) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(J_COLOR_SPACE),
+                                     little, !is_unsigned);
+    }
+}
+
+/* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_boolean(boolean value) {
+    const boolean neg_one = (boolean) ((boolean) 0 - (boolean) 1), const_zero = (boolean) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(boolean) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(boolean) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(boolean) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(boolean) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(boolean) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(boolean),
                                      little, !is_unsigned);
     }
 }

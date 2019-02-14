@@ -1,16 +1,38 @@
 
-cdef extern from "jpeglib.h":      
+cdef extern from "jconfig.h":
+    ctypedef unsigned char boolean
+
+
+cdef extern from "jmorecfg.h":
+    ctypedef unsigned short UINT16
+    ctypedef unsigned int JDIMENSION
+    ctypedef short JCOEF
+
+
+cdef extern from "jpeglib.h":    
 
     cdef const int DCTSIZE          = 8   # The basic DCT block is 8x8 coefficients
     cdef const int DCTSIZE2         = 64  # DCTSIZE squared; # of elements in a block
     cdef const int NUM_QUANT_TBLS   = 4   # Quantization tables are numbered 0..3
     cdef const int NUM_HUFF_TBLS    = 4   # Huffman tables are numbered 0..3
     cdef const int NUM_ARITH_TBLS   = 16  # Arith-coding tables are numbered 0..15
+    
+    ctypedef enum J_COLOR_SPACE:
+        JCS_UNKNOWN,      # error/unspecified
+        JCS_GRAYSCALE,    # monochrome
+        JCS_RGB,          # red/green/blue
+        JCS_YCbCr,        # Y/Cb/Cr (also known as YUV)
+        JCS_CMYK,         # C/M/Y/K
+        JCS_YCCK          # Y/Cb/Cr/K
 
-
-    cdef struct jpeg_decompress_struct:
+    cdef struct jpeg_decompress_struct:        
+        JDIMENSION image_width
+        JDIMENSION image_height
         int num_components
-        pass    
+        int out_color_components
+        J_COLOR_SPACE jpeg_color_space
+        J_COLOR_SPACE out_color_space       
+        boolean progressive_mode    
 
     ctypedef jpeg_decompress_struct* j_decompress_ptr    
     
@@ -22,9 +44,3 @@ cdef extern from "jpeglib.h":
     
     jvirt_barray_ptr* jpeg_read_coefficients(j_decompress_ptr cinfo)
 
-
-
-cdef extern from "jmorecfg.h":
-    ctypedef unsigned short UINT16
-    ctypedef unsigned int JDIMENSION
-    ctypedef short JCOEF

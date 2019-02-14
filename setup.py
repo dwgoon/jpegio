@@ -14,6 +14,7 @@ import glob
 
 import numpy
 
+"""
 def find_pyx(dir, files=None):
     if not files:
         files = []
@@ -28,7 +29,7 @@ def find_pyx(dir, files=None):
 
 
 ext_names = find_pyx("jpegio")
-print(ext_names)
+"""
 
 cargs = []
 #cargs.append("/DNPY_NO_DEPRECATED_API")
@@ -61,9 +62,6 @@ for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
     
 srcs.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
 srcs.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
-
-print("include:", incs)
-print("sources", srcs)
 
 ext_modules = [
     Extension("jpegio.decompressedjpeg",

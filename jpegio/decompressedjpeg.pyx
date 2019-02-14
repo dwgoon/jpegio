@@ -29,8 +29,11 @@ cdef class DecompressedJpeg:
         
 
     def __dealloc__(self):
-        if self._cinfo:
-            free(self._cinfo)
+        if self._cinfo != NULL:
+            _finalize(self._cinfo)
+        
+        #if self._cinfo:
+        #    free(self._cinfo)
         
         if self._jerr:
             free(self._jerr)
@@ -60,6 +63,7 @@ cdef class DecompressedJpeg:
         self._get_dct_coefficients()
         
         fclose(self._infile)
+        self._infile = NULL
         
     cdef _get_quant_tables(self):
         """Get the quantization tables.
@@ -72,7 +76,8 @@ cdef class DecompressedJpeg:
         _read_quant_tables(&arr_memview[0], self._cinfo)
         self.quant_tables = arr.reshape(num_tables, DCTSIZE, DCTSIZE)
     
-        
+    
+    
     cdef _get_dct_coefficients(self):
         """Get the DCT coefficients.
         """        
@@ -115,3 +120,24 @@ cdef class DecompressedJpeg:
     cdef _finalize(self):
         _finalize(self._cinfo)
         
+    @property
+    def image_width(self):
+        return self._cinfo.image_width
+    @property
+    def image_height(self):
+        return self._cinfo.image_height    
+    @property
+    def out_color_space(self):
+        return self._cinfo.out_color_space    
+    @property
+    def out_color_components(self):
+        return self._cinfo.out_color_components    
+    @property
+    def jpeg_color_space(self):
+        return self._cinfo.jpeg_color_space
+    @property
+    def num_components(self):
+        return self._cinfo.num_components
+    @property
+    def progressive_mode(self):
+        return self._cinfo.progressive_mode

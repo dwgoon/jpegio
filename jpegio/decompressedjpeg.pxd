@@ -41,8 +41,18 @@ cdef class DecompressedJpeg:
     cdef my_error_ptr _jerr
     cdef public np.ndarray quant_tables
     cdef public list coef_arrays
-
-    cpdef read(self, fname)
+    
     cdef _get_quant_tables(self)
     cdef _get_dct_coefficients(self)
     cdef _finalize(self)
+
+    cpdef read(self, fname)
+    
+    # Properties
+#    def image_width(self)        
+#    def image_height(self)
+#    def num_components(self)
+#    def out_color_components(self)
+#    def out_color_space(self)
+#    def jpeg_color_space(self)
+#    def progressive_mode(self)
