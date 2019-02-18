@@ -24,15 +24,30 @@ cdef extern from "jpeglib.h":
         JCS_YCbCr,        # Y/Cb/Cr (also known as YUV)
         JCS_CMYK,         # C/M/Y/K
         JCS_YCCK          # Y/Cb/Cr/K
+            
+    ctypedef struct jpeg_component_info:
+        int component_id
+        int h_samp_factor
+        int v_samp_factor       
+        int quant_tbl_no
+        int ac_tbl_no
+        int dc_tbl_no#        
+        JDIMENSION downsampled_height         
+        JDIMENSION downsampled_width        
+        JDIMENSION height_in_blocks
+        JDIMENSION width_in_blocks
 
     cdef struct jpeg_decompress_struct:        
+        jpeg_component_info* comp_info
+        
         JDIMENSION image_width
         JDIMENSION image_height
         int num_components
         int out_color_components
         J_COLOR_SPACE jpeg_color_space
         J_COLOR_SPACE out_color_space       
-        boolean progressive_mode    
+        boolean progressive_mode        
+        
 
     ctypedef jpeg_decompress_struct* j_decompress_ptr    
     

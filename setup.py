@@ -32,10 +32,11 @@ ext_names = find_pyx("jpegio")
 """
 
 cargs = []
-#cargs.append("/DNPY_NO_DEPRECATED_API")
+
 
 if sys.platform == 'win32': # Windows
-    pass
+    cargs.append("/DNPY_NO_DEPRECATED_API")
+    cargs.append("/DNPY_1_7_API")
 else: # POSIX
     cargs.extend(['-O2', '-w', '-m64', '-fPIC',])
 # end of if-else
@@ -59,16 +60,26 @@ srcs = []
 for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
     print("[LIBJPEG]", fpath)
     srcs.append(fpath)
-    
+
+
+#srcs.append(pjoin(DIR_JPEGIO_SOURCE, "clibjpeg.pyx"))    
 srcs.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
+#srcs.append(pjoin(DIR_JPEGIO_SOURCE, "componentinfo.pyx"))
+
+
 srcs.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
 
 ext_modules = [
+    Extension("jpegio.componentinfo",
+              sources=['jpegio/componentinfo.pyx'],
+              language='c',
+              include_dirs=incs,
+              extra_compile_args=cargs),
     Extension("jpegio.decompressedjpeg",
               sources=srcs,
               language='c',
               include_dirs=incs,
-              extra_compile_args=cargs)
+              extra_compile_args=cargs),
 ]
 
 requirements = ['cython>=0.29',
@@ -80,7 +91,7 @@ package_data = {
     'jpegio/libjpeg':file_formats}
 
 setup(name='jpegio',
-      version='0.0.1',
+      version='0.0.2',
       description='A library to to read and write the parameters of JPEG compression',
       url='http://github.com/dwgoon/jpegio',
       author='Daewon Lee',

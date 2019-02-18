@@ -36,12 +36,15 @@ cdef extern from "read.h":
     void _finalize(j_decompress_ptr cinfo)
 
 cdef class DecompressedJpeg:
+    cdef public list comp_info
+    cdef public np.ndarray quant_tables
+    cdef public list coef_arrays    
+    
     cdef FILE* _infile
     cdef j_decompress_ptr _cinfo
-    cdef my_error_ptr _jerr
-    cdef public np.ndarray quant_tables
-    cdef public list coef_arrays
-    
+    cdef my_error_ptr _jerr    
+        
+    cdef _get_comp_info(self)
     cdef _get_quant_tables(self)
     cdef _get_dct_coefficients(self)
     cdef _finalize(self)

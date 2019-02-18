@@ -7,11 +7,16 @@ from libc.stdio cimport FILE, fopen, fclose
 from libc.stdlib cimport malloc, free
 
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 
 cimport clibjpeg
-from clibjpeg cimport *
+from .clibjpeg cimport *
+from .clibjpeg cimport jpeg_component_info
 
+
+from . cimport componentinfo
+from .componentinfo cimport ComponentInfo
+#from .componentinfo import ComponentInfo
 
 cdef class DecompressedJpeg:
 
@@ -59,18 +64,48 @@ cdef class DecompressedJpeg:
         if res < 0:
             raise IOError("An error has occurs in reading the file.")
         
+        self._get_comp_info()
         self._get_quant_tables()
         self._get_dct_coefficients()
         
         fclose(self._infile)
         self._infile = NULL
         
+        
+    cdef _get_comp_info(self):
+        cdef int i
+        cdef int nch = self._cinfo.num_components
+        cdef jpeg_component_info* ptr_ci
+        cdef ComponentInfo comp_info
+        
+        self.comp_info = list()        
+        for i in range(nch):
+            comp_info = ComponentInfo()
+            ptr_ci = &(self._cinfo.comp_info[i])
+            comp_info.component_id = ptr_ci.component_id
+            comp_info.h_samp_factor = ptr_ci.h_samp_factor
+            comp_info.v_samp_factor = ptr_ci.v_samp_factor    
+            
+            comp_info.quant_tbl_no = ptr_ci.quant_tbl_no 
+            comp_info.ac_tbl_no = ptr_ci.ac_tbl_no
+            comp_info.dc_tbl_no = ptr_ci.dc_tbl_no
+            
+            comp_info.downsampled_height = ptr_ci.downsampled_height
+            comp_info.downsampled_width = ptr_ci.downsampled_width
+        
+            comp_info.height_in_blocks = ptr_ci.height_in_blocks
+            comp_info.width_in_blocks = ptr_ci.width_in_blocks
+            
+            self.comp_info.append(comp_info)
+#        # end of for
+        
+        
     cdef _get_quant_tables(self):
         """Get the quantization tables.
         """
         cdef int num_tables = _get_num_quant_tables(self._cinfo)
-        cdef np.ndarray arr = np.zeros((num_tables*DCTSIZE2),
-                                       dtype=np.uint16)
+        cdef cnp.ndarray arr = np.zeros((num_tables*DCTSIZE2),
+                                        dtype=np.uint16)
         cdef UINT16[::1] arr_memview = arr
                 
         _read_quant_tables(&arr_memview[0], self._cinfo)
@@ -86,15 +121,15 @@ cdef class DecompressedJpeg:
         cdef DctBlockArraySize blkarr_size
         cdef list list_blkarr_sizes = list()
         cdef int num_total_coef = 0
-        cdef np.ndarray arr
+        cdef cnp.ndarray arr
         cdef JCOEF[:, ::1] arr_mv  # Memory view
         cdef jvirt_barray_ptr* coef_arrays      
                 
         cdef Py_ssize_t idx_beg = 0
         cdef Py_ssize_t idx_end = 0
         cdef JDIMENSION nrows, ncols
-        cdef np.ndarray block_array
-        cdef np.ndarray subarr
+        cdef cnp.ndarray block_array
+        cdef cnp.ndarray subarr
 
                 
         # Create and populate the DCT coefficient arrays
@@ -103,6 +138,7 @@ cdef class DecompressedJpeg:
             printf("[LIBJPEG ERROR] Failed to read coefficients.\n")
             return
         
+        cdef int i
         for i in range(nch):
             _get_size_dct_block(&blkarr_size, self._cinfo, i)
             arr = np.zeros((blkarr_size.nrows*DCTSIZE,

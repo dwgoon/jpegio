@@ -9,3 +9,5 @@ build/
 dist/
 
 jpegio.egg-info/
+tests/vim.exe.stackdump
+.eggs/
