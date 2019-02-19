@@ -4,10 +4,13 @@ import unittest
 import os
 from os.path import join as pjoin
 from os.path import abspath as apath
+import random
+
 import numpy as np
 import scipy.io as spio
 
 import jpegio
+
 
 class ComparisionTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -36,6 +39,14 @@ class ComparisionTest(unittest.TestCase):
                 res = np.array_equal(jpeg.coef_arrays[i],
                                      coef_arrays_mat[i])
                 self.assertTrue(res)
+
+    def test_repeat_read(self):
+        for i in range(1000):
+            fpath = random.choice(self.list_fpaths)
+            jpeg = jpegio.read(fpath)
+
+
+
 
 if __name__ == "__main__":
     unittest.main()

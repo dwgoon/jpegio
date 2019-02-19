@@ -22,6 +22,8 @@ srcs = []
 lib_dirs = []
 dname_libjpeg = None
 
+DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
+
 if sys.platform == 'win32': # Windows
 
     DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", "include")
@@ -47,8 +49,6 @@ else: # POSIX
 
 
 # end of if-else
-
-DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "include")
 DIR_LIBJPEG_SOURCE = pjoin("jpegio", dname_libjpeg, "src")
