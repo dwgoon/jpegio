@@ -34,11 +34,10 @@ cdef class DecompressedJpeg:
         
 
     def __dealloc__(self):
-        if self._cinfo != NULL:
-            _finalize(self._cinfo)
+        print("Try to deallocate %s..."%(id(self)))
         
-        #if self._cinfo:
-        #    free(self._cinfo)
+        if self._cinfo:
+            _finalize(self._cinfo)
         
         if self._jerr:
             free(self._jerr)
@@ -46,7 +45,14 @@ cdef class DecompressedJpeg:
         if self._infile:
             fclose(self._infile)
             
+        if self._cinfo:
+            free(self._cinfo)
+            
+        print("%s has been deallocated..."%(id(self)))
+
+            
     cpdef read(self, fname):
+        print("Read jpeg...")
         cdef bytes py_bytes = fname.encode()
         cdef char* fname_cstr = py_bytes
         cdef int res
@@ -61,11 +67,19 @@ cdef class DecompressedJpeg:
         res = _read_jpeg_decompress_struct(self._infile,
                                            self._cinfo,
                                            self._jerr)
+                                           
+        #print("_read_jpeg_decompress_struct")
+
         if res < 0:
             raise IOError("An error has occurs in reading the file.")
         
+        print("_get_comp_info")
         self._get_comp_info()
+        
+        print("_get_quant_tables")
         self._get_quant_tables()
+        
+        print("_get_dct_coefficients")
         self._get_dct_coefficients()
         
         fclose(self._infile)
@@ -112,7 +126,6 @@ cdef class DecompressedJpeg:
         self.quant_tables = arr.reshape(num_tables, DCTSIZE, DCTSIZE)
     
     
-    
     cdef _get_dct_coefficients(self):
         """Get the DCT coefficients.
         """        
@@ -151,6 +164,7 @@ cdef class DecompressedJpeg:
             
             self.coef_arrays.append(arr)
         # end of for
+        
 
         
     cdef _finalize(self):
@@ -161,13 +175,13 @@ cdef class DecompressedJpeg:
         return self._cinfo.image_width
     @property
     def image_height(self):
-        return self._cinfo.image_height    
+        return self._cinfo.image_height
     @property
     def out_color_space(self):
-        return self._cinfo.out_color_space    
+        return self._cinfo.out_color_space
     @property
     def out_color_components(self):
-        return self._cinfo.out_color_components    
+        return self._cinfo.out_color_components
     @property
     def jpeg_color_space(self):
         return self._cinfo.jpeg_color_space

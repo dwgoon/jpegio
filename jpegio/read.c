@@ -44,16 +44,23 @@ int _read_jpeg_decompress_struct(
     my_error_ptr jerr)
 {
 
+    struct stat file_info;
     JDIMENSION blk_x, blk_y;
     JBLOCKARRAY buffer;
     JCOEFPTR bufptr;
     int strlen, c_width, c_height, ci, i, j, n, dims[2];
     double *mp, *mptop;
+    
+    unsigned char *mem = NULL;
+    unsigned long mem_size = 0;
 
     // Set up the normal JPEG error routines, then override error_exit. 
     cinfo->err = jpeg_std_error(&jerr->pub);
+    printf("jpeg_std_error finished...\n");
+    
     jerr->pub.error_exit = my_error_exit;
     jerr->pub.output_message = my_output_message;
+    
     
     // Establish the setjmp return context for error_exit to use. 
     if (setjmp(jerr->setjmp_buffer))
@@ -63,16 +70,34 @@ int _read_jpeg_decompress_struct(
         return -1;
     }
     
+    
+    rc = stat(infile, &file_info);
+    if (rc) {
+		syslog(LOG_ERR, "FAILED to stat source jpg");
+		exit(EXIT_FAILURE);
+	}
+	jpg_size = file_info.st_size;
+	jpg_buffer = (unsigned char*) malloc(jpg_size + 100);
 
     // Initialize JPEG decompression cinfo object 
     jpeg_create_decompress(cinfo);
-    jpeg_stdio_src(cinfo, infile);
+    printf("jpeg_create_decompress finished...\n");
+    
+    //jpeg_stdio_src(cinfo, infile);
+    
+    //jpeg_mem_src(cinfo, img_data, img_size); 
+    jpeg_mem_src(&cinfo, jpg_buffer, jpg_size);
+    
+    
+    printf("jpeg_stdio_src finished...\n");
+    
 
     // Save contents of markers 
-    jpeg_save_markers(cinfo, JPEG_COM, 0xFFFF);
+    // jpeg_save_markers(cinfo, JPEG_COM, 0xFFFF);
 
     // Read header
     jpeg_read_header(cinfo, TRUE);
+    printf("jpeg_read_header finished...\n");
 
     // for some reason out_color_components isn't being set by
     // jpeg_read_header, so we will infer it from out_color_space: 
@@ -193,5 +218,5 @@ void _read_coef_array(JCOEF* arr,
 void _finalize(j_decompress_ptr cinfo)
 {
     jpeg_finish_decompress(cinfo);
-    jpeg_destroy_decompress(cinfo);    
+    jpeg_destroy_decompress(cinfo);
 }

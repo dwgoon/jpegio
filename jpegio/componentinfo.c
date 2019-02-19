@@ -17,7 +17,7 @@
             "D:\\repos\\jpegio",
             "D:\\repos\\jpegio\\jpegio\\libjpeg\\include",
             "D:\\repos\\jpegio\\jpegio",
-            "C:\\anaconda3\\envs\\jpeg\\lib\\site-packages\\numpy\\core\\include"
+            "C:\\anaconda3\\envs\\torch\\lib\\site-packages\\numpy\\core\\include"
         ],
         "language": "c",
         "name": "jpegio.componentinfo",
