@@ -2,6 +2,13 @@
 
 #include "read.h"
 
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#if defined(_WIN32) || defined(WIN32)
+#define stat _stat
+#endif
 
 /* The default output_message routine causes a seg fault in Matlab,
  * at least on Windows.  Its generally used to emit warnings, since
@@ -38,26 +45,24 @@ my_error_exit(j_common_ptr cinfo)
 }
 
 
-int _read_jpeg_decompress_struct(
+unsigned char* _read_jpeg_decompress_struct(
+    const char* fpath,
     FILE* infile,
     j_decompress_ptr cinfo,
     my_error_ptr jerr)
 {
-
+    int rc;
     struct stat file_info;
-    JDIMENSION blk_x, blk_y;
-    JBLOCKARRAY buffer;
-    JCOEFPTR bufptr;
-    int strlen, c_width, c_height, ci, i, j, n, dims[2];
-    double *mp, *mptop;
+    //JDIMENSION blk_x, blk_y;
+    //JBLOCKARRAY buffer;
+    //JCOEFPTR bufptr;
+    //int strlen, c_width, c_height, ci, i, j, n, dims[2];
     
-    unsigned char *mem = NULL;
+    unsigned char* mem_buffer = NULL;
     unsigned long mem_size = 0;
 
     // Set up the normal JPEG error routines, then override error_exit. 
-    cinfo->err = jpeg_std_error(&jerr->pub);
-    printf("jpeg_std_error finished...\n");
-    
+    cinfo->err = jpeg_std_error(&jerr->pub);    
     jerr->pub.error_exit = my_error_exit;
     jerr->pub.output_message = my_output_message;
     
@@ -66,40 +71,35 @@ int _read_jpeg_decompress_struct(
     if (setjmp(jerr->setjmp_buffer))
     {
         jpeg_destroy_decompress(cinfo);
-        printf("Error occurs during reading file.\n");
-        return -1;
+        printf("[LIBJPEG] Error occurs during reading file.\n");
+        return NULL;
     }
     
     
-    rc = stat(infile, &file_info);
-    if (rc) {
-		syslog(LOG_ERR, "FAILED to stat source jpg");
-		exit(EXIT_FAILURE);
-	}
-	jpg_size = file_info.st_size;
-	jpg_buffer = (unsigned char*) malloc(jpg_size + 100);
+    rc = stat(fpath, &file_info);
+    if (rc)
+    {        
+        printf("[LIBJPEG] Failed to open jpeg file with stat.\n");
+        exit(EXIT_FAILURE);
+    }
+    mem_size = file_info.st_size;
+    mem_buffer = (unsigned char*) malloc(mem_size + 100);
+
+    int num_bytes = fread(mem_buffer, sizeof(unsigned char), mem_size, infile);
 
     // Initialize JPEG decompression cinfo object 
     jpeg_create_decompress(cinfo);
-    printf("jpeg_create_decompress finished...\n");
     
-    //jpeg_stdio_src(cinfo, infile);
-    
-    //jpeg_mem_src(cinfo, img_data, img_size); 
-    jpeg_mem_src(&cinfo, jpg_buffer, jpg_size);
-    
-    
-    printf("jpeg_stdio_src finished...\n");
-    
+    // Replace jpeg_stdio_src(cinfo, infile) with jpeg_mem_src
+    jpeg_mem_src(cinfo, mem_buffer, mem_size);
 
     // Save contents of markers 
     // jpeg_save_markers(cinfo, JPEG_COM, 0xFFFF);
 
     // Read header
     jpeg_read_header(cinfo, TRUE);
-    printf("jpeg_read_header finished...\n");
 
-    // for some reason out_color_components isn't being set by
+    // For some reason out_color_components isn't being set by
     // jpeg_read_header, so we will infer it from out_color_space: 
     switch (cinfo->out_color_space)
     {
@@ -120,7 +120,7 @@ int _read_jpeg_decompress_struct(
         break;
     }
     
-    return 0;
+    return mem_buffer;
 }
 
 

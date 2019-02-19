@@ -15,7 +15,9 @@ cdef extern from "read.h":
     ctypedef my_error_mgr* my_error_ptr
 
 
-    int _read_jpeg_decompress_struct(FILE* infile,
+    unsigned char* _read_jpeg_decompress_struct(
+                                     const char* fpath,
+                                     FILE* infile,
                                      j_decompress_ptr cinfo,
                                      my_error_ptr jerr)
 
@@ -38,8 +40,9 @@ cdef extern from "read.h":
 cdef class DecompressedJpeg:
     cdef public list comp_info
     cdef public np.ndarray quant_tables
-    cdef public list coef_arrays    
+    cdef public list coef_arrays
     
+    cdef unsigned char* _mem
     cdef FILE* _infile
     cdef j_decompress_ptr _cinfo
     cdef my_error_ptr _jerr    

@@ -3,8 +3,10 @@
 # _cython: boundscheck=False, wraparound=False
 
 from libc.stdio cimport printf
-from libc.stdio cimport FILE, fopen, fclose
+from libc.stdio cimport FILE, fopen, fclose, fread
 from libc.stdlib cimport malloc, free
+
+import os
 
 import numpy as np
 cimport numpy as cnp
@@ -16,7 +18,8 @@ from .clibjpeg cimport jpeg_component_info
 
 from . cimport componentinfo
 from .componentinfo cimport ComponentInfo
-#from .componentinfo import ComponentInfo
+
+
 
 cdef class DecompressedJpeg:
 
@@ -25,61 +28,49 @@ cdef class DecompressedJpeg:
         self._jerr = <my_error_ptr> malloc(sizeof(my_error_mgr))
         
         if self._cinfo is NULL:
-            raise MemoryError("jpeg_decompress_struct")
+            raise MemoryError("Failed to malloc jpeg_decompress_struct")
             
         if self._jerr is NULL:
-            raise MemoryError("my_error_mgr")
+            raise MemoryError("Failed to malloc my_error_mgr")
         
         self._infile = NULL
+        self._mem = NULL
         
 
     def __dealloc__(self):
-        print("Try to deallocate %s..."%(id(self)))
-        
         if self._cinfo:
             _finalize(self._cinfo)
-        
-        if self._jerr:
-            free(self._jerr)
-            
-        if self._infile:
+                    
+        if self._infile != NULL:
             fclose(self._infile)
             
-        if self._cinfo:
+        if self._jerr != NULL:
+            free(self._jerr)
+            
+        if self._cinfo != NULL:
             free(self._cinfo)
             
-        print("%s has been deallocated..."%(id(self)))
-
-            
+        if self._mem != NULL:
+            free(self._mem)
+    
     cpdef read(self, fname):
-        print("Read jpeg...")
         cdef bytes py_bytes = fname.encode()
-        cdef char* fname_cstr = py_bytes
-        cdef int res
-        
-        self._infile = fopen(fname_cstr, "rb")
+        cdef char* fpath_cstr = py_bytes
+        self._infile = fopen(fpath_cstr, "rb")
         if self._infile == NULL:
             printf("Can't open the given JPEG file.\n")
             return
         
-        self._infile = fopen(fname_cstr, "rb")
-        
-        res = _read_jpeg_decompress_struct(self._infile,
-                                           self._cinfo,
-                                           self._jerr)
-                                           
-        #print("_read_jpeg_decompress_struct")
+        self._mem = _read_jpeg_decompress_struct(fpath_cstr,
+                                            self._infile,
+                                     self._cinfo,
+                                     self._jerr)
 
-        if res < 0:
+        if self._mem == NULL:
             raise IOError("An error has occurs in reading the file.")
         
-        print("_get_comp_info")
-        self._get_comp_info()
-        
-        print("_get_quant_tables")
-        self._get_quant_tables()
-        
-        print("_get_dct_coefficients")
+        self._get_comp_info()        
+        self._get_quant_tables()        
         self._get_dct_coefficients()
         
         fclose(self._infile)

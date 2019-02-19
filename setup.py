@@ -66,15 +66,12 @@ if sys.platform == 'win32': # Windows
     cargs.append("/DNPY_NO_DEPRECATED_API")
     cargs.append("/DNPY_1_7_API")
     
-    libs.append("simd_win10_msvc14_x64.lib")
-    libs.append("jpeg-static_win10_msvc14_x64.lib")
+    libs.append("simd_win10_msvc14_x64")
+    libs.append("jpeg-static_win10_msvc14_x64")
 else: # POSIX
     cargs.extend(['-O2', '-w', '-m64', '-fPIC',])
 # end of if-else
 
-
-
- ["simd", "jpeg-static"]
 
 """
 srcs_excluded = [
@@ -93,12 +90,7 @@ for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
     srcs.append(fpath)
 """
 
-
-#srcs.append(pjoin(DIR_JPEGIO_SOURCE, "clibjpeg.pyx"))    
 srcs.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
-#srcs.append(pjoin(DIR_JPEGIO_SOURCE, "componentinfo.pyx"))
-
-
 srcs.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
 
 ext_modules = [

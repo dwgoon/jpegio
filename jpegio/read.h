@@ -22,7 +22,9 @@ struct my_error_mgr {
 typedef struct my_error_mgr* my_error_ptr;
 
 
-int _read_jpeg_decompress_struct(FILE* infile,
+unsigned char* _read_jpeg_decompress_struct(
+                                 const char* fpath,
+                                 FILE* infile,
                                  j_decompress_ptr cinfo,
                                  my_error_ptr jerr);
 
