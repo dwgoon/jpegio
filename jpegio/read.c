@@ -2,14 +2,6 @@
 
 #include "read.h"
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#if defined(_WIN32) || defined(WIN32)
-#define stat _stat
-#endif
-
 /* The default output_message routine causes a seg fault in Matlab,
  * at least on Windows.  Its generally used to emit warnings, since
  * fatal errors call the error_exit routine, so we emit a Matlab
@@ -46,18 +38,10 @@ my_error_exit(j_common_ptr cinfo)
 
 
 unsigned char* _read_jpeg_decompress_struct(
-    const char* fpath,
     FILE* infile,
     j_decompress_ptr cinfo,
     my_error_ptr jerr)
 {
-    int rc;
-    struct stat file_info;
-    //JDIMENSION blk_x, blk_y;
-    //JBLOCKARRAY buffer;
-    //JCOEFPTR bufptr;
-    //int strlen, c_width, c_height, ci, i, j, n, dims[2];
-    
     unsigned char* mem_buffer = NULL;
     unsigned long mem_size = 0;
 
@@ -75,14 +59,12 @@ unsigned char* _read_jpeg_decompress_struct(
         return NULL;
     }
     
+    // Get the size of file
+    fseek(infile, 0, SEEK_END);
+    mem_size = ftell(infile);
+    rewind(infile);
     
-    rc = stat(fpath, &file_info);
-    if (rc)
-    {        
-        printf("[LIBJPEG] Failed to open jpeg file with stat.\n");
-        exit(EXIT_FAILURE);
-    }
-    mem_size = file_info.st_size;
+    // Allocate memory buffer for the jpeg file.
     mem_buffer = (unsigned char*) malloc(mem_size + 100);
 
     int num_bytes = fread(mem_buffer, sizeof(unsigned char), mem_size, infile);
@@ -215,8 +197,17 @@ void _read_coef_array(JCOEF* arr,
     }
 }
 
-void _finalize(j_decompress_ptr cinfo)
+void _dealloc_jpeg_decompress(j_decompress_ptr cinfo)
 {
     jpeg_finish_decompress(cinfo);
     jpeg_destroy_decompress(cinfo);
+    
+}
+
+void _dealloc_memory_buffer(unsigned char* mem_buffer)
+{
+    if (mem_buffer != NULL)
+    {
+        free(mem_buffer);
+    }
 }

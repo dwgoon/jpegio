@@ -22,11 +22,9 @@ struct my_error_mgr {
 typedef struct my_error_mgr* my_error_ptr;
 
 
-unsigned char* _read_jpeg_decompress_struct(
-                                 const char* fpath,
-                                 FILE* infile,
-                                 j_decompress_ptr cinfo,
-                                 my_error_ptr jerr);
+unsigned char* _read_jpeg_decompress_struct(FILE* infile,
+                                            j_decompress_ptr cinfo,
+                                            my_error_ptr jerr);
 
 int _get_num_quant_tables(const j_decompress_ptr cinfo);
 
@@ -42,4 +40,6 @@ void _read_coef_array(JCOEF* arr,
                       jvirt_barray_ptr coef_array,
                       struct DctBlockArraySize blkarr_size);
 
-void _finalize(j_decompress_ptr cinfo);
+void _dealloc_jpeg_decompress(j_decompress_ptr cinfo);
+
+void _dealloc_memory_buffer(unsigned char* mem_buffer);

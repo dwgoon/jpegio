@@ -14,12 +14,9 @@ cdef extern from "read.h":
 
     ctypedef my_error_mgr* my_error_ptr
 
-
-    unsigned char* _read_jpeg_decompress_struct(
-                                     const char* fpath,
-                                     FILE* infile,
-                                     j_decompress_ptr cinfo,
-                                     my_error_ptr jerr)
+    unsigned char* _read_jpeg_decompress_struct(FILE* infile,
+                                                j_decompress_ptr cinfo,
+                                                my_error_ptr jerr)
 
     int _get_num_quant_tables(const j_decompress_ptr cinfo)
     
@@ -35,14 +32,15 @@ cdef extern from "read.h":
                           jvirt_barray_ptr coef_array,
                           DctBlockArraySize blkarr_size)                       
 
-    void _finalize(j_decompress_ptr cinfo)
+    void _dealloc_jpeg_decompress(j_decompress_ptr cinfo)
+    void _dealloc_memory_buffer(unsigned char* mem_buffer)
 
 cdef class DecompressedJpeg:
     cdef public list comp_info
     cdef public np.ndarray quant_tables
     cdef public list coef_arrays
     
-    cdef unsigned char* _mem
+    cdef unsigned char* _mem_buff
     cdef FILE* _infile
     cdef j_decompress_ptr _cinfo
     cdef my_error_ptr _jerr    
@@ -50,15 +48,6 @@ cdef class DecompressedJpeg:
     cdef _get_comp_info(self)
     cdef _get_quant_tables(self)
     cdef _get_dct_coefficients(self)
-    cdef _finalize(self)
 
     cpdef read(self, fname)
     
-    # Properties
-#    def image_width(self)        
-#    def image_height(self)
-#    def num_components(self)
-#    def out_color_components(self)
-#    def out_color_space(self)
-#    def jpeg_color_space(self)
-#    def progressive_mode(self)

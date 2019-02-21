@@ -34,12 +34,12 @@ cdef class DecompressedJpeg:
             raise MemoryError("Failed to malloc my_error_mgr")
         
         self._infile = NULL
-        self._mem = NULL
+        self._mem_buff = NULL
         
 
     def __dealloc__(self):
         if self._cinfo:
-            _finalize(self._cinfo)
+            _dealloc_jpeg_decompress(self._cinfo)
                     
         if self._infile != NULL:
             fclose(self._infile)
@@ -50,8 +50,8 @@ cdef class DecompressedJpeg:
         if self._cinfo != NULL:
             free(self._cinfo)
             
-        if self._mem != NULL:
-            free(self._mem)
+        if self._mem_buff != NULL:
+            _dealloc_memory_buffer(self._mem_buff)
     
     cpdef read(self, fname):
         cdef bytes py_bytes = fname.encode()
@@ -61,12 +61,11 @@ cdef class DecompressedJpeg:
             printf("Can't open the given JPEG file.\n")
             return
         
-        self._mem = _read_jpeg_decompress_struct(fpath_cstr,
-                                            self._infile,
-                                     self._cinfo,
-                                     self._jerr)
+        self._mem_buff = _read_jpeg_decompress_struct(self._infile,
+                                                      self._cinfo,
+                                                      self._jerr)
 
-        if self._mem == NULL:
+        if self._mem_buff == NULL:
             raise IOError("An error has occurs in reading the file.")
         
         self._get_comp_info()        
@@ -111,9 +110,9 @@ cdef class DecompressedJpeg:
         cdef int num_tables = _get_num_quant_tables(self._cinfo)
         cdef cnp.ndarray arr = np.zeros((num_tables*DCTSIZE2),
                                         dtype=np.uint16)
-        cdef UINT16[::1] arr_memview = arr
+        cdef UINT16[::1] arr_mem_buffview = arr
                 
-        _read_quant_tables(&arr_memview[0], self._cinfo)
+        _read_quant_tables(&arr_mem_buffview[0], self._cinfo)
         self.quant_tables = arr.reshape(num_tables, DCTSIZE, DCTSIZE)
     
     
@@ -156,10 +155,6 @@ cdef class DecompressedJpeg:
             self.coef_arrays.append(arr)
         # end of for
         
-
-        
-    cdef _finalize(self):
-        _finalize(self._cinfo)
         
     @property
     def image_width(self):
