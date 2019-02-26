@@ -1,11 +1,8 @@
 # setup.py
-#from distutils.core import setup
-#from distutils.extension import Extension
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from Cython.Distutils import build_ext
 from Cython.Build import cythonize
-
 
 import os
 from os.path import join as pjoin
@@ -18,7 +15,6 @@ import numpy
 incs = ["."]
 libs = []
 cargs = []
-srcs = []
 lib_dirs = []
 dname_libjpeg = None
 
@@ -40,14 +36,9 @@ if sys.platform == 'win32': # Windows
     lib_dirs.append(DIR_SIMD_LIB)
 
     dname_libjpeg = "libjpeg-turbo"
-else: # POSIX
+elif sys.platform in ['linux', 'darwin']:
     cargs.extend(['-O2', '-w', '-m64', '-fPIC',])
-
     dname_libjpeg = 'libjpeg'
-
-
-
-
 # end of if-else
 
 DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "include")
@@ -64,15 +55,18 @@ incs.append(DIR_JPEGIO_HEADER)
 DIR_LIBJPEG_LIB = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "lib")
 lib_dirs.append(DIR_LIBJPEG_LIB)
 
+srcs_decompressedjpeg = []
+srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
+srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
 
-srcs.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
-srcs.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
-
-if sys.platform == 'linux':
+if sys.platform in ['linux', 'darwin']:
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
         print("[LIBJPEG]", fpath)
-        srcs.append(fpath)
+        srcs_decompressedjpeg.append(fpath)
+elif sys.platform == 'win32':
+    print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
 
+    
 ext_modules = [
     Extension("jpegio.componentinfo",
               sources=['jpegio/componentinfo.pyx'],
@@ -80,7 +74,7 @@ ext_modules = [
               include_dirs=incs,
               extra_compile_args=cargs),
     Extension("jpegio.decompressedjpeg",
-              sources=srcs,
+              sources=srcs_decompressedjpeg,
               language='c',
               include_dirs=incs,
               extra_compile_args=cargs,
@@ -97,8 +91,8 @@ package_data = {
     'jpegio/libjpeg':file_formats}
 
 setup(name='jpegio',
-      version='0.0.2',
-      description='A library to to read and write the parameters of JPEG compression',
+      version='0.1.0',
+      description='A library to read and write the parameters of JPEG compression',
       url='http://github.com/dwgoon/jpegio',
       author='Daewon Lee',
       author_email='daewon4you@gmail.com',
@@ -109,24 +103,3 @@ setup(name='jpegio',
       ext_modules=cythonize(ext_modules, include_path=incs),
       cmdclass={'build_ext':build_ext},
       zip_safe=False) 
-
-"""
-# Extension of jpegio
-incs_jpegio = []
-incs_jpegio.append(numpy.get_include())
-incs_jpegio.append(DIR_LIBJPEG_HEADER)
-
-ext = cythonize(Extension("jpegio",
-                          sources=['jpegio.pyx'],
-                          language='c',
-                          include_dirs=incs_jpegio,
-                          extra_compile_args=cargs))
-                          #extra_compile_args=cargs,
-                          #extra_link_args=largs,
-                          #library_dirs=lib_dirs,
-                          #libraries=libs))         
-setup(name='jpegio',
-      ext_modules=ext,
-      cmdclass={'build_ext':build_ext},) 
-
-"""
