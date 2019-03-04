@@ -75,7 +75,6 @@ cdef class DecompressedJpeg:
         fclose(self._infile)
         self._infile = NULL
         
-        
     cdef _get_comp_info(self):
         cdef int i
         cdef int nch = self._cinfo.num_components
@@ -120,28 +119,34 @@ cdef class DecompressedJpeg:
         """Get the DCT coefficients.
         """        
         self.coef_arrays = list()
+        self.coef_block_arrays = list()
+
         cdef int nch = self._cinfo.num_components
         cdef DctBlockArraySize blkarr_size
-        cdef list list_blkarr_sizes = list()
-        cdef int num_total_coef = 0
+        #cdef list list_blkarr_sizes = list()
+        #cdef int num_total_coef = 0
         cdef cnp.ndarray arr
+        cdef cnp.ndarray blk_arr
         cdef JCOEF[:, ::1] arr_mv  # Memory view
-        cdef jvirt_barray_ptr* coef_arrays      
+        cdef jvirt_barray_ptr* jvirt_barray      
                 
-        cdef Py_ssize_t idx_beg = 0
-        cdef Py_ssize_t idx_end = 0
-        cdef JDIMENSION nrows, ncols
-        cdef cnp.ndarray block_array
-        cdef cnp.ndarray subarr
+        #cdef Py_ssize_t idx_beg = 0
+        #cdef Py_ssize_t idx_end = 0
+        #cdef JDIMENSION nrows, ncols
+        #cdef cnp.ndarray block_array
+        #cdef cnp.ndarray subarr
 
                 
         # Create and populate the DCT coefficient arrays
-        coef_arrays = jpeg_read_coefficients(self._cinfo)
-        if coef_arrays == NULL:
+        jvirt_barray = jpeg_read_coefficients(self._cinfo)
+        if jvirt_barray == NULL:
             printf("[LIBJPEG ERROR] Failed to read coefficients.\n")
             return
         
         cdef int i
+        cdef slice sr
+        cdef slice sc
+        
         for i in range(nch):
             _get_size_dct_block(&blkarr_size, self._cinfo, i)
             arr = np.zeros((blkarr_size.nrows*DCTSIZE,
@@ -149,12 +154,28 @@ cdef class DecompressedJpeg:
             arr_mv = arr
             _read_coef_array(<JCOEF*> &arr_mv[0, 0],
                              self._cinfo,
-                             coef_arrays[i],
+                             jvirt_barray[i],
                              blkarr_size)
             
             self.coef_arrays.append(arr)
+            
+            blk_arr = np.zeros((blkarr_size.nrows,
+                                blkarr_size.ncols,
+                                DCTSIZE,
+                                DCTSIZE),
+                                dtype=np.int16)
+            for ir_blk in range(blkarr_size.nrows):
+                for ic_blk in range(blkarr_size.ncols):
+                    sr = slice(ir_blk*DCTSIZE, (ir_blk+1)*DCTSIZE, 1)
+                    sc = slice(ic_blk*DCTSIZE, (ir_blk+1)*DCTSIZE, 1)
+                    blk_arr[ir_blk, ic_blk, :, :] = arr[sr, sc]
+                # end of for
+            # end of for
+            self.coef_blocks.append(blk_arr)                
         # end of for
         
+                
+            
         
     @property
     def image_width(self):
