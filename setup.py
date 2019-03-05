@@ -91,7 +91,7 @@ package_data = {
     'jpegio/libjpeg':file_formats}
 
 setup(name='jpegio',
-      version='0.1.0',
+      version='0.1.1',
       description='A library to read and write the parameters of JPEG compression',
       url='http://github.com/dwgoon/jpegio',
       author='Daewon Lee',

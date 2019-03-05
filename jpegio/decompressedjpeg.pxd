@@ -50,4 +50,6 @@ cdef class DecompressedJpeg:
     cdef _get_dct_coefficients(self)
 
     cpdef read(self, fname)
+    cpdef get_coef_block(self, c, i, j)
+    cpdef get_coef_block_shape(self, c)
     

@@ -26,6 +26,7 @@ cdef class DecompressedJpeg:
     def __cinit__(self):
         self._cinfo = <j_decompress_ptr> malloc(sizeof(jpeg_decompress_struct))
         self._jerr = <my_error_ptr> malloc(sizeof(my_error_mgr))
+        self.coef_arrays = None
         
         if self._cinfo is NULL:
             raise MemoryError("Failed to malloc jpeg_decompress_struct")
@@ -75,6 +76,21 @@ cdef class DecompressedJpeg:
         fclose(self._infile)
         self._infile = NULL
         
+    cpdef get_coef_block(self, c, i, j):
+        if not self.coef_arrays:
+            raise AttributeError("coef_arrays has not been created yet.")
+            
+        cdef slice sr = slice(i*DCTSIZE, (i+1)*DCTSIZE, 1)
+        cdef slice sc = slice(j*DCTSIZE, (j+1)*DCTSIZE, 1)
+        return self.coef_arrays[c][sr, sc]
+    
+    cpdef get_coef_block_shape(self, c):
+        if not self.coef_arrays:
+            raise AttributeError("coef_arrays has not been created yet.")
+            
+        return (int(self.coef_arrays[c].shape[0]/DCTSIZE),
+                int(self.coef_arrays[c].shape[1]/DCTSIZE))
+        
     cdef _get_comp_info(self):
         cdef int i
         cdef int nch = self._cinfo.num_components
@@ -119,7 +135,7 @@ cdef class DecompressedJpeg:
         """Get the DCT coefficients.
         """        
         self.coef_arrays = list()
-        self.coef_block_arrays = list()
+#        self.coef_block_arrays = list()
 
         cdef int nch = self._cinfo.num_components
         cdef DctBlockArraySize blkarr_size
@@ -144,8 +160,8 @@ cdef class DecompressedJpeg:
             return
         
         cdef int i
-        cdef slice sr
-        cdef slice sc
+        #cdef slice sr
+        #cdef slice sc
         
         for i in range(nch):
             _get_size_dct_block(&blkarr_size, self._cinfo, i)
@@ -164,14 +180,14 @@ cdef class DecompressedJpeg:
                                 DCTSIZE,
                                 DCTSIZE),
                                 dtype=np.int16)
-            for ir_blk in range(blkarr_size.nrows):
-                for ic_blk in range(blkarr_size.ncols):
-                    sr = slice(ir_blk*DCTSIZE, (ir_blk+1)*DCTSIZE, 1)
-                    sc = slice(ic_blk*DCTSIZE, (ir_blk+1)*DCTSIZE, 1)
-                    blk_arr[ir_blk, ic_blk, :, :] = arr[sr, sc]
-                # end of for
-            # end of for
-            self.coef_blocks.append(blk_arr)                
+#            for ir_blk in range(blkarr_size.nrows):
+#                for ic_blk in range(blkarr_size.ncols):
+#                    sr = slice(ir_blk*DCTSIZE, (ir_blk+1)*DCTSIZE, 1)
+#                    sc = slice(ic_blk*DCTSIZE, (ir_blk+1)*DCTSIZE, 1)
+#                    blk_arr[ir_blk, ic_blk, :, :] = arr[sr, sc]
+#                # end of for
+#            # end of for
+#            self.coef_blocks.append(blk_arr)                
         # end of for
         
                 
