@@ -54,9 +54,14 @@ cdef class DecompressedJpeg:
         if self._mem_buff != NULL:
             _dealloc_memory_buffer(self._mem_buff)
     
-    cpdef read(self, fname):
-        cdef bytes py_bytes = fname.encode()
-        cdef char* fpath_cstr = py_bytes
+    cpdef read(self, fpath):
+        if not os.path.isfile(fpath):
+            print("Wrong file path: %s"%(fpath))
+            return
+            
+        cdef bytes py_bytes = fpath.encode()
+        cdef char* fpath_cstr = py_bytes        
+        
         self._infile = fopen(fpath_cstr, "rb")
         if self._infile == NULL:
             printf("Can't open the given JPEG file.\n")
