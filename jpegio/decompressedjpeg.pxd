@@ -51,5 +51,5 @@ cdef class DecompressedJpeg:
 
     cpdef read(self, fname)
     cpdef get_coef_block(self, c, i, j)
-    cpdef get_coef_block_shape(self, c)
+    cpdef get_coef_block_array_shape(self, c)
     

@@ -89,7 +89,7 @@ cdef class DecompressedJpeg:
         cdef slice sc = slice(j*DCTSIZE, (j+1)*DCTSIZE, 1)
         return self.coef_arrays[c][sr, sc]
     
-    cpdef get_coef_block_shape(self, c):
+    cpdef get_coef_block_array_shape(self, c):
         if not self.coef_arrays:
             raise AttributeError("coef_arrays has not been created yet.")
             
