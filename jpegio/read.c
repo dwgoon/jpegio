@@ -197,6 +197,44 @@ void _read_coef_array(JCOEF* arr,
     }
 }
 
+
+
+void _read_coef_array_zigzag_dct_1d(JCOEF* arr,
+                                    j_decompress_ptr cinfo,
+                                    jvirt_barray_ptr coef_array,
+                                    struct DctBlockArraySize blkarr_size)
+{
+    JBLOCKARRAY buffer;
+    JCOEFPTR bufptr;
+    JDIMENSION ir_blk, ic_blk;
+    JDIMENSION ir_arr, ic_arr;
+    int i, j;
+
+    // Copy coefficients from virtual block arrays
+    for (ir_blk = 0; ir_blk < blkarr_size.nrows; ir_blk++)
+    {
+        buffer = (cinfo->mem->access_virt_barray) ((j_common_ptr)cinfo, coef_array, ir_blk, 1, FALSE);
+        for (ic_blk = 0; ic_blk < blkarr_size.ncols; ic_blk++)
+        {
+            bufptr = buffer[0][ic_blk];            
+            ir_arr = DCTSIZE2*blkarr_size.ncols*ir_blk;
+            
+            // Read a single block of DCT coefficients
+            for (i = 0; i < DCTSIZE; i++) // for each row in block
+            {                
+                ic_arr = DCTSIZE*ic_blk;
+                for (j = 0; j < DCTSIZE; j++) // for each column in block
+                {
+                    *(arr + ir_arr + ic_arr) = bufptr[i*DCTSIZE + j];
+                    ic_arr++;
+                    
+                }
+                ir_arr += DCTSIZE*blkarr_size.ncols;
+            }
+        }
+    }
+}
+
 void _dealloc_jpeg_decompress(j_decompress_ptr cinfo)
 {
     jpeg_finish_decompress(cinfo);

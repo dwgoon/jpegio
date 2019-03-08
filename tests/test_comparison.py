@@ -25,17 +25,24 @@ class ComparisionTest(unittest.TestCase):
                 self.list_fpaths.append(fpath)
         
     def test_repeat_read(self):
+        """=> Check memory errors and garbage collection.
+        """
         for i in range(1000):
             fpath = random.choice(self.list_fpaths)
             jpeg = jpegio.read(fpath)
                 
     def test_compare_dct_coef(self):
+        """=> Test reading DCT coefficients.
+        """
         for fpath in self.list_fpaths:
             fname = os.path.basename(fpath)
             dpath_mat = apath(pjoin(os.path.dirname(fpath),
                                     os.path.pardir,
                                     'matlab_outputs'))
             fpath_mat = pjoin(dpath_mat, fname+'.mat')
+            if not os.path.isfile(fpath_mat):
+                continue
+
             mat = spio.loadmat(fpath_mat)
             coef_arrays_mat = mat['coef_arrays'][0]
             jpeg = jpegio.read(fpath)
@@ -46,27 +53,27 @@ class ComparisionTest(unittest.TestCase):
                                      coef_arrays_mat[i])
                 self.assertTrue(res)
 
-    def test_compare_coef_block_shape(self):
+    def test_compare_coef_block_array_shape(self):
+        """=> Test getting DCT block array shape.
+        """        
         for fpath in self.list_fpaths:
             jpeg = jpegio.read(fpath)
             
             for c in range(len(jpeg.coef_arrays)):
                 coef_arr = jpeg.coef_arrays[c]
-                blk_shape = jpeg.get_coef_block_shape(c)
+                blk_shape = jpeg.get_coef_block_array_shape(c)
                 self.assertTrue(int(coef_arr.shape[0]/BS) == blk_shape[0])
                 self.assertTrue(int(coef_arr.shape[1]/BS) == blk_shape[1])
 
     def test_compare_coef_block(self):
-<<<<<<< HEAD
-=======
-        
->>>>>>> d4e87c55a0914fb3f1ff54a44463cc177aa79ef7
+        """=> Test getting DCT block array.
+        """        
         for fpath in self.list_fpaths:
             jpeg = jpegio.read(fpath)
             
             for c in range(len(jpeg.coef_arrays)):
                 coef_arr = jpeg.coef_arrays[c]
-                nrows_blk, ncols_blk = jpeg.get_coef_block_shape(c)
+                nrows_blk, ncols_blk = jpeg.get_coef_block_array_shape(c)
                 for i in range(nrows_blk):
                     for j in range(ncols_blk):
                         coef_blk = jpeg.get_coef_block(c, i, j)
@@ -76,6 +83,37 @@ class ComparisionTest(unittest.TestCase):
             # end of for
         # end of for
 
+    def test_are_channel_sizes_same(self):
+        """=> Test deciding sizes of all channels are identical.
+        """        
+        # False cases
+        jpeg = jpegio.read(pjoin('images', 'arborgreens01.jpg'))
+        self.assertFalse(jpeg.are_channel_sizes_same())
+        
+        jpeg = jpegio.read(pjoin('images', 'cherries01.jpg'))
+        self.assertFalse(jpeg.are_channel_sizes_same())
+        
+        jpeg = jpegio.read(pjoin('images', 'football01.jpg'))
+        self.assertFalse(jpeg.are_channel_sizes_same())
+        
+        jpeg = jpegio.read(pjoin('images', 'greenlake01.jpg'))
+        self.assertFalse(jpeg.are_channel_sizes_same())
+        
+        # True cases
+        jpeg = jpegio.read(pjoin('images', 'test01.jpg'))
+        self.assertTrue(jpeg.are_channel_sizes_same())
+        
+        jpeg = jpegio.read(pjoin('images', 'test02.jpg'))
+        self.assertTrue(jpeg.are_channel_sizes_same())
+        
+        jpeg = jpegio.read(pjoin('images', 'test03.jpg'))
+        self.assertTrue(jpeg.are_channel_sizes_same())
+        
+        jpeg = jpegio.read(pjoin('images', 'test04.jpg'))
+        self.assertTrue(jpeg.are_channel_sizes_same())
+        
+        jpeg = jpegio.read(pjoin('images', 'test05.jpg'))
+        self.assertTrue(jpeg.are_channel_sizes_same())
 
 if __name__ == "__main__":
     unittest.main()

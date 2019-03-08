@@ -95,6 +95,22 @@ cdef class DecompressedJpeg:
             
         return (int(self.coef_arrays[c].shape[0]/DCTSIZE),
                 int(self.coef_arrays[c].shape[1]/DCTSIZE))
+    
+    cpdef are_channel_sizes_same(self):
+        cdef ComponentInfo ci
+        cdef set set_nrows = set()
+        cdef set set_ncols = set()
+        
+        for ci in self.comp_info:
+            if len(set_nrows) == 1 and ci.downsampled_height not in set_nrows:
+                return False            
+            set_nrows.add(ci.downsampled_height)
+            
+            if len(set_ncols) == 1 and ci.downsampled_width not in set_ncols:
+                return False
+            set_ncols.add(ci.downsampled_width)
+        
+        return True
         
     cdef _get_comp_info(self):
         cdef int i
@@ -140,23 +156,13 @@ cdef class DecompressedJpeg:
         """Get the DCT coefficients.
         """        
         self.coef_arrays = list()
-#        self.coef_block_arrays = list()
 
         cdef int nch = self._cinfo.num_components
         cdef DctBlockArraySize blkarr_size
-        #cdef list list_blkarr_sizes = list()
-        #cdef int num_total_coef = 0
         cdef cnp.ndarray arr
         cdef cnp.ndarray blk_arr
         cdef JCOEF[:, ::1] arr_mv  # Memory view
         cdef jvirt_barray_ptr* jvirt_barray      
-                
-        #cdef Py_ssize_t idx_beg = 0
-        #cdef Py_ssize_t idx_end = 0
-        #cdef JDIMENSION nrows, ncols
-        #cdef cnp.ndarray block_array
-        #cdef cnp.ndarray subarr
-
                 
         # Create and populate the DCT coefficient arrays
         jvirt_barray = jpeg_read_coefficients(self._cinfo)
@@ -164,10 +170,7 @@ cdef class DecompressedJpeg:
             printf("[LIBJPEG ERROR] Failed to read coefficients.\n")
             return
         
-        cdef int i
-        #cdef slice sr
-        #cdef slice sc
-        
+        cdef int i       
         for i in range(nch):
             _get_size_dct_block(&blkarr_size, self._cinfo, i)
             arr = np.zeros((blkarr_size.nrows*DCTSIZE,
@@ -185,15 +188,6 @@ cdef class DecompressedJpeg:
                                 DCTSIZE,
                                 DCTSIZE),
                                 dtype=np.int16)
-#            for ir_blk in range(blkarr_size.nrows):
-#                for ic_blk in range(blkarr_size.ncols):
-#                    sr = slice(ir_blk*DCTSIZE, (ir_blk+1)*DCTSIZE, 1)
-#                    sc = slice(ic_blk*DCTSIZE, (ir_blk+1)*DCTSIZE, 1)
-#                    blk_arr[ir_blk, ic_blk, :, :] = arr[sr, sc]
-#                # end of for
-#            # end of for
-#            self.coef_blocks.append(blk_arr)                
-        # end of for
         
                 
             

@@ -12,3 +12,4 @@ tests/vim.exe.stackdump
 .eggs/
 jpegio/decompressedjpeg.c
 jpegio/componentinfo.c
+jpegio/zigzagdctjpeg.c

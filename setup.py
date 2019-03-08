@@ -59,6 +59,10 @@ srcs_decompressedjpeg = []
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
 
+srcs_zigzagdctjpeg = []
+srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "zigzagdctjpeg.pyx"))
+srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
+
 if sys.platform in ['linux', 'darwin']:
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
         print("[LIBJPEG]", fpath)
@@ -75,6 +79,13 @@ ext_modules = [
               extra_compile_args=cargs),
     Extension("jpegio.decompressedjpeg",
               sources=srcs_decompressedjpeg,
+              language='c',
+              include_dirs=incs,
+              extra_compile_args=cargs,
+              library_dirs=lib_dirs,
+              libraries=libs),
+    Extension("jpegio.zigzagdctjpeg",
+              sources=srcs_zigzagdctjpeg,
               language='c',
               include_dirs=incs,
               extra_compile_args=cargs,
