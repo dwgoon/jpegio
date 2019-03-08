@@ -23,7 +23,7 @@ from .decompressedjpeg cimport DecompressedJpeg
 
 
 
-cdef class ZigzagDctJpeg(DecompressedJpeg):
+cdef class ZigzagDct1d(DecompressedJpeg):
 
     def __cinit__(self):
         pass
@@ -32,7 +32,10 @@ cdef class ZigzagDctJpeg(DecompressedJpeg):
     def __dealloc__(self):
         pass
     
-        
+    def __init__(self, icut=DCTSIZE2):
+        super().__init__()
+        self.icut = icut
+                
     cpdef get_coef_block(self, c, i, j):
         if not self.coef_arrays:
             raise AttributeError("coef_arrays has not been created yet.")
@@ -52,8 +55,6 @@ cdef class ZigzagDctJpeg(DecompressedJpeg):
     cdef _get_dct_coefficients(self):
         """Get the DCT coefficients.
         """        
-        
-        
         self.coef_arrays = list()
 
         cdef int nch = self._cinfo.num_components

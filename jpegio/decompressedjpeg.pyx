@@ -182,12 +182,6 @@ cdef class DecompressedJpeg:
                              blkarr_size)
             
             self.coef_arrays.append(arr)
-            
-            blk_arr = np.zeros((blkarr_size.nrows,
-                                blkarr_size.ncols,
-                                DCTSIZE,
-                                DCTSIZE),
-                                dtype=np.int16)
         
                 
             
