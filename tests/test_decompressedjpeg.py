@@ -24,12 +24,13 @@ class ComparisionTest(unittest.TestCase):
             for fpath in glob.glob(pjoin('images', ext)):
                 self.list_fpaths.append(fpath)
         
-    def test_repeat_read(self):
+    def test_repeat_read_1000(self):
         """=> Check memory errors and garbage collection.
         """
         for i in range(1000):
             fpath = random.choice(self.list_fpaths)
             jpeg = jpegio.read(fpath)
+            del jpeg
                 
     def test_compare_dct_coef(self):
         """=> Test reading DCT coefficients.

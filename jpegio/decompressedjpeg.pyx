@@ -53,6 +53,10 @@ cdef class DecompressedJpeg:
             
         if self._mem_buff != NULL:
             _dealloc_memory_buffer(self._mem_buff)
+            
+    def __init__(self, *args, **kwargs):
+        pass
+        #super().__init__(*args, **kwargs)
     
     cpdef read(self, fpath):
         if not os.path.isfile(fpath):

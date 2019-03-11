@@ -9,4 +9,6 @@ from .decompressedjpeg cimport DecompressedJpeg
 cdef class ZigzagDct1d(DecompressedJpeg):
     cdef public size_t icut
     
+    cpdef get_coef_block_array_shape(self, c)
+    cpdef get_coef_block(self, c, i, j)
     cdef _get_dct_coefficients(self)
