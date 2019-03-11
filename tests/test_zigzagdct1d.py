@@ -105,14 +105,14 @@ class ZigzagDct1dTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
         
         self.list_fpaths = []
-        self.extensions = ['*.jpg', '*.jpeg']
+        self.extensions = ['*.jpg']
         
         for ext in self.extensions:
             for fpath in glob.glob(pjoin('images', ext)):
                 self.list_fpaths.append(fpath)
     
-    def test_compare_coef_with_decompressedjpeg(self):
-        """=> Compare DCT coef between ZigzagDct1d and DecompressedJpeg.
+    def test_performance_load_dct_block(self):
+        """=> Test the performance of loading zigzag DCT coef.
         """        
         for fpath in self.list_fpaths:
             time_beg_zz = time.time()
@@ -135,103 +135,106 @@ class ZigzagDct1dTest(unittest.TestCase):
                 nrows_blk, ncols_blk = jpeg_de.get_coef_block_array_shape(c)
                 arr_de = arr_de.reshape(nrows_blk, BS, ncols_blk, BS)
                 arr_de = arr_de.transpose(0, 2, 1, 3)
-                arr_de = arr_de.reshape(nrows_blk*ncols_blk, BS, BS)
+                arr_de = arr_de.reshape(nrows_blk, ncols_blk, BS, BS)
                 
                 zz_de = np.zeros((nrows_blk, ncols_blk, BS*BS),
                                  dtype=np.int16)
-                for i in range(arr_de.shape[0]):
-                    #zz_de[i] = get_arr_zigzag(arr_de[i])
-                    zz_de[i][0] = arr_de[i][0, 0]
-                    
-                    zz_de[i][1] = arr_de[i][0, 1]
-                    zz_de[i][2] = arr_de[i][1, 0]
-                    
-                    zz_de[i][3] = arr_de[i][2, 0]
-                    zz_de[i][4] = arr_de[i][1, 1]
-                    zz_de[i][5] = arr_de[i][0, 2]
-                    
-                    zz_de[i][6] = arr_de[i][0, 3]
-                    zz_de[i][7] = arr_de[i][1, 2]
-                    zz_de[i][8] = arr_de[i][2, 1]
-                    zz_de[i][9] = arr_de[i][3, 0]
-                    
-                    zz_de[i][10] = arr_de[i][4, 0]
-                    zz_de[i][11] = arr_de[i][3, 1]
-                    zz_de[i][12] = arr_de[i][2, 2]
-                    zz_de[i][13] = arr_de[i][1, 3]
-                    zz_de[i][14] = arr_de[i][0, 4]
-                    
-                    zz_de[i][15] = arr_de[i][0, 5]
-                    zz_de[i][16] = arr_de[i][1, 4]
-                    zz_de[i][17] = arr_de[i][2, 3]
-                    zz_de[i][18] = arr_de[i][3, 2]
-                    zz_de[i][19] = arr_de[i][4, 1]
-                    zz_de[i][20] = arr_de[i][5, 0]
-                    
-                    zz_de[i][21] = arr_de[i][6, 0]
-                    zz_de[i][22] = arr_de[i][5, 1]
-                    zz_de[i][23] = arr_de[i][4, 2]
-                    zz_de[i][24] = arr_de[i][3, 3]
-                    zz_de[i][25] = arr_de[i][2, 4]
-                    zz_de[i][26] = arr_de[i][1, 5]
-                    zz_de[i][27] = arr_de[i][0, 6]
-                    
-                    zz_de[i][28] = arr_de[i][0, 7]
-                    zz_de[i][29] = arr_de[i][1, 6]
-                    zz_de[i][30] = arr_de[i][2, 5]
-                    zz_de[i][31] = arr_de[i][3, 4]
-                    zz_de[i][32] = arr_de[i][4, 3]
-                    zz_de[i][33] = arr_de[i][5, 2]
-                    zz_de[i][34] = arr_de[i][6, 1]
-                    zz_de[i][35] = arr_de[i][7, 0]
-                    
-                    zz_de[i][36] = arr_de[i][7, 1]
-                    zz_de[i][37] = arr_de[i][6, 2]
-                    zz_de[i][38] = arr_de[i][5, 3]
-                    zz_de[i][39] = arr_de[i][4, 4]
-                    zz_de[i][40] = arr_de[i][3, 5]
-                    zz_de[i][41] = arr_de[i][2, 6]
-                    zz_de[i][42] = arr_de[i][1, 7]
-                    
-                    zz_de[i][43] = arr_de[i][2, 7]
-                    zz_de[i][44] = arr_de[i][3, 6]
-                    zz_de[i][45] = arr_de[i][4, 5]
-                    zz_de[i][46] = arr_de[i][5, 4]
-                    zz_de[i][47] = arr_de[i][6, 3]
-                    zz_de[i][48] = arr_de[i][7, 2]
                 
-                    zz_de[i][49] = arr_de[i][7, 3]
-                    zz_de[i][50] = arr_de[i][6, 4]
-                    zz_de[i][51] = arr_de[i][5, 5]
-                    zz_de[i][52] = arr_de[i][4, 6]
-                    zz_de[i][53] = arr_de[i][3, 7]
-                
-                    zz_de[i][54] = arr_de[i][4, 7]
-                    zz_de[i][55] = arr_de[i][5, 6]
-                    zz_de[i][56] = arr_de[i][6, 5]
-                    zz_de[i][57] = arr_de[i][7, 4]
+                # Zigzag scanning over DCT blocks.
+                for i in range(nrows_blk):
+                    for j in range(ncols_blk):
+                        zz_de[i, j][0] = arr_de[i, j][0, 0]
+                        
+                        zz_de[i, j][1] = arr_de[i, j][0, 1]
+                        zz_de[i, j][2] = arr_de[i, j][1, 0]
+                        
+                        zz_de[i, j][3] = arr_de[i, j][2, 0]
+                        zz_de[i, j][4] = arr_de[i, j][1, 1]
+                        zz_de[i, j][5] = arr_de[i, j][0, 2]
+                        
+                        zz_de[i, j][6] = arr_de[i, j][0, 3]
+                        zz_de[i, j][7] = arr_de[i, j][1, 2]
+                        zz_de[i, j][8] = arr_de[i, j][2, 1]
+                        zz_de[i, j][9] = arr_de[i, j][3, 0]
+                        
+                        zz_de[i, j][10] = arr_de[i, j][4, 0]
+                        zz_de[i, j][11] = arr_de[i, j][3, 1]
+                        zz_de[i, j][12] = arr_de[i, j][2, 2]
+                        zz_de[i, j][13] = arr_de[i, j][1, 3]
+                        zz_de[i, j][14] = arr_de[i, j][0, 4]
+                        
+                        zz_de[i, j][15] = arr_de[i, j][0, 5]
+                        zz_de[i, j][16] = arr_de[i, j][1, 4]
+                        zz_de[i, j][17] = arr_de[i, j][2, 3]
+                        zz_de[i, j][18] = arr_de[i, j][3, 2]
+                        zz_de[i, j][19] = arr_de[i, j][4, 1]
+                        zz_de[i, j][20] = arr_de[i, j][5, 0]
+                        
+                        zz_de[i, j][21] = arr_de[i, j][6, 0]
+                        zz_de[i, j][22] = arr_de[i, j][5, 1]
+                        zz_de[i, j][23] = arr_de[i, j][4, 2]
+                        zz_de[i, j][24] = arr_de[i, j][3, 3]
+                        zz_de[i, j][25] = arr_de[i, j][2, 4]
+                        zz_de[i, j][26] = arr_de[i, j][1, 5]
+                        zz_de[i, j][27] = arr_de[i, j][0, 6]
+                        
+                        zz_de[i, j][28] = arr_de[i, j][0, 7]
+                        zz_de[i, j][29] = arr_de[i, j][1, 6]
+                        zz_de[i, j][30] = arr_de[i, j][2, 5]
+                        zz_de[i, j][31] = arr_de[i, j][3, 4]
+                        zz_de[i, j][32] = arr_de[i, j][4, 3]
+                        zz_de[i, j][33] = arr_de[i, j][5, 2]
+                        zz_de[i, j][34] = arr_de[i, j][6, 1]
+                        zz_de[i, j][35] = arr_de[i, j][7, 0]
+                        
+                        zz_de[i, j][36] = arr_de[i, j][7, 1]
+                        zz_de[i, j][37] = arr_de[i, j][6, 2]
+                        zz_de[i, j][38] = arr_de[i, j][5, 3]
+                        zz_de[i, j][39] = arr_de[i, j][4, 4]
+                        zz_de[i, j][40] = arr_de[i, j][3, 5]
+                        zz_de[i, j][41] = arr_de[i, j][2, 6]
+                        zz_de[i, j][42] = arr_de[i, j][1, 7]
+                        
+                        zz_de[i, j][43] = arr_de[i, j][2, 7]
+                        zz_de[i, j][44] = arr_de[i, j][3, 6]
+                        zz_de[i, j][45] = arr_de[i, j][4, 5]
+                        zz_de[i, j][46] = arr_de[i, j][5, 4]
+                        zz_de[i, j][47] = arr_de[i, j][6, 3]
+                        zz_de[i, j][48] = arr_de[i, j][7, 2]
                     
-                    zz_de[i][58] = arr_de[i][7, 5]
-                    zz_de[i][59] = arr_de[i][6, 6]
-                    zz_de[i][60] = arr_de[i][5, 7]
+                        zz_de[i, j][49] = arr_de[i, j][7, 3]
+                        zz_de[i, j][50] = arr_de[i, j][6, 4]
+                        zz_de[i, j][51] = arr_de[i, j][5, 5]
+                        zz_de[i, j][52] = arr_de[i, j][4, 6]
+                        zz_de[i, j][53] = arr_de[i, j][3, 7]
                     
-                    zz_de[i][61] = arr_de[i][6, 7]
-                    zz_de[i][62] = arr_de[i][7, 6]
-                    
-                    zz_de[i][63] = arr_de[i][7, 7]
+                        zz_de[i, j][54] = arr_de[i, j][4, 7]
+                        zz_de[i, j][55] = arr_de[i, j][5, 6]
+                        zz_de[i, j][56] = arr_de[i, j][6, 5]
+                        zz_de[i, j][57] = arr_de[i, j][7, 4]
+                        
+                        zz_de[i, j][58] = arr_de[i, j][7, 5]
+                        zz_de[i, j][59] = arr_de[i, j][6, 6]
+                        zz_de[i, j][60] = arr_de[i, j][5, 7]
+                        
+                        zz_de[i, j][61] = arr_de[i, j][6, 7]
+                        zz_de[i, j][62] = arr_de[i, j][7, 6]
+                        
+                        zz_de[i, j][63] = arr_de[i, j][7, 7]
                 # end of for
                 list_coef_de.append(zz_de)
                     
 
             # end of for            
             time_elapsed_de = time.time() - time_beg_de
-            print("[Time] zz: %f, de: %f"%(time_elapsed_zz, time_elapsed_de))
+            print("[Time] C-optimized: %f, Naive Python: %f" \
+                  %(time_elapsed_zz, time_elapsed_de))
             self.assertTrue(time_elapsed_zz <= time_elapsed_de)
         # end of for
     # end of def
 
-    def test_performance_load_dct_block(self):
-        """=> Test the performance of loading zigzag DCT coef.
+    def test_compare_coef_with_decompressedjpeg(self):
+        """=> Compare DCT coef between ZigzagDct1d and DecompressedJpeg.
         """        
         for fpath in self.list_fpaths:
             jpeg_de = jpegio.read(fpath, jpegio.DECOMPRESSED)
