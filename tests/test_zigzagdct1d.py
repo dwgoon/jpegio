@@ -115,6 +115,7 @@ class ZigzagDct1dTest(unittest.TestCase):
         """=> Test the performance of loading zigzag DCT coef.
         """        
         for fpath in self.list_fpaths:
+            # Read DCT with ZigzagDct1d
             time_beg_zz = time.time()
             jpeg_zz = jpegio.read(fpath, jpegio.ZIGZAG_DCT_1D)
             list_coef_zz = []
@@ -127,6 +128,7 @@ class ZigzagDct1dTest(unittest.TestCase):
             # end of for
             time_elapsed_zz = time.time() - time_beg_zz
             
+            # Read DCT with DecompressedJpeg
             time_beg_de = time.time()
             jpeg_de = jpegio.read(fpath, jpegio.DECOMPRESSED)
             list_coef_de = []
@@ -221,16 +223,20 @@ class ZigzagDct1dTest(unittest.TestCase):
                         zz_de[i, j][62] = arr_de[i, j][7, 6]
                         
                         zz_de[i, j][63] = arr_de[i, j][7, 7]
-                # end of for
+                    # end of for (j)
+                # end of for (i)
                 list_coef_de.append(zz_de)
-                    
-
-            # end of for            
+            # end of for (c)
             time_elapsed_de = time.time() - time_beg_de
             print("[Time] C-optimized: %f, Naive Python: %f" \
                   %(time_elapsed_zz, time_elapsed_de))
-            self.assertTrue(time_elapsed_zz <= time_elapsed_de)
+            self.assertTrue(time_elapsed_zz <= time_elapsed_de)            
+            
+            # Check the numbers of coef arrays
+            self.assertTrue(len(list_coef_zz) == len(list_coef_de))        
         # end of for
+        
+        
     # end of def
 
     def test_compare_coef_with_decompressedjpeg(self):
