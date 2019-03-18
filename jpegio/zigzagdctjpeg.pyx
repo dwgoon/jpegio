@@ -10,6 +10,7 @@ import os
 
 import numpy as np
 cimport numpy as cnp
+from numpy import count_nonzero as cnt_nnz
 
 cimport clibjpeg
 from .clibjpeg cimport *
@@ -35,11 +36,10 @@ cdef class ZigzagDct1d(DecompressedJpeg):
     def __init__(self):
         super().__init__()
                 
-#    cpdef get_coef_block(self, c, i, j):
-#        if not self.coef_arrays:
-#            raise AttributeError("coef_arrays has not been created yet.")            
-#
-#        return self.coef_arrays[c][i, j, :]
+    cpdef get_coef_block(self, c, i, j):
+        if not self.coef_arrays:
+            raise AttributeError("coef_arrays has not been created yet.")
+        return self.coef_arrays[c][i, j]
     
     cpdef get_coef_block_array_shape(self, c):
         if not self.coef_arrays:
@@ -47,6 +47,14 @@ cdef class ZigzagDct1d(DecompressedJpeg):
             
         return (self.coef_arrays[c].shape[0],
                 self.coef_arrays[c].shape[1])
+
+    # Override
+    cpdef count_nnz_ac(self):
+        num_nnz_ac = 0
+        for i in range(self._cinfo.num_components):
+            coef = self.coef_arrays[i]
+            num_nnz_ac += (cnt_nnz(coef) - cnt_nnz(coef[:, :, 0]))        
+        return num_nnz_ac        
         
     # Override
     cdef _get_dct_coefficients(self):

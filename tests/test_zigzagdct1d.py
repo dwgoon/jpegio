@@ -240,7 +240,8 @@ class ZigzagDct1dTest(unittest.TestCase):
     # end of def
 
     def test_compare_coef_with_decompressedjpeg(self):
-        """=> Compare DCT coef between ZigzagDct1d and DecompressedJpeg.
+        """=> Test reading DCT coefficients of ZigzagDct1d
+              by comparing with DecompressedJpeg.
         """        
         for fpath in self.list_fpaths:
             jpeg_de = jpegio.read(fpath, jpegio.DECOMPRESSED)
@@ -264,6 +265,32 @@ class ZigzagDct1dTest(unittest.TestCase):
         # end of for
     # end of def
 
+
+    def test_compare_count_nnz_ac_with_decompressedjpeg(self):
+        """=> Test counting non-zero DCT AC coefficients
+              by comparing with DecompressedJpeg.
+        """
+        for fpath in self.list_fpaths:
+#            fname = os.path.basename(fpath)
+#            dpath_mat = apath(pjoin(os.path.dirname(fpath),
+#                                    os.path.pardir,
+#                                    'matlab_outputs'))
+#            fpath_mat = pjoin(dpath_mat, 'nnz_'+fname+'.mat')
+#            if not os.path.isfile(fpath_mat):
+#                continue
+#
+#            mat = spio.loadmat(fpath_mat)
+#            nnz_ac_mat = mat['nnz_ac'][0]
+            
+            jpeg_de = jpegio.read(fpath, jpegio.DECOMPRESSED)
+            jpeg_zz = jpegio.read(fpath, jpegio.ZIGZAG_DCT_1D)
+            
+            nnz_ac_de = jpeg_de.count_nnz_ac()
+            nnz_ac_zz = jpeg_zz.count_nnz_ac()
+            
+            self.assertTrue(nnz_ac_de == nnz_ac_zz)
+        # end of for
+    # end of def
 
 if __name__ == "__main__":
     unittest.main()
