@@ -104,4 +104,4 @@ arr_zz = jpeg_zz.coef_arrays[c].reshape(nrows_blk*ncols_blk, BS*BS)
 
 for i in range(arr_de.shape[0]):
     zz_de = get_arr_zigzag(arr_de[i])
-    print(np.array_equal(zz_de, arr_zz[i]))
+    #print(np.array_equal(zz_de, arr_zz[i]))

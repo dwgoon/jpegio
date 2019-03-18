@@ -10,6 +10,7 @@ import os
 
 import numpy as np
 cimport numpy as cnp
+from numpy import count_nonzero as cnt_nnz
 
 cimport clibjpeg
 from .clibjpeg cimport *
@@ -115,6 +116,15 @@ cdef class DecompressedJpeg:
             set_ncols.add(ci.downsampled_width)
         
         return True
+    
+    
+    cpdef count_nnz_ac(self):
+        num_nnz_ac = 0
+        for i in range(self._cinfo.num_components):
+            coef = self.coef_arrays[i]
+            num_nnz_ac += (cnt_nnz(coef) - cnt_nnz(coef[0::8, 0::8]))        
+        return num_nnz_ac
+
         
     cdef _get_comp_info(self):
         cdef int i

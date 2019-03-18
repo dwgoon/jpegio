@@ -40,7 +40,7 @@ class ComparisionTest(unittest.TestCase):
             dpath_mat = apath(pjoin(os.path.dirname(fpath),
                                     os.path.pardir,
                                     'matlab_outputs'))
-            fpath_mat = pjoin(dpath_mat, fname+'.mat')
+            fpath_mat = pjoin(dpath_mat, 'coef_arrays'+fname+'.mat')
             if not os.path.isfile(fpath_mat):
                 continue
 
@@ -115,7 +115,29 @@ class ComparisionTest(unittest.TestCase):
         
         jpeg = jpegio.read(pjoin('images', 'test05.jpg'))
         self.assertTrue(jpeg.are_channel_sizes_same())
+        
+    def test_compare_count_nnz_ac(self):
+        """=> Test counting non-zero DCT AC coefficients.
+        """
+        for fpath in self.list_fpaths:
+            fname = os.path.basename(fpath)
+            dpath_mat = apath(pjoin(os.path.dirname(fpath),
+                                    os.path.pardir,
+                                    'matlab_outputs'))
+            fpath_mat = pjoin(dpath_mat, 'nnz_'+fname+'.mat')
+            if not os.path.isfile(fpath_mat):
+                continue
 
+            mat = spio.loadmat(fpath_mat)
+            nnz_ac_mat = mat['nnz_ac'][0]
+            
+            jpeg = jpegio.read(fpath)
+            nnz_ac_jpegio = jpeg.count_nnz_ac()                
+            
+            self.assertTrue(nnz_ac_mat == nnz_ac_jpegio)
+        # end of for
+    # end of def
+    
 if __name__ == "__main__":
     unittest.main()
     

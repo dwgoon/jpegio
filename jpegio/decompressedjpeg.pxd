@@ -24,3 +24,4 @@ cdef class DecompressedJpeg:
     cpdef get_coef_block(self, c, i, j)
     cpdef get_coef_block_array_shape(self, c)
     cpdef are_channel_sizes_same(self)
+    cpdef count_nnz_ac(self)
