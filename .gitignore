@@ -8,7 +8,6 @@ build/
 dist/
 
 jpegio.egg-info/
-tests/vim.exe.stackdump
 .eggs/
 jpegio/decompressedjpeg.c
 jpegio/componentinfo.c
