@@ -13,3 +13,4 @@ tests/vim.exe.stackdump
 jpegio/decompressedjpeg.c
 jpegio/componentinfo.c
 jpegio/zigzagdctjpeg.c
+examples/.ipynb_checkpoints/
