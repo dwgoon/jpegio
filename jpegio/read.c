@@ -9,7 +9,7 @@
  * user with "warnings off".   -- PAS 10/03
 */
 METHODDEF(void)
-my_output_message(j_common_ptr cinfo)
+jpegio_output_message(j_common_ptr cinfo)
 {
     char buffer[JMSG_LENGTH_MAX];
 
@@ -21,19 +21,19 @@ my_output_message(j_common_ptr cinfo)
 
 
 METHODDEF(void)
-my_error_exit(j_common_ptr cinfo)
+jpegio_error_exit(j_common_ptr cinfo)
 {
     char buffer[JMSG_LENGTH_MAX];
 
     // cinfo->err really points to a jpegio_error_mgr struct, so coerce pointer 
-    jpegio_error_ptr myerr = (jpegio_error_ptr) cinfo->err;
+    jpegio_error_ptr jpegio_err = (jpegio_error_ptr) cinfo->err;
 
     // create the message
     (*cinfo->err->format_message) (cinfo, buffer);
     printf("[LIBJPEG ERROR]: %s\n", buffer);
 
     // return control to the setjmp point
-    longjmp(myerr->setjmp_buffer, 1);
+    longjmp(jpegio_err->setjmp_buffer, 1);
 }
 
 
@@ -47,8 +47,8 @@ unsigned char* _read_jpeg_decompress_struct(
 
     // Set up the normal JPEG error routines, then override error_exit. 
     cinfo->err = jpeg_std_error(&jerr->pub);    
-    jerr->pub.error_exit = my_error_exit;
-    jerr->pub.output_message = my_output_message;
+    jerr->pub.error_exit = jpegio_error_exit;
+    jerr->pub.output_message = jpegio_output_message;
     
     
     // Establish the setjmp return context for error_exit to use. 
