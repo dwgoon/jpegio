@@ -8,15 +8,10 @@
 
 #include "dctblockarraysize.h"
 
-/* We need to create our own error handler so that we can override the 
- * default handler in case a fatal error occurs.  The standard error_exit
- * method calls exit() which doesn't clean things up properly and also 
- * exits Matlab.  This is described in the example.c routine provided in
- * the IJG's code library.
- */
+
 struct jpegio_error_mgr {
-  struct jpeg_error_mgr pub;	/* "public" fields */
-  jmp_buf setjmp_buffer;	/* for return to caller */
+  struct jpeg_error_mgr pub;
+  jmp_buf setjmp_buffer;
 };
 
 typedef struct jpegio_error_mgr* jpegio_error_ptr;

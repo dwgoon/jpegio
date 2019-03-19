@@ -1,13 +1,7 @@
 
-
 #include "read.h"
 
-/* The default output_message routine causes a seg fault in Matlab,
- * at least on Windows.  Its generally used to emit warnings, since
- * fatal errors call the error_exit routine, so we emit a Matlab
- * warning instead.  If desired, warnings can be turned off by the
- * user with "warnings off".   -- PAS 10/03
-*/
+
 METHODDEF(void)
 jpegio_output_message(j_common_ptr cinfo)
 {
@@ -220,21 +214,6 @@ void _read_coef_array_zigzag_dct_1d(JCOEF* arr,
             ir_arr = DCTSIZE2*blkarr_size.ncols*ir_blk;
             ic_arr = DCTSIZE2*ic_blk;
             
-            /*
-            // Read a single block of DCT coefficients
-            for (i = 0; i < DCTSIZE; i++) // for each row in block
-            {                
-                ic_arr = DCTSIZE*ic_blk;
-                for (j = 0; j < DCTSIZE; j++) // for each column in block
-                {
-                    *(arr + ir_arr + ic_arr) = bufptr[i*DCTSIZE + j];
-                    ic_arr++;
-                    
-                }
-                ir_arr += DCTSIZE*blkarr_size.ncols;
-            }
-            */
-            
             *(arr + ir_arr + ic_arr) = bufptr[0];  // [0, 0]
     
             *(arr + ir_arr + ic_arr + 1) = bufptr[1];  // [0, 1]
@@ -313,9 +292,6 @@ void _read_coef_array_zigzag_dct_1d(JCOEF* arr,
             *(arr + ir_arr + ic_arr + 62) = bufptr[7*DCTSIZE + 6];  // [7, 6]
             
             *(arr + ir_arr + ic_arr + 63) = bufptr[7*DCTSIZE + 7];  // [7, 7]
-            
-            
-            //ir_arr += DCTSIZE*blkarr_size.ncols;
         }
     }
 }
