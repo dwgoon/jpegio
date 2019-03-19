@@ -26,14 +26,14 @@ cdef class DecompressedJpeg:
 
     def __cinit__(self):
         self._cinfo = <j_decompress_ptr> malloc(sizeof(jpeg_decompress_struct))
-        self._jerr = <my_error_ptr> malloc(sizeof(my_error_mgr))
+        self._jerr = <jpegio_error_ptr> malloc(sizeof(jpegio_error_mgr))
         self.coef_arrays = None
         
         if self._cinfo is NULL:
             raise MemoryError("Failed to malloc jpeg_decompress_struct")
             
         if self._jerr is NULL:
-            raise MemoryError("Failed to malloc my_error_mgr")
+            raise MemoryError("Failed to malloc jpegio_error_mgr")
         
         self._infile = NULL
         self._mem_buff = NULL

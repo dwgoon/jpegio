@@ -13,7 +13,7 @@ cdef class DecompressedJpeg:
     cdef unsigned char* _mem_buff
     cdef FILE* _infile
     cdef j_decompress_ptr _cinfo
-    cdef my_error_ptr _jerr    
+    cdef jpegio_error_ptr _jerr    
         
     cdef _get_comp_info(self)
     cdef _get_quant_tables(self)

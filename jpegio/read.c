@@ -25,8 +25,8 @@ my_error_exit(j_common_ptr cinfo)
 {
     char buffer[JMSG_LENGTH_MAX];
 
-    // cinfo->err really points to a my_error_mgr struct, so coerce pointer 
-    my_error_ptr myerr = (my_error_ptr) cinfo->err;
+    // cinfo->err really points to a jpegio_error_mgr struct, so coerce pointer 
+    jpegio_error_ptr myerr = (jpegio_error_ptr) cinfo->err;
 
     // create the message
     (*cinfo->err->format_message) (cinfo, buffer);
@@ -40,7 +40,7 @@ my_error_exit(j_common_ptr cinfo)
 unsigned char* _read_jpeg_decompress_struct(
     FILE* infile,
     j_decompress_ptr cinfo,
-    my_error_ptr jerr)
+    jpegio_error_ptr jerr)
 {
     unsigned char* mem_buffer = NULL;
     unsigned long mem_size = 0;

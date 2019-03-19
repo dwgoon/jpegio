@@ -14,17 +14,17 @@
  * exits Matlab.  This is described in the example.c routine provided in
  * the IJG's code library.
  */
-struct my_error_mgr {
+struct jpegio_error_mgr {
   struct jpeg_error_mgr pub;	/* "public" fields */
   jmp_buf setjmp_buffer;	/* for return to caller */
 };
 
-typedef struct my_error_mgr* my_error_ptr;
+typedef struct jpegio_error_mgr* jpegio_error_ptr;
 
 
 unsigned char* _read_jpeg_decompress_struct(FILE* infile,
                                             j_decompress_ptr cinfo,
-                                            my_error_ptr jerr);
+                                            jpegio_error_ptr jerr);
 
 int _get_num_quant_tables(const j_decompress_ptr cinfo);
 

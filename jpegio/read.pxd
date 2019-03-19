@@ -10,14 +10,14 @@ cdef extern from "dctblockarraysize.h":
         JDIMENSION ncols
                 
 cdef extern from "read.h":
-    cdef struct my_error_mgr:
+    cdef struct jpegio_error_mgr:
         pass    
 
-    ctypedef my_error_mgr* my_error_ptr
+    ctypedef jpegio_error_mgr* jpegio_error_ptr
 
     unsigned char* _read_jpeg_decompress_struct(FILE* infile,
                                                 j_decompress_ptr cinfo,
-                                                my_error_ptr jerr)
+                                                jpegio_error_ptr jerr)
 
     int _get_num_quant_tables(const j_decompress_ptr cinfo)
     
