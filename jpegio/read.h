@@ -2,19 +2,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <setjmp.h>
 #include "jpeglib.h"
-#include "jerror.h"
 
+#include "jpegioerror.h"
 #include "dctblockarraysize.h"
 
-
-struct jpegio_error_mgr {
-  struct jpeg_error_mgr pub;
-  jmp_buf setjmp_buffer;
-};
-
-typedef struct jpegio_error_mgr* jpegio_error_ptr;
 
 
 unsigned char* _read_jpeg_decompress_struct(FILE* infile,

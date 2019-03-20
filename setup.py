@@ -16,7 +16,9 @@ incs = ["."]
 libs = []
 cargs = []
 lib_dirs = []
+largs = []
 dname_libjpeg = None
+
 
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,6 +29,9 @@ if sys.platform == 'win32': # Windows
 
     cargs.append("/DNPY_NO_DEPRECATED_API")
     cargs.append("/DNPY_1_7_API")
+    
+    largs.append("/NODEFAULTLIB:LIBCMT")
+
 
     incs.append(DIR_SIMD_HEADER)
     
@@ -58,10 +63,12 @@ lib_dirs.append(DIR_LIBJPEG_LIB)
 srcs_decompressedjpeg = []
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
+srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jpegioerror.c"))
 
 srcs_zigzagdctjpeg = []
 srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "zigzagdctjpeg.pyx"))
 srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
+srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jpegioerror.c"))
 
 if sys.platform in ['linux', 'darwin']:
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
@@ -83,14 +90,16 @@ ext_modules = [
               include_dirs=incs,
               extra_compile_args=cargs,
               library_dirs=lib_dirs,
-              libraries=libs),
+              libraries=libs,
+              extra_link_args=largs),
     Extension("jpegio.zigzagdctjpeg",
               sources=srcs_zigzagdctjpeg,
               language='c',
               include_dirs=incs,
               extra_compile_args=cargs,
               library_dirs=lib_dirs,
-              libraries=libs),
+              libraries=libs,
+              extra_link_args=largs),
 ]
 
 requirements = ['cython>=0.29',
