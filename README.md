@@ -4,7 +4,7 @@
 
 It is recommended to install using wheel, because the installation process include compiling C source codes.  
 ```
-pip install jpegio-x.x.x-cp3x-cp3x-win_amd64.whl
+pip install dist/jpegio-x.x.x-cp3x-cp3x-win_amd64.whl
 ```
 
 If you want to install this package by compiling yourself, it is recommended to use the following command.
