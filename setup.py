@@ -11,6 +11,8 @@ import glob
 
 import numpy
 
+import jpegio
+
 
 incs = ["."]
 libs = []
@@ -111,7 +113,7 @@ package_data = {
     'jpegio/libjpeg':file_formats}
 
 setup(name='jpegio',
-      version='0.1.2',
+      version=jpegio.__version__,
       description='A library to read and write the parameters of JPEG compression',
       url='http://github.com/dwgoon/jpegio',
       author='Daewon Lee',

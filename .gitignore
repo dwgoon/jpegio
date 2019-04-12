@@ -2,13 +2,11 @@
 *.obj
 *.exp
 *.pyc
-*.whl
 
-build/
-dist/
-
-jpegio.egg-info/
+.idea/
 .eggs/
+jpegio.egg-info/
+build/
 jpegio/decompressedjpeg.c
 jpegio/componentinfo.c
 jpegio/zigzagdctjpeg.c
