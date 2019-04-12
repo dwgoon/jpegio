@@ -15,9 +15,8 @@ python setup.py install
 
 Compilation requires some dependencies.
 
-- `Cython`
-- `NumPy`
-
+- [`Cython`](https://cython.org/)
+- [`NumPy`](http://www.numpy.org/)
 
 ## Usage example
 
