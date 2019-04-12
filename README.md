@@ -2,16 +2,22 @@
 
 ## Installation
 
-It is recommended to install using wheel, because the installation process include compiling C source codes.  
+It is recommended to install using wheel, because the installation process includes compiling C source codes.  
 ```
 pip install dist/jpegio-x.x.x-cp3x-cp3x-win_amd64.whl
 ```
 
-If you want to install this package by compiling yourself, it is recommended to use the following command.
+If you want to install this package by compiling yourself, use the following command.
  
 ```
 python setup.py install
 ```
+
+Compilation requires some dependencies.
+
+- `Cython`
+- `NumPy`
+
 
 ## Usage example
 
