@@ -11,9 +11,6 @@ import glob
 
 import numpy
 
-import jpegio
-
-
 incs = ["."]
 libs = []
 cargs = []
@@ -76,6 +73,7 @@ if sys.platform in ['linux', 'darwin']:
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
         print("[LIBJPEG]", fpath)
         srcs_decompressedjpeg.append(fpath)
+        srcs_zigzagdctjpeg.append(fpath)
 elif sys.platform == 'win32':
     print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
 
@@ -113,7 +111,7 @@ package_data = {
     'jpegio/libjpeg':file_formats}
 
 setup(name='jpegio',
-      version=jpegio.__version__,
+      version="0.1.3",
       description='A library to read and write the parameters of JPEG compression',
       url='http://github.com/dwgoon/jpegio',
       author='Daewon Lee',
