@@ -44,4 +44,8 @@ quant_tbl = img.quant_tables[0]
 - `quant_tables` is a `numpy.ndarray` object that represents the quantization tables in JPEG.
 
 ## References
-The core parts of this package, implemented in C/C++, are adopted from the souce codes of [Jessica Fridrich's laboratory](http://dde.binghamton.edu).
+- The core parts of this package, implemented in C/C++, are adopted from the souce codes of [Jessica Fridrich's laboratory](http://dde.binghamton.edu).
+- The functionality of libjpeg is borrowed from [IJG](https://www.ijg.org/) and [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo).
+
+## License
+To be updated...
