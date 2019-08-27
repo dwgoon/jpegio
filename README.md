@@ -1,4 +1,6 @@
-# jpegio
+# JpegIO
+
+A python package for accessing the internal variables of JPEG file format such as DCT coefficients and quantization tables.
 
 ## Installation
 
@@ -17,6 +19,16 @@ Compilation requires some dependencies.
 
 - [`Cython`](https://cython.org/)
 - [`NumPy`](http://www.numpy.org/)
+
+## Making a wheel
+
+You can use the following command for making a wheel for your own architecture such as x64 or ppc64le.
+
+```
+python setup.py bdist_wheel
+```
+
+The cooked wheel files are located at `dist` directory.
 
 ## Usage example
 
