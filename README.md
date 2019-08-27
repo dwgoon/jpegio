@@ -43,3 +43,5 @@ quant_tbl = img.quant_tables[0]
 - `coef_arrays` is a list of `numpy.ndarray` objects that represent DCT coefficients of YCbCr channels in JPEG.
 - `quant_tables` is a `numpy.ndarray` object that represents the quantization tables in JPEG.
 
+## References
+The core parts of this package, implemented in C/C++, are adopted from the souce codes of [Jessica Fridrich's laboratory](http://dde.binghamton.edu).
