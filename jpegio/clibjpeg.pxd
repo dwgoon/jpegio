@@ -31,7 +31,7 @@ cdef extern from "jpeglib.h":
         int v_samp_factor       
         int quant_tbl_no
         int ac_tbl_no
-        int dc_tbl_no#        
+        int dc_tbl_no
         JDIMENSION downsampled_height         
         JDIMENSION downsampled_width        
         JDIMENSION height_in_blocks

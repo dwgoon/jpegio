@@ -7,12 +7,24 @@
 #include <algorithm>
 #include <fstream>
 
+namespace jpegio {
+
 template <class T>
 class mat2D
 {
 public:
 	int rows;
 	int cols;
+
+private:
+	std::vector<T> vect;
+
+public:
+
+    T* GetBuffer()
+    {
+        return &this->vect[0];
+    }
 
 	mat2D(int rows, int cols)
 	{
@@ -373,8 +385,8 @@ public:
 		return result;
 	}
 
-private:
-	std::vector<T> vect;
 };
+
+} // end of namespace jpegio
 
 #endif

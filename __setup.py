@@ -69,28 +69,37 @@ srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "zigzagdctjpeg.pyx"))
 srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
 srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jpegioerror.c"))
 
-srcs_jstruct = ["jpegio/decompressedjpeg.pyx",
-                "jpegio/jstruct.cpp"]
-
 if sys.platform in ['linux', 'darwin']:
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
         print("[LIBJPEG]", fpath)
         srcs_decompressedjpeg.append(fpath)
         srcs_zigzagdctjpeg.append(fpath)
-        srcs_jstruct.append(fpath)
 elif sys.platform == 'win32':
     print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
 
     
 ext_modules = [
-    Extension("decompressedjpeg",
-              sources=srcs_jstruct,
-              language="c++",
+    Extension("jpegio.componentinfo",
+              sources=['jpegio/componentinfo.pyx'],
+              language='c',
+              include_dirs=incs,
+              extra_compile_args=cargs),
+    Extension("jpegio.decompressedjpeg",
+              sources=srcs_decompressedjpeg,
+              language='c',
               include_dirs=incs,
               extra_compile_args=cargs,
               library_dirs=lib_dirs,
               libraries=libs,
-              extra_link_args=largs)
+              extra_link_args=largs),
+    Extension("jpegio.zigzagdctjpeg",
+              sources=srcs_zigzagdctjpeg,
+              language='c',
+              include_dirs=incs,
+              extra_compile_args=cargs,
+              library_dirs=lib_dirs,
+              libraries=libs,
+              extra_link_args=largs),
 ]
 
 requirements = ['cython>=0.29',
@@ -111,8 +120,6 @@ setup(name='jpegio',
       packages=find_packages(exclude=['tests']),
       package_data=package_data,
       setup_requires=requirements,
-      ext_modules=cythonize(ext_modules,
-                            include_path=incs,
-                            language_level="3"),
+      ext_modules=cythonize(ext_modules, include_path=incs),
       cmdclass={'build_ext':build_ext},
       zip_safe=False) 

@@ -1,28 +1,30 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #include <setjmp.h>
 #include "jstruct.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include "jerror.h"
+#include <cstdio>
+#include <cstdlib>
 extern "C"
 {
 #include "jpeglib.h"
 #include "jpegint.h"
+#include "jerror.h"
 }
 #include "mat2D.h"
 
-jstruct::jstruct(std::string filePath)
+
+namespace jpegio {
+
+
+jstruct::jstruct(std::string file_path)
 {
-	jstruct(filePath, false);
+	jstruct(file_path, false);
 }
 
-jstruct::jstruct(std::string filePath, bool loadSpatial)
+jstruct::jstruct(std::string file_path, bool load_spatial)
 {
-	this->loadSpatial = loadSpatial;
-
-	jpeg_load(filePath);
-
-	if (loadSpatial) spatial_load(filePath);
+	this->load_spatial = load_spatial;
+	jpeg_load(file_path);
+	if (load_spatial) spatial_load(file_path);
 }
 
 jstruct::~jstruct()
@@ -36,7 +38,7 @@ jstruct::~jstruct()
 	for (int i=0; i<(int)spatial_arrays.size(); i++) delete spatial_arrays[i]; spatial_arrays.clear();
 }
 
-void jstruct::jpeg_load(std::string filePath)
+void jstruct::jpeg_load(std::string file_path)
 {
 	jpeg_decompress_struct cinfo;
 	jpeg_saved_marker_ptr marker_ptr;
@@ -51,15 +53,31 @@ void jstruct::jpeg_load(std::string filePath)
 	int c_width, c_height, ci, i, j, n;
 
 	/* open file */
-	if ((infile = fopen(filePath.c_str(), "rb")) == NULL)
-	    throw new std::string("Can't open file to read");
+	if ((infile = fopen(file_path.c_str(), "rb")) == NULL)
+	    throw new std::string("[JSTRUCT] Can't open file to read");
 
 	/* set up the normal JPEG error routines, then override error_exit. */
 	cinfo.err = jpeg_std_error(new jpeg_error_mgr());
 
+
+
+	// Get the size of JPEG file
+    fseek(infile, 0, SEEK_END);
+    unsigned long mem_size = ftell(infile);
+    rewind(infile);
+
+    // Allocate memory buffer for the JPEG file.
+    unsigned char* mem_buffer = (unsigned char*) malloc(mem_size + 100);
+    fread(mem_buffer, sizeof(unsigned char), mem_size, infile);
+
 	/* initialize JPEG decompression object */
 	jpeg_create_decompress(&cinfo);
-	jpeg_stdio_src(&cinfo, infile);
+
+
+	/* Replace jpeg_stdio_src(cinfo, infile) with jpeg_mem_src
+	   due to some unresolved errors in Python. */
+    // jpeg_stdio_src(&cinfo, infile);
+    jpeg_mem_src(&cinfo, mem_buffer, mem_size);
 
 	/* save contents of markers */
 	jpeg_save_markers(&cinfo, JPEG_COM, 0xFFFF);
@@ -104,6 +122,14 @@ void jstruct::jpeg_load(std::string filePath)
 		temp->quant_tbl_no = cinfo.comp_info[ci].quant_tbl_no;
 		temp->ac_tbl_no = cinfo.comp_info[ci].ac_tbl_no;
 		temp->dc_tbl_no = cinfo.comp_info[ci].dc_tbl_no;
+
+		// The followings are added.
+		temp->downsampled_height = cinfo.comp_info[ci].downsampled_height;
+        temp->downsampled_width = cinfo.comp_info[ci].downsampled_width;
+
+        temp->height_in_blocks = cinfo.comp_info[ci].height_in_blocks;
+        temp->width_in_blocks = cinfo.comp_info[ci].width_in_blocks;
+
 		this->comp_info.push_back(temp);
 	}
 
@@ -183,15 +209,20 @@ void jstruct::jpeg_load(std::string filePath)
 		this->coef_arrays.push_back(tempCoeffs);
 	}
 
+
+    // Dealloc memory buffer
+    free(mem_buffer);
+
 	/* done with cinfo */
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 
 	/* close input file */
 	fclose(infile);
-}
 
-void jstruct::jpeg_write(std::string filePath, bool optimize_coding)
+	}
+
+void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 {
 	struct jpeg_compress_struct cinfo;
 	int c_height,c_width,ci,i,j,n,t;
@@ -202,8 +233,8 @@ void jstruct::jpeg_write(std::string filePath, bool optimize_coding)
 	JCOEFPTR bufptr;  
 	
 	/* open file */
-	if ((outfile = fopen(filePath.c_str(), "wb")) == NULL)
-	    throw new std::string("Can't open file to write");
+	if ((outfile = fopen(file_path.c_str(), "wb")) == NULL)
+	    throw new std::string("[JSTRUCT] Can't open file to write");
 
 	/* set up the normal JPEG error routines, then override error_exit. */
 	cinfo.err = jpeg_std_error(new jpeg_error_mgr());
@@ -301,7 +332,7 @@ void jstruct::jpeg_write(std::string filePath, bool optimize_coding)
 			{
 				t = this->quant_tables[n]->Read(i, j);
 				if (t<1 || t>65535)
-					throw new std::string("Quantization table entries not in range 1..65535");
+					throw new std::string("[JSTRUCT] Quantization table entries not in range 1..65535");
 
 				cinfo.quant_tbl_ptrs[n]->quantval[i*DCTSIZE+j] = (UINT16) t;
 			}
@@ -366,12 +397,12 @@ void jstruct::jpeg_write(std::string filePath, bool optimize_coding)
 	fclose(outfile);
 }
 
-void jstruct::spatial_load(std::string filePath)
+void jstruct::spatial_load(std::string file_path)
 {
 	/* open file */
 	FILE * infile;
-	if ((infile = fopen(filePath.c_str(), "rb")) == NULL)
-	    throw new std::string("Can't open file to read");
+	if ((infile = fopen(file_path.c_str(), "rb")) == NULL)
+	    throw new std::string("[JSTRUCT] Can't open file to read");
 
 	struct jpeg_decompress_struct cinfo;
 	cinfo.err = jpeg_std_error(new jpeg_error_mgr());
@@ -406,3 +437,5 @@ void jstruct::spatial_load(std::string filePath)
 	jpeg_destroy_decompress(&cinfo);
 	fclose(infile);
 }
+
+} // end of namespace jpegio
