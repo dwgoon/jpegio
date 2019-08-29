@@ -1,5 +1,5 @@
 
-from clibjpeg cimport *
+from clibjpeg cimport JDIMENSION
 
 cdef class ComponentInfo:    
     cdef public int component_id

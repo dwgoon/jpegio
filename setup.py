@@ -60,31 +60,26 @@ DIR_LIBJPEG_LIB = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "lib")
 lib_dirs.append(DIR_LIBJPEG_LIB)
 
 srcs_decompressedjpeg = []
-srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "deprecated_decompressedjpeg.pyx"))
-srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
-srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jpegioerror.c"))
-
-srcs_zigzagdctjpeg = []
-srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "zigzagdctjpeg.pyx"))
-srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "read.c"))
-srcs_zigzagdctjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jpegioerror.c"))
-
-srcs_jstruct = ["jpegio/decompressedjpeg.pyx",
-                "jpegio/jstruct.cpp"]
+srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
+srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jstruct.cpp"))
 
 if sys.platform in ['linux', 'darwin']:
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
         print("[LIBJPEG]", fpath)
         srcs_decompressedjpeg.append(fpath)
-        srcs_zigzagdctjpeg.append(fpath)
-        srcs_jstruct.append(fpath)
+
 elif sys.platform == 'win32':
     print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
 
     
 ext_modules = [
-    Extension("decompressedjpeg",
-              sources=srcs_jstruct,
+    Extension("jpegio.componentinfo",
+              sources=['jpegio/componentinfo.pyx'],
+              language='c++',
+              include_dirs=incs,
+              extra_compile_args=cargs),
+    Extension("jpegio.decompressedjpeg",
+              sources=srcs_decompressedjpeg,
               language="c++",
               include_dirs=incs,
               extra_compile_args=cargs,
@@ -99,11 +94,12 @@ requirements = ['cython>=0.29',
 file_formats = ['*.pxd', '*.pyx', '*.h', '*.c']
 package_data = {
     'jpegio':file_formats,
-    'jpegio/libjpeg':file_formats}
+    'jpegio/libjpeg':file_formats
+}
 
 setup(name='jpegio',
       version="0.2.0",
-      description='A library to read and write the parameters of JPEG compression',
+      description='A python package for accessing the internal variables of JPEG file format.',
       url='http://github.com/dwgoon/jpegio',
       author='Daewon Lee',
       author_email='daewon4you@gmail.com',

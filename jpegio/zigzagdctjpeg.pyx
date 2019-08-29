@@ -26,12 +26,12 @@ from .decompressedjpeg cimport DecompressedJpeg
 
 cdef class ZigzagDct1d(DecompressedJpeg):
 
-    def __cinit__(self):
-        pass
-        
-
-    def __dealloc__(self):
-        pass
+    # def __cinit__(self):
+    #     pass
+    #
+    #
+    # def __dealloc__(self):
+    #     pass
     
     def __init__(self):
         super().__init__()
@@ -62,7 +62,7 @@ cdef class ZigzagDct1d(DecompressedJpeg):
         """        
         self.coef_arrays = list()
 
-        cdef int nch = self._cinfo.num_components
+        cdef int nch = self.num_components
         cdef DctBlockArraySize blkarr_size
         cdef cnp.ndarray arr
         cdef cnp.ndarray blk_arr
@@ -78,8 +78,10 @@ cdef class ZigzagDct1d(DecompressedJpeg):
         cdef int i       
         for i in range(nch):
             _get_size_dct_block(&blkarr_size, self._cinfo, i)
-            arr = np.zeros((blkarr_size.nrows, blkarr_size.ncols,
-                            DCTSIZE2), dtype=np.int16)
+            arr = np.zeros((blkarr_size.nrows,
+                            blkarr_size.ncols,
+                            DCTSIZE2),
+                           dtype=np.int16)
             arr_mv = arr
             _read_coef_array_zigzag_dct_1d(<JCOEF*> &arr_mv[0, 0, 0],
                                            self._cinfo,

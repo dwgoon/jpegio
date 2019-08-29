@@ -13,19 +13,33 @@ import jpegio
 
 BS = 8  # DCT block size
 
+
+def create_list_fpaths(self):
+    self.list_fpaths = []
+    self.extensions = ['*.jpg', '*.jpeg']
+
+    dpath = os.path.dirname(__file__)
+    for ext in self.extensions:
+        for fpath in glob.glob(pjoin(dpath, 'images', ext)):
+            self.list_fpaths.append(apath(fpath))
+
+
 class ComparisionTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        self.list_fpaths = []
-        self.extensions = ['*.jpg', '*.jpeg']
-        
-        for ext in self.extensions:
-            for fpath in glob.glob(pjoin('images', ext)):
-                self.list_fpaths.append(fpath)
-        
+        create_list_fpaths(self)
+
+    def test_repeat_read_100(self):
+        """=> Check memory errors and garbage collection (100 iterations).
+        """
+        for i in range(100):
+            fpath = random.choice(self.list_fpaths)
+            jpeg = jpegio.read(fpath)
+            del jpeg
+
+    @unittest.skip("This test takes a relatively long time.")
     def test_repeat_read_1000(self):
-        """=> Check memory errors and garbage collection.
+        """=> Check memory errors and garbage collection (1000 iterations).
         """
         for i in range(1000):
             fpath = random.choice(self.list_fpaths)
@@ -86,34 +100,36 @@ class ComparisionTest(unittest.TestCase):
 
     def test_are_channel_sizes_same(self):
         """=> Test deciding sizes of all channels are identical.
-        """        
+        """
+        dpath = os.path.dirname(__file__)
+
         # False cases
-        jpeg = jpegio.read(pjoin('images', 'arborgreens01.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'arborgreens01.jpg'))
         self.assertFalse(jpeg.are_channel_sizes_same())
         
-        jpeg = jpegio.read(pjoin('images', 'cherries01.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'cherries01.jpg'))
         self.assertFalse(jpeg.are_channel_sizes_same())
         
-        jpeg = jpegio.read(pjoin('images', 'football01.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'football01.jpg'))
         self.assertFalse(jpeg.are_channel_sizes_same())
         
-        jpeg = jpegio.read(pjoin('images', 'greenlake01.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'greenlake01.jpg'))
         self.assertFalse(jpeg.are_channel_sizes_same())
         
         # True cases
-        jpeg = jpegio.read(pjoin('images', 'test01.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'test01.jpg'))
         self.assertTrue(jpeg.are_channel_sizes_same())
         
-        jpeg = jpegio.read(pjoin('images', 'test02.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'test02.jpg'))
         self.assertTrue(jpeg.are_channel_sizes_same())
         
-        jpeg = jpegio.read(pjoin('images', 'test03.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'test03.jpg'))
         self.assertTrue(jpeg.are_channel_sizes_same())
         
-        jpeg = jpegio.read(pjoin('images', 'test04.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'test04.jpg'))
         self.assertTrue(jpeg.are_channel_sizes_same())
         
-        jpeg = jpegio.read(pjoin('images', 'test05.jpg'))
+        jpeg = jpegio.read(pjoin(dpath, 'images', 'test05.jpg'))
         self.assertTrue(jpeg.are_channel_sizes_same())
         
     def test_compare_count_nnz_ac(self):
@@ -137,7 +153,47 @@ class ComparisionTest(unittest.TestCase):
             self.assertTrue(nnz_ac_mat == nnz_ac_jpegio)
         # end of for
     # end of def
+
+
+class WriteTest(unittest.TestCase):
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        create_list_fpaths(self)
+
+    def test_write_dct(self):
+        """=> Test modifying a single DCT coefficient and writing the JPEG file.
+        """
+        for fpath in self.list_fpaths:
+            for i in range(3):  # Test 3 times
+                jpeg = jpegio.read(fpath)
+                fpath_no_ext, ext = os.path.splitext(fpath)
+                fpath_modified = fpath_no_ext + "_modified" + ext
+
+                ix_coef_arr = np.random.randint(0, len(jpeg.coef_arrays))
+                coef_arr = jpeg.coef_arrays[ix_coef_arr]
+                ix_row = np.random.randint(0, coef_arr.shape[0])
+                ix_col = np.random.randint(0, coef_arr.shape[1])
+                val = np.random.randint(-256, 256)
+
+                coef_arr[ix_row, ix_col] = val
+
+                self.assertTrue(hasattr(jpeg, 'write'))
+                jpeg.write(fpath_modified)
+                jpeg_modified = jpegio.read(fpath_modified)
+
+                coef_arr_modified = jpeg_modified.coef_arrays[ix_coef_arr]
+                self.assertEqual(coef_arr[ix_row, ix_col],
+                                 coef_arr_modified[ix_row, ix_col])
+
+                del jpeg
+                del jpeg_modified
+                os.remove(fpath_modified)
+
+#    def test_write_quant_table(self):
+
+
+
 if __name__ == "__main__":
     unittest.main()
     

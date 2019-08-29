@@ -110,10 +110,11 @@ void jstruct::jpeg_load(std::string file_path)
 	this->image_color_space = cinfo.out_color_space;
 	this->image_components = cinfo.out_color_components;
 	this->jpeg_color_space = cinfo.jpeg_color_space;
-	this->jpeg_components = cinfo.num_components;
+	this->num_components = cinfo.num_components;
 	this->progressive_mode = cinfo.progressive_mode;
 	this->optimize_coding = 0;
-    for (ci = 0; ci < this->jpeg_components; ci++)
+
+    for (ci = 0; ci < this->num_components; ci++)
 	{
 		struct_comp_info * temp = new struct_comp_info();
 		temp->component_id = cinfo.comp_info[ci].component_id;
@@ -220,7 +221,123 @@ void jstruct::jpeg_load(std::string file_path)
 	/* close input file */
 	fclose(infile);
 
-	}
+}
+
+/*
+void jstruct::read_coef_array_zigzag_dct_1d(jpeg_decompress_struct* cinfo)
+{
+   self._cinfo,
+   jvirt_barray[i],
+   blkarr_size)
+
+    JBLOCKARRAY buffer;
+    JCOEFPTR bufptr;
+    JDIMENSION ir_blk, ic_blk;
+    JDIMENSION ir_arr, ic_arr;
+    int i, j;
+    int blk_nrows, blk_ncols;
+
+	coef_arrays = jpeg_read_coefficients(&cinfo);
+	for (ci = 0; ci < cinfo.num_components; ci++)
+	{
+		compptr = cinfo.comp_info + ci;
+        blk_nrows = compptr->height_in_blocks;
+		blk_ncols = compptr->width_in_blocks;
+		mat2D<int> * tempCoeffs = new mat2D<int>(blk_nrows, blk_ncols, DCTSIZE2);
+
+        // Copy coefficients from virtual block arrays
+        for (ir_blk = 0; ir_blk < blkarr_size.nrows; ir_blk++)
+        {
+            buffer = (cinfo->mem->access_virt_barray) ((j_common_ptr)cinfo, coef_array, ir_blk, 1, FALSE);
+            for (ic_blk = 0; ic_blk < blkarr_size.ncols; ic_blk++)
+            {
+                bufptr = buffer[0][ic_blk];
+                ir_arr = DCTSIZE2*blkarr_size.ncols*ir_blk;
+                ic_arr = DCTSIZE2*ic_blk;
+
+                *(arr + ir_arr + ic_arr) = bufptr[0];  // [0, 0]
+
+                *(arr + ir_arr + ic_arr + 1) = bufptr[1];  // [0, 1]
+                *(arr + ir_arr + ic_arr + 2) = bufptr[DCTSIZE];  // [1, 0]
+
+                *(arr + ir_arr + ic_arr + 3) = bufptr[2*DCTSIZE];  // [2, 0]
+                *(arr + ir_arr + ic_arr + 4) = bufptr[DCTSIZE + 1];  // [1, 1]
+                *(arr + ir_arr + ic_arr + 5) = bufptr[2];  // [0, 2]
+
+                *(arr + ir_arr + ic_arr + 6) = bufptr[3];  // [0, 3]
+                *(arr + ir_arr + ic_arr + 7) = bufptr[DCTSIZE + 2];  // [1, 2]
+                *(arr + ir_arr + ic_arr + 8) = bufptr[2*DCTSIZE + 1];  // [2, 1]
+                *(arr + ir_arr + ic_arr + 9) = bufptr[3*DCTSIZE]; // [3, 0]
+
+                *(arr + ir_arr + ic_arr + 10) = bufptr[4*DCTSIZE];  // [4, 0]
+                *(arr + ir_arr + ic_arr + 11) = bufptr[3*DCTSIZE + 1];  // [3, 1]
+                *(arr + ir_arr + ic_arr + 12) = bufptr[2*DCTSIZE + 2];  // [2, 2]
+                *(arr + ir_arr + ic_arr + 13) = bufptr[DCTSIZE + 3];  // [1, 3]
+                *(arr + ir_arr + ic_arr + 14) = bufptr[4]; // [0, 4]
+
+                *(arr + ir_arr + ic_arr + 15) = bufptr[5];  // [0, 5]
+                *(arr + ir_arr + ic_arr + 16) = bufptr[DCTSIZE + 4];  // [1, 4]
+                *(arr + ir_arr + ic_arr + 17) = bufptr[2*DCTSIZE + 3];  // [2, 3]
+                *(arr + ir_arr + ic_arr + 18) = bufptr[3*DCTSIZE + 2];  // [3, 2]
+                *(arr + ir_arr + ic_arr + 19) = bufptr[4*DCTSIZE + 1];  // [4, 1]
+                *(arr + ir_arr + ic_arr + 20) = bufptr[5*DCTSIZE];  // [5, 0]
+
+                *(arr + ir_arr + ic_arr + 21) = bufptr[6*DCTSIZE];  // [6, 0]
+                *(arr + ir_arr + ic_arr + 22) = bufptr[5*DCTSIZE + 1];  // [5, 1]
+                *(arr + ir_arr + ic_arr + 23) = bufptr[4*DCTSIZE + 2];  // [4, 2]
+                *(arr + ir_arr + ic_arr + 24) = bufptr[3*DCTSIZE + 3];  // [3, 3]
+                *(arr + ir_arr + ic_arr + 25) = bufptr[2*DCTSIZE + 4];  // [2, 4]
+                *(arr + ir_arr + ic_arr + 26) = bufptr[DCTSIZE + 5];  // [1, 5]
+                *(arr + ir_arr + ic_arr + 27) = bufptr[6];  // [0, 6]
+
+                *(arr + ir_arr + ic_arr + 28) = bufptr[7];  // [0, 7]
+                *(arr + ir_arr + ic_arr + 29) = bufptr[DCTSIZE + 6];  // [1, 6]
+                *(arr + ir_arr + ic_arr + 30) = bufptr[2*DCTSIZE + 5];  // [2, 5]
+                *(arr + ir_arr + ic_arr + 31) = bufptr[3*DCTSIZE + 4];  // [3, 4]
+                *(arr + ir_arr + ic_arr + 32) = bufptr[4*DCTSIZE + 3];  // [4, 3]
+                *(arr + ir_arr + ic_arr + 33) = bufptr[5*DCTSIZE + 2];  // [5, 2]
+                *(arr + ir_arr + ic_arr + 34) = bufptr[6*DCTSIZE + 1];  // [6, 1]
+                *(arr + ir_arr + ic_arr + 35) = bufptr[7*DCTSIZE];  // [7, 0]
+
+                *(arr + ir_arr + ic_arr + 36) = bufptr[7*DCTSIZE + 1];  // [7, 1]
+                *(arr + ir_arr + ic_arr + 37) = bufptr[6*DCTSIZE + 2];  // [6, 2]
+                *(arr + ir_arr + ic_arr + 38) = bufptr[5*DCTSIZE + 3];  // [5, 3]
+                *(arr + ir_arr + ic_arr + 39) = bufptr[4*DCTSIZE + 4];  // [4, 4]
+                *(arr + ir_arr + ic_arr + 40) = bufptr[3*DCTSIZE + 5];  // [3, 5]
+                *(arr + ir_arr + ic_arr + 41) = bufptr[2*DCTSIZE + 6];  // [2, 6]
+                *(arr + ir_arr + ic_arr + 42) = bufptr[DCTSIZE + 7];  // [1, 7]
+
+                *(arr + ir_arr + ic_arr + 43) = bufptr[2*DCTSIZE + 7];  // [2, 7]
+                *(arr + ir_arr + ic_arr + 44) = bufptr[3*DCTSIZE + 6];  // [3, 6]
+                *(arr + ir_arr + ic_arr + 45) = bufptr[4*DCTSIZE + 5];  // [4, 5]
+                *(arr + ir_arr + ic_arr + 46) = bufptr[5*DCTSIZE + 4];  // [5, 4]
+                *(arr + ir_arr + ic_arr + 47) = bufptr[6*DCTSIZE + 3];  // [6, 3]
+                *(arr + ir_arr + ic_arr + 48) = bufptr[7*DCTSIZE + 2];  // [7, 2]
+
+                *(arr + ir_arr + ic_arr + 49) = bufptr[7*DCTSIZE + 3];  // [7, 3]
+                *(arr + ir_arr + ic_arr + 50) = bufptr[6*DCTSIZE + 4];  // [6, 4]
+                *(arr + ir_arr + ic_arr + 51) = bufptr[5*DCTSIZE + 5];  // [5, 5]
+                *(arr + ir_arr + ic_arr + 52) = bufptr[4*DCTSIZE + 6];  // [4, 6]
+                *(arr + ir_arr + ic_arr + 53) = bufptr[3*DCTSIZE + 7];  // [3, 7]
+
+                *(arr + ir_arr + ic_arr + 54) = bufptr[4*DCTSIZE + 7];  // [4, 7]
+                *(arr + ir_arr + ic_arr + 55) = bufptr[5*DCTSIZE + 6];  // [5, 6]
+                *(arr + ir_arr + ic_arr + 56) = bufptr[6*DCTSIZE + 5];  // [6, 5]
+                *(arr + ir_arr + ic_arr + 57) = bufptr[7*DCTSIZE + 4];  // [7, 4]
+
+                *(arr + ir_arr + ic_arr + 58) = bufptr[7*DCTSIZE + 5];  // [7, 5]
+                *(arr + ir_arr + ic_arr + 59) = bufptr[6*DCTSIZE + 6];  // [6, 6]
+                *(arr + ir_arr + ic_arr + 60) = bufptr[5*DCTSIZE + 7];  // [5, 7]
+
+                *(arr + ir_arr + ic_arr + 61) = bufptr[6*DCTSIZE + 7];  // [6, 7]
+                *(arr + ir_arr + ic_arr + 62) = bufptr[7*DCTSIZE + 6];  // [7, 6]
+
+                *(arr + ir_arr + ic_arr + 63) = bufptr[7*DCTSIZE + 7];  // [7, 7]
+            }
+        } // end of for
+    } // end of for
+}
+*/
 
 void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 {
@@ -254,7 +371,7 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 
 	jpeg_set_defaults(&cinfo);
 	cinfo.optimize_coding = optimize_coding;
-	cinfo.num_components = this->jpeg_components;
+	cinfo.num_components = this->num_components;
 	cinfo.jpeg_color_space = (J_COLOR_SPACE)this->jpeg_color_space;
 	/* set the compression object with default parameters */
 	cinfo.min_DCT_h_scaled_size = 8;
@@ -295,7 +412,7 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 	}
 
 	/* realize virtual block arrays */
-	jpeg_write_coefficients(&cinfo,coef_arrays);
+	jpeg_write_coefficients(&cinfo, coef_arrays);
 
 	/* populate the array with the DCT coefficients */
 	for (ci = 0; ci < cinfo.num_components; ci++)
