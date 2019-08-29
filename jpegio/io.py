@@ -7,9 +7,8 @@ def read(fpath, flag=jpegio.DECOMPRESSED):
         obj = jpegio.DecompressedJpeg()  
         obj.read(fpath)
     elif flag == jpegio.ZIGZAG_DCT_1D:
-        obj = jpegio.ZigzagDct1d()
-        obj.read(fpath)
-    
+        raise ValueError("ZIGZAG_DCT_1D: not supported yet")
+
     return obj
 
 
@@ -20,7 +19,6 @@ def write(obj, fpath, flag=jpegio.DECOMPRESSED):
         obj = jpegio.DecompressedJpeg()
         obj.write(fpath)
     elif flag == jpegio.ZIGZAG_DCT_1D:
-        obj = jpegio.ZigzagDct1d()
-        obj.write(fpath)
+        raise ValueError("ZIGZAG_DCT_1D: not supported yet")
 
     return obj

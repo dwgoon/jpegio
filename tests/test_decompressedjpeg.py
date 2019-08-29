@@ -193,7 +193,6 @@ class WriteTest(unittest.TestCase):
 #    def test_write_quant_table(self):
 
 
-
 if __name__ == "__main__":
     unittest.main()
-    
+
