@@ -9,11 +9,11 @@ from cython cimport view
 from jpegio.clibjpeg cimport DCTSIZE, DCTSIZE2
 from jpegio.jstruct cimport jstruct
 from jpegio.jstruct cimport ptr_mat2D
-from jpegio.jstruct cimport struct_comp_info
+from jpegio.jstruct cimport ptr_struct_ci
+from jpegio.jstruct cimport ptr_struct_ht
 from jpegio.componentinfo cimport ComponentInfo
 
 cdef class DecompressedJpeg:
-    #cdef jstruct* _jstruct_obj
 
     def __cinit__(self):
         self._jstruct_obj = NULL  # new jstruct()
@@ -37,40 +37,24 @@ cdef class DecompressedJpeg:
             del self._jstruct_obj
 
         self._jstruct_obj = new jstruct()
-
-        #cdef bytes py_bytes = fpath.encode()
-        #cdef char* fpath_cstr = py_bytes
         self._jstruct_obj.jpeg_load(fpath.encode())
+        self._jstruct_obj.spatial_load(fpath.encode())
+        self._jstruct_obj.load_spatial = True
 
-        #cdef int [:] carr_view =
+        self._read_comp_info()
+        self._read_markers()
+        self._read_quant_tables()
+        self._read_huffman_tables()
+        self._read_dct_coefficients()
 
-        #cdef int[:, ::1] arr = self._jstruct_obj.coef_arrays[0][0].GetBuffer()
 
-        cdef ptr_mat2D ptr_mat2D_obj = &self._jstruct_obj.coef_arrays[0][0]
-
-        # <cnp.int_t[:]>
-        #
-        cdef view.array my_array = view.array(shape=(ptr_mat2D_obj.rows, ptr_mat2D_obj.cols),
-                                              itemsize=sizeof(int),
-                                              format="i",
-                                              mode="c",
-                                              allocate_buffer=False)
-        my_array.data = <char *> ptr_mat2D_obj.GetBuffer()
-        self.numpy_array = np.asarray(my_array)
-
-        self._get_comp_info()
-        self._get_quant_tables()
-        self._get_dct_coefficients()
-
-        # cdef public cnp.ndarray quant_tables
-
-    cdef _get_comp_info(self):
+    cdef _read_comp_info(self):
         self.comp_info = list()
 
         cdef int i
         cdef int nch = self._jstruct_obj.num_components
         cdef ComponentInfo comp_info
-        cdef struct_comp_info*ptr_ci
+        cdef ptr_struct_ci ptr_ci
 
         for i in range(nch):
             comp_info = ComponentInfo()
@@ -93,9 +77,34 @@ cdef class DecompressedJpeg:
             self.comp_info.append(comp_info)
         # end of for
 
-    cdef _get_quant_tables(self):
-        """Get the quantization tables.
+    cdef _read_markers(self):
+        """Connect the buffer of markers to numpy.ndarray.
         """
+        self.markers = list()
+        cdef Py_ssize_t n_markers = self._jstruct_obj.markers.size()
+        cdef Py_ssize_t i
+        cdef bytes py_bytes
+        if n_markers > 0:
+            # cdef view.array cy_arr
+            # cy_arr = view.array(shape=(n_markers,),
+            #                     itemsize=sizeof(int),
+            #                     format="s",
+            #                     mode="c",
+            #                     allocate_buffer=False)
+            # cy_arr.data = <char *> &(self._jstruct_obj.markers[0])
+            #
+            #
+
+            # self.markers = np.asarray(cy_arr)
+
+            for i in range(n_markers):
+                py_bytes = self._jstruct_obj.markers[i]
+                self.markers.append(py_bytes.decode('utf-8'))
+
+    cdef _read_quant_tables(self):
+        """Connect the buffer of quantization tables to numpy.ndarray.
+        """
+
         self.quant_tables = list()
         cdef int num_quant_tables = self._jstruct_obj.quant_tables.size()
 
@@ -103,7 +112,7 @@ cdef class DecompressedJpeg:
         cdef view.array cy_arr
         cdef Py_ssize_t i
         for i in range(num_quant_tables):
-            ptr_mat2D_obj = &self._jstruct_obj.quant_tables[i][0]
+            ptr_mat2D_obj = self._jstruct_obj.quant_tables[i]
             shape = (ptr_mat2D_obj.rows, ptr_mat2D_obj.cols)
             cy_arr = view.array(shape=shape,
                                 itemsize=sizeof(int),
@@ -113,15 +122,64 @@ cdef class DecompressedJpeg:
             cy_arr.data = <char *> ptr_mat2D_obj.GetBuffer()
             self.quant_tables.append(np.asarray(cy_arr))
 
-    cdef _get_dct_coefficients(self):
-        """Get the DCT coefficients.
+    cdef _read_huffman_tables(self):
+        """Connect the buffer of Huffman tables to numpy.ndarray.
+        """
+
+        self.ac_huff_tables = list()
+        self.dc_huff_tables = list()
+
+        cdef Py_ssize_t i
+        cdef ptr_struct_ht ptr_ht
+        cdef view.array cy_arr_counts
+        cdef view.array cy_arr_symbols
+
+        for i in range(self._jstruct_obj.ac_huff_tables.size()):
+            ptr_ht = self._jstruct_obj.ac_huff_tables[i]
+            cy_arr_counts = view.array(shape=(ptr_ht.counts.size(),),
+                                       itemsize=sizeof(int),
+                                       format="i",
+                                       mode="c",
+                                       allocate_buffer=False)
+            cy_arr_counts.data = <char *> &(ptr_ht.counts[0])
+
+            cy_arr_symbols = view.array(shape=(ptr_ht.symbols.size(),),
+                                        itemsize=sizeof(int),
+                                        format="i",
+                                        mode="c",
+                                        allocate_buffer=False)
+            cy_arr_symbols.data = <char *> &(ptr_ht.symbols[0])
+            self.ac_huff_tables.append({"counts": np.asarray(cy_arr_counts),
+                                        "symbols": np.asarray(cy_arr_symbols)})
+
+        for i in range(self._jstruct_obj.dc_huff_tables.size()):
+            ptr_ht = self._jstruct_obj.dc_huff_tables[i]
+            cy_arr_counts = view.array(shape=(ptr_ht.counts.size(),),
+                                       itemsize=sizeof(int),
+                                       format="i",
+                                       mode="c",
+                                       allocate_buffer=False)
+            cy_arr_counts.data = <char *> &(ptr_ht.counts[0])
+
+            cy_arr_symbols = view.array(shape=(ptr_ht.symbols.size(),),
+                                        itemsize=sizeof(int),
+                                        format="i",
+                                        mode="c",
+                                        allocate_buffer=False)
+            cy_arr_symbols.data = <char *> &(ptr_ht.symbols[0])
+
+            self.dc_huff_tables.append({"counts": np.asarray(cy_arr_counts),
+                                        "symbols": np.asarray(cy_arr_symbols)})
+
+    cdef _read_dct_coefficients(self):
+        """Connect the buffer of DCT coefficients to numpy.ndarray.
         """
         self.coef_arrays = list()
         cdef ptr_mat2D ptr_mat2D_obj
         cdef view.array cy_arr
         cdef Py_ssize_t i
         for i in range(self._jstruct_obj.coef_arrays.size()):
-            ptr_mat2D_obj = &self._jstruct_obj.coef_arrays[i][0]
+            ptr_mat2D_obj = self._jstruct_obj.coef_arrays[i]
             shape = (ptr_mat2D_obj.rows, ptr_mat2D_obj.cols)
             cy_arr = view.array(shape=shape,
                                 itemsize=sizeof(int),
@@ -131,8 +189,27 @@ cdef class DecompressedJpeg:
             cy_arr.data = <char *> ptr_mat2D_obj.GetBuffer()
             self.coef_arrays.append(np.asarray(cy_arr))
 
+
     cpdef write(self, fpath):
+
+        self._write_markers()
+
         self._jstruct_obj.jpeg_write(fpath.encode(), self.optimize_coding)
+
+    cdef _write_markers(self):
+        cdef Py_ssize_t n_markers = len(self.markers)
+        cdef Py_ssize_t i
+        cdef bytes py_bytes
+        cdef char* cstr
+        if n_markers > 0:
+
+            self._jstruct_obj.markers.clear()
+            for i in range(n_markers):
+                py_bytes = self.markers[i].encode()
+                cstr = py_bytes
+                self._jstruct_obj.markers.push_back(cstr)
+            # end of for
+        # end of if
 
     cpdef get_coef_block(self, c, i, j):
         if not self.coef_arrays:

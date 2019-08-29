@@ -6,14 +6,20 @@ cdef class DecompressedJpeg:
     cdef public list comp_info
     cdef public list quant_tables
     cdef public list coef_arrays
-
-    cdef public cnp.ndarray numpy_array
+    cdef public list spatial_arrays
+    cdef public list ac_huff_tables
+    cdef public list dc_huff_tables
+    cdef public list markers
 
     cdef jstruct* _jstruct_obj
 
-    cdef _get_comp_info(self)
-    cdef _get_quant_tables(self)
-    cdef _get_dct_coefficients(self)
+    cdef _read_comp_info(self)
+    cdef _read_markers(self)
+    cdef _read_quant_tables(self)
+    cdef _read_huffman_tables(self)
+    cdef _read_dct_coefficients(self)
+
+    cdef _write_markers(self)
 
     cpdef public read(self, fpath)
     cpdef public write(self, fpath)

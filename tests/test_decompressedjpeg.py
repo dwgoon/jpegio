@@ -161,8 +161,8 @@ class WriteTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
         create_list_fpaths(self)
 
-    def test_write_dct(self):
-        """=> Test modifying a single DCT coefficient and writing the JPEG file.
+    def test_write_dct_coef(self):
+        """=> Test modifying a single DCT coefficient.
         """
         for fpath in self.list_fpaths:
             for i in range(3):  # Test 3 times
@@ -190,7 +190,78 @@ class WriteTest(unittest.TestCase):
                 del jpeg_modified
                 os.remove(fpath_modified)
 
-#    def test_write_quant_table(self):
+    def test_write_quant_table(self):
+        """=> Test modifying a single element of quantization tables.
+        """
+        for fpath in self.list_fpaths:
+            for i in range(3):  # Test 3 times
+                jpeg = jpegio.read(fpath)
+                fpath_no_ext, ext = os.path.splitext(fpath)
+                fpath_modified = fpath_no_ext + "_modified" + ext
+
+                ix_qt = np.random.randint(0, len(jpeg.quant_tables))
+                qt = jpeg.quant_tables[ix_qt]
+                ix_row = np.random.randint(0, qt.shape[0])
+                ix_col = np.random.randint(0, qt.shape[1])
+                val = np.random.randint(0, 100)
+
+                qt[ix_row, ix_col] = val
+
+                self.assertTrue(hasattr(jpeg, 'write'))
+                jpeg.write(fpath_modified)
+                jpeg_modified = jpegio.read(fpath_modified)
+
+                qt_modified = jpeg_modified.quant_tables[ix_qt]
+                self.assertEqual(qt[ix_row, ix_col],
+                                 qt_modified[ix_row, ix_col])
+
+                del jpeg
+                del jpeg_modified
+                os.remove(fpath_modified)
+
+    @unittest.skip("libjpeg cannot write arbitrarily modified Huffman table")
+    def test_write_huffman_tables(self):
+        """=> Test modifying a single element of Huffman tables.
+        """
+        for fpath in self.list_fpaths:
+            for i in range(3):  # Test 3 times
+                jpeg = jpegio.read(fpath)
+                fpath_no_ext, ext = os.path.splitext(fpath)
+                fpath_modified = fpath_no_ext + "_modified" + ext
+
+                ix_hftb = np.random.randint(0, len(jpeg.ac_huff_tables))
+                ac_hftb = jpeg.ac_huff_tables[ix_hftb]
+                counts = ac_hftb["counts"]
+                symbols = ac_hftb["symbols"]
+                ix_counts = np.random.randint(0, counts.size)
+                ix_symbols = np.random.randint(0, symbols.size)
+                val_counts = np.random.randint(counts.min(), counts.max()+1)
+                val_symbols = np.random.randint(symbols.min(), symbols.max()+1)
+
+                print(counts)
+                print(symbols)
+
+                counts[ix_counts] = val_counts
+                symbols[ix_symbols] = val_symbols
+
+                print(counts)
+                print(symbols)
+
+                self.assertTrue(hasattr(jpeg, 'write'))
+                jpeg.write(fpath_modified)
+                jpeg_modified = jpegio.read(fpath_modified)
+
+                ac_hftb_modified = jpeg.ac_huff_tables[ix_hftb]
+                counts_modified = ac_hftb_modified["counts"]
+                symbols_modified = ac_hftb_modified["symbols"]
+                self.assertEqual(counts[ix_counts],
+                                 counts_modified[ix_counts])
+                self.assertEqual(symbols[ix_symbols],
+                                 symbols_modified[ix_symbols])
+
+                del jpeg
+                del jpeg_modified
+                os.remove(fpath_modified)
 
 
 if __name__ == "__main__":

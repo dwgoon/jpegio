@@ -34,6 +34,8 @@ namespace jpegio {
     class jstruct
     {
     public:
+        bool load_spatial;
+
         unsigned int image_width;
         unsigned int image_height;
         int image_components;
@@ -60,8 +62,6 @@ namespace jpegio {
         void jpeg_load(std::string file_path);
         void spatial_load(std::string file_path);
 
-    private:
-        bool load_spatial;
     };
 
 }

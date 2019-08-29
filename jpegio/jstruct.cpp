@@ -157,8 +157,10 @@ void jstruct::jpeg_load(std::string file_path)
 		{
 			quant_ptr = cinfo.quant_tbl_ptrs[n];
 			for (i = 0; i < DCTSIZE; i++) 
-				for (j = 0; j < DCTSIZE; j++)
+				for (j = 0; j < DCTSIZE; j++) {
 					tempMat->Write(i, j, quant_ptr->quantval[i*DCTSIZE+j]);
+					// printf("[DEBUG] quant_val: %d\n", quant_ptr->quantval[i*DCTSIZE+j]);
+				}
 			this->quant_tables.push_back(tempMat);
 		}
 	}
@@ -171,8 +173,9 @@ void jstruct::jpeg_load(std::string file_path)
 
 			for (i = 1; i <= 16; i++) tempStruct->counts.push_back(huff_ptr->bits[i]);
 			for (i = 0; i < 256; i++) tempStruct->symbols.push_back(huff_ptr->huffval[i]);
+			this->ac_huff_tables.push_back(tempStruct);
 		}
-		this->ac_huff_tables.push_back(tempStruct);
+		// this->ac_huff_tables.push_back(tempStruct);
 	}
 
 	for (n = 0; n < NUM_HUFF_TBLS; n++) 
@@ -183,8 +186,9 @@ void jstruct::jpeg_load(std::string file_path)
 
 			for (i = 1; i <= 16; i++) tempStruct->counts.push_back(huff_ptr->bits[i]);
 			for (i = 0; i < 256; i++) tempStruct->symbols.push_back(huff_ptr->huffval[i]);
+			this->dc_huff_tables.push_back(tempStruct);
 		}
-		this->dc_huff_tables.push_back(tempStruct);
+		// this->dc_huff_tables.push_back(tempStruct);
 	}
 
 	/* creation and population of the DCT coefficient arrays */
@@ -524,7 +528,19 @@ void jstruct::spatial_load(std::string file_path)
 	struct jpeg_decompress_struct cinfo;
 	cinfo.err = jpeg_std_error(new jpeg_error_mgr());
 	jpeg_create_decompress(&cinfo);
-	jpeg_stdio_src(&cinfo, infile);
+
+	// Prepare buffer
+    fseek(infile, 0, SEEK_END);
+    unsigned long mem_size = ftell(infile);
+    rewind(infile);
+    unsigned char* mem_buffer = (unsigned char*) malloc(mem_size + 100);
+    fread(mem_buffer, sizeof(unsigned char), mem_size, infile);
+
+	jpeg_create_decompress(&cinfo);
+    jpeg_mem_src(&cinfo, mem_buffer, mem_size);
+
+    // jpeg_stdio_src(&cinfo, infile);
+
 	jpeg_read_header(&cinfo, true);
 	//jpeg_start_decompress(&cinfo);
 
@@ -552,6 +568,8 @@ void jstruct::spatial_load(std::string file_path)
 
 	(void) jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
+
+	free(mem_buffer);
 	fclose(infile);
 }
 

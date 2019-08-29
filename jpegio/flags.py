@@ -11,6 +11,3 @@ class AutoNumber(IntEnum):
 class Flag(AutoNumber):
     DECOMPRESSED = ()
     ZIGZAG_DCT_1D = ()
-    
-    
-    

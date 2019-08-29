@@ -16,9 +16,9 @@ ctypedef mat2D[int]* ptr_mat2D
 
 cdef extern from "jstruct.h" namespace "jpegio":
     cdef struct struct_huff_tables:
-        pass
-    #vector[int] counts
-    #vector[int] symbols
+        vector[int] counts
+        vector[int] symbols
+
 
     cdef struct struct_comp_info:
         int component_id
@@ -32,11 +32,18 @@ cdef extern from "jstruct.h" namespace "jpegio":
         JDIMENSION height_in_blocks
         JDIMENSION width_in_blocks
 
+ctypedef struct_huff_tables* ptr_struct_ht
+ctypedef struct_comp_info* ptr_struct_ci
+
+
+cdef extern from "jstruct.h" namespace "jpegio":
+
     cdef cppclass jstruct:
         jstruct() except +
         jstruct(string file_path) except +
         jstruct(file_path, load_spatial) except +
 
+        bool load_spatial
         unsigned int image_width
         unsigned int image_height
         int image_components
@@ -46,13 +53,13 @@ cdef extern from "jstruct.h" namespace "jpegio":
         unsigned char optimize_coding
         unsigned char progressive_mode
 
-        vector[struct_comp_info *] comp_info
+        vector[ptr_struct_ci] comp_info
         vector[char *] markers
         vector[ptr_mat2D] coef_arrays
         vector[ptr_mat2D] spatial_arrays
         vector[ptr_mat2D] quant_tables
-        vector[struct_huff_tables *] ac_huff_tables
-        vector[struct_huff_tables *] dc_huff_tables
+        vector[ptr_struct_ht] ac_huff_tables
+        vector[ptr_struct_ht] dc_huff_tables
 
         void jpeg_load(string file_path) except +
         void spatial_load(string file_path)
