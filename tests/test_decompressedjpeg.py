@@ -23,11 +23,19 @@ def create_list_fpaths(self):
         for fpath in glob.glob(pjoin(dpath, 'images', ext)):
             self.list_fpaths.append(apath(fpath))
 
+def remove_modified_files(self):
+
+    dpath = pjoin(os.path.dirname(__file__), 'images')
+    for entity in os.listdir(dpath):
+        if "modified" in entity:
+            fpath = pjoin(dpath, entity)
+            os.remove(fpath)
 
 class ComparisionTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         create_list_fpaths(self)
+        remove_modified_files(self)
 
     def test_repeat_read_100(self):
         """=> Check memory errors and garbage collection (100 iterations).
@@ -160,6 +168,7 @@ class WriteTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         create_list_fpaths(self)
+        remove_modified_files(self)
 
     def test_write_dct_coef(self):
         """=> Test modifying a single DCT coefficient.
@@ -203,7 +212,7 @@ class WriteTest(unittest.TestCase):
                 qt = jpeg.quant_tables[ix_qt]
                 ix_row = np.random.randint(0, qt.shape[0])
                 ix_col = np.random.randint(0, qt.shape[1])
-                val = np.random.randint(0, 100)
+                val = np.random.randint(1, 65535)
 
                 qt[ix_row, ix_col] = val
 

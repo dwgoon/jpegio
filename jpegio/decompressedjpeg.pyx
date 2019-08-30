@@ -191,9 +191,7 @@ cdef class DecompressedJpeg:
 
 
     cpdef write(self, fpath):
-
         self._write_markers()
-
         self._jstruct_obj.jpeg_write(fpath.encode(), self.optimize_coding)
 
     cdef _write_markers(self):
@@ -206,7 +204,7 @@ cdef class DecompressedJpeg:
             self._jstruct_obj.markers.clear()
             for i in range(n_markers):
                 py_bytes = self.markers[i].encode()
-                cstr = py_bytes
+                cstr = <char *> py_bytes
                 self._jstruct_obj.markers.push_back(cstr)
             # end of for
         # end of if
