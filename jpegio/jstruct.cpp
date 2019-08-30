@@ -368,8 +368,16 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 	/* Set the compression object with our parameters */
 	cinfo.image_width = this->image_width;
 	cinfo.image_height = this->image_height;
+#ifdef JPEG_LIB_VERSION
+    #if JPEG_LIB_VERSION > 80
 	cinfo.jpeg_height = this->image_height;
 	cinfo.jpeg_width = this->image_width;
+
+	/* set the compression object with default parameters */
+	cinfo.min_DCT_h_scaled_size = 8;
+	cinfo.min_DCT_v_scaled_size = 8;
+    #endif
+#endif
 	cinfo.input_components = this->image_components;
 	cinfo.in_color_space = (J_COLOR_SPACE)this->image_color_space;
 
@@ -377,9 +385,7 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 	cinfo.optimize_coding = optimize_coding;
 	cinfo.num_components = this->num_components;
 	cinfo.jpeg_color_space = (J_COLOR_SPACE)this->jpeg_color_space;
-	/* set the compression object with default parameters */
-	cinfo.min_DCT_h_scaled_size = 8;
-	cinfo.min_DCT_v_scaled_size = 8;
+	
 	
 	/* basic support for writing progressive mode JPEG */
 	if (this->progressive_mode) 
