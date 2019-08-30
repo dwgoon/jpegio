@@ -4,13 +4,20 @@ A python package for accessing the internal variables of JPEG file format such a
 
 ## Installation
 
-It is recommended to install using wheel, because the installation process includes compiling C source codes.  
+It is recommended to install using wheel, because the installation process includes compiling C/C++ source codes.  
+
+On Linux:
+```
+pip install dist/jpegio-x.x.x-cp3x-cp3x-linux_<your architecture>.whl
+```
+
+On Windows 10 x64:
 ```
 pip install dist/jpegio-x.x.x-cp3x-cp3x-win_amd64.whl
 ```
 
 If you want to install this package by compiling yourself, use the following command.
- 
+
 ```
 python setup.py install
 ```
@@ -35,13 +42,16 @@ The cooked wheel files are located at `dist` directory.
 ```python
 import jpegio as jio
 
-img = jio.read("image.jpg")
-coef_array = img.coef_arrays[0]  
-quant_tbl = img.quant_tables[0]  
+jpeg = jio.read("image.jpg")
+coef_array = jpeg.coef_arrays[0]  
+quant_tbl = jpeg.quant_tables[0]
 ```
 
 - `coef_arrays` is a list of `numpy.ndarray` objects that represent DCT coefficients of YCbCr channels in JPEG.
-- `quant_tables` is a `numpy.ndarray` object that represents the quantization tables in JPEG.
+- `quant_tables` is a list of `numpy.ndarray` objects that represent the quantization tables in JPEG.
+
+You can also utilize other variables (one of the simplest ways for finding them is to use `dir(img)`).
+The names of member variables have been determined following the convention of libjpeg.
 
 ## References
 - The core parts of this package, implemented in C/C++, are adopted from the souce codes of [Jessica Fridrich's laboratory](http://dde.binghamton.edu).
