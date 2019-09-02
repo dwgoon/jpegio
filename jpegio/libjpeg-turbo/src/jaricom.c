@@ -28,7 +28,7 @@
 
 #define V(i,a,b,c,d) (((INT32)a << 16) | ((INT32)c << 8) | ((INT32)d << 7) | b)
 
-const INT32 jpeg_aritab[113+1] = {
+const JLONG jpeg_aritab[113+1] = {
 /*
  * Index, Qe_Value, Next_Index_LPS, Next_Index_MPS, Switch_MPS
  */

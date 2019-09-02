@@ -3,6 +3,7 @@ import numpy as np
 cimport numpy as cnp
 from numpy import count_nonzero as cnt_nnz
 
+import cython
 from cython.operator cimport dereference as deref, preincrement as inc
 from cython cimport view
 
@@ -13,15 +14,16 @@ from jpegio.jstruct cimport ptr_struct_ci
 from jpegio.jstruct cimport ptr_struct_ht
 from jpegio.componentinfo cimport ComponentInfo
 
-cdef class DecompressedJpeg:
 
+cdef class DecompressedJpeg:
+    
     def __cinit__(self):
         self._jstruct_obj = NULL  # new jstruct()
 
     def __dealloc__(self):
         if self._jstruct_obj != NULL:
             del self._jstruct_obj
-
+    
     cdef _is_valid_fpath(self, fpath):
         if not os.path.isfile(fpath):
             print("[JPEGIO] Wrong file path: %s" % (fpath))
