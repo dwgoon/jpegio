@@ -40,6 +40,8 @@ jstruct::~jstruct()
 
 void jstruct::jpeg_load(std::string file_path)
 {
+	
+	// printf("Size of boolean: %d\n", sizeof(boolean));
 	jpeg_decompress_struct cinfo;
 	jpeg_saved_marker_ptr marker_ptr;
 	jpeg_component_info *compptr;

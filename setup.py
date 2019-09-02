@@ -43,7 +43,7 @@ if sys.platform == 'win32': # Windows
 
     dname_libjpeg = "libjpeg-turbo"
 elif sys.platform in ['linux', 'darwin']:
-    cargs.extend(['-O2', '-w', '-fPIC', '-DHAVE_BOOLEAN'])
+    cargs.extend(['-w', '-fPIC', '-DHAVE_BOOLEAN'])
     arch, _ = platform.architecture()
     if arch == '64bit':
         cargs.append('-m64')
