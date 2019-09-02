@@ -7,6 +7,7 @@ from Cython.Build import cythonize
 import os
 from os.path import join as pjoin
 import sys
+import platform
 import glob
 
 import numpy
@@ -28,6 +29,7 @@ if sys.platform == 'win32': # Windows
 
     cargs.append("/DNPY_NO_DEPRECATED_API")
     cargs.append("/DNPY_1_7_API")
+    cargs.append("/DHAVE_BOOLEAN")
     
     largs.append("/NODEFAULTLIB:LIBCMT")
 
@@ -41,7 +43,10 @@ if sys.platform == 'win32': # Windows
 
     dname_libjpeg = "libjpeg-turbo"
 elif sys.platform in ['linux', 'darwin']:
-    cargs.extend(['-O2', '-w', '-m64', '-fPIC',])
+    cargs.extend(['-O2', '-w', '-fPIC', '-DHAVE_BOOLEAN'])
+    arch, _ = platform.architecture()
+    if arch == '64bit':
+        cargs.append('-m64')
     dname_libjpeg = 'libjpeg'
 # end of if-else
 
