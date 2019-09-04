@@ -245,8 +245,6 @@ dummy_consume_data (j_decompress_ptr cinfo)
 METHODDEF(int)
 consume_data (j_decompress_ptr cinfo)
 {
-  //printf("consume_data entered...\n");
-
   my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
   JDIMENSION MCU_col_num;	/* index of current MCU within row */
   int blkn, ci, xindex, yindex, yoffset;

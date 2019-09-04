@@ -6,7 +6,7 @@
 extern "C"
 {
 #include "jpeglib.h"
-#include "jmorecfg.h"
+//#include "jmorecfg.h"
 }
 
 namespace jpegio {
