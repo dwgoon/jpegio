@@ -1,4 +1,5 @@
-# __setup.py
+# setup.py
+
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from Cython.Distutils import build_ext
@@ -21,11 +22,22 @@ dname_libjpeg = None
 
 
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
+arch, _ = platform.architecture()
+arch = 32 if arch == '32bits' else 64
 
 if sys.platform == 'win32': # Windows
+    os_arch = "win%d_x%d"%(platform.release(), arch)
+    
+    DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "include")
+    DIR_SIMD_LIB = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "lib")
+    incs.append(DIR_SIMD_HEADER)
+    lib_dirs.append(DIR_SIMD_LIB)
 
-    DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", "include")
-    DIR_SIMD_LIB = pjoin(DIR_ROOT, "jpegio", "simd", "lib")
+    if arch == 64:
+        libs.append("simd_win10_msvc14_x64")
+        libs.append("jpeg-static_win10_msvc14_x64")
+    
+    dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
 
     cargs.append("/DNPY_NO_DEPRECATED_API")
     cargs.append("/DNPY_1_7_API")
@@ -33,21 +45,40 @@ if sys.platform == 'win32': # Windows
     
     largs.append("/NODEFAULTLIB:LIBCMT")
 
-
-    incs.append(DIR_SIMD_HEADER)
+elif sys.platform == 'darwin': # macOS
+    #os.environ['CC'] = "g++"
+    #os.environ['CXX'] = "g++"
     
-    libs.append("simd_win10_msvc14_x64")
-    libs.append("jpeg-static_win10_msvc14_x64")
+    os_arch = "mac_x%d"%(arch)
+    
+    #DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "include")
+    #DIR_SIMD_LIB = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "lib")
+    #incs.append(DIR_SIMD_HEADER)
+    #lib_dirs.append(DIR_SIMD_LIB)
 
-    lib_dirs.append(DIR_SIMD_LIB)
+    if arch == 64:
+        libs.append("jpeg")
+    
+    dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
 
-    dname_libjpeg = "libjpeg-turbo"
-elif sys.platform in ['linux', 'darwin']:
     cargs.extend(['-w', '-fPIC'])
-    arch, _ = platform.architecture()
-    if arch == '64bit':
+    cargs.append('-v')
+    cargs.append('-march=native')
+    #cargs.append('-stdlib=libc++')
+    #cargs.append('-std=c++11')
+    largs.append('-lc++')
+    largs.append('-v')
+
+    if arch == 64:
+        cargs.append('-m64')
+#elif sys.platform in ['linux', 'darwin']:
+elif sys.platform == 'linux':
+    cargs.extend(['-w', '-fPIC'])
+
+    if arch == 64:
         cargs.append('-m64')
     dname_libjpeg = 'libjpeg'
+
 # end of if-else
 
 DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "include")
@@ -80,17 +111,17 @@ elif sys.platform == 'win32':
 ext_modules = [
     Extension("jpegio.componentinfo",
               sources=['jpegio/componentinfo.pyx'],
-              language='c++',
               include_dirs=incs,
-              extra_compile_args=cargs),
+              extra_compile_args=cargs,
+              language="c++"),
     Extension("jpegio.decompressedjpeg",
               sources=srcs_decompressedjpeg,
-              language="c++",
               include_dirs=incs,
               extra_compile_args=cargs,
               library_dirs=lib_dirs,
               libraries=libs,
-              extra_link_args=largs)
+              extra_link_args=largs,
+              language="c++")
 ]
 
 requirements = ['cython>=0.29',
