@@ -46,15 +46,7 @@ if sys.platform == 'win32': # Windows
     largs.append("/NODEFAULTLIB:LIBCMT")
 
 elif sys.platform == 'darwin': # macOS
-    #os.environ['CC'] = "g++"
-    #os.environ['CXX'] = "g++"
-    
     os_arch = "mac_x%d"%(arch)
-    
-    #DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "include")
-    #DIR_SIMD_LIB = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "lib")
-    #incs.append(DIR_SIMD_HEADER)
-    #lib_dirs.append(DIR_SIMD_LIB)
 
     if arch == 64:
         libs.append("jpeg")
@@ -62,16 +54,15 @@ elif sys.platform == 'darwin': # macOS
     dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
 
     cargs.extend(['-w', '-fPIC'])
-    cargs.append('-v')
-    cargs.append('-march=native')
-    #cargs.append('-stdlib=libc++')
-    #cargs.append('-std=c++11')
-    largs.append('-lc++')
-    largs.append('-v')
+    cargs.append('-march=native')    
+    cargs.append('-std=c++11')
+    cargs.append('-mmacosx-version-min=10.9')
+    
+    largs.append('-stdlib=libc++')
+    largs.append('-mmacosx-version-min=10.9')
 
     if arch == 64:
         cargs.append('-m64')
-#elif sys.platform in ['linux', 'darwin']:
 elif sys.platform == 'linux':
     cargs.extend(['-w', '-fPIC'])
 
@@ -99,12 +90,12 @@ srcs_decompressedjpeg = []
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jstruct.cpp"))
 
-if sys.platform in ['linux', 'darwin']:
+if sys.platform is 'linux':
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
         print("[LIBJPEG]", fpath)
         srcs_decompressedjpeg.append(fpath)
 
-elif sys.platform == 'win32':
+elif sys.platform in ['win32', 'darwin']:
     print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
 
     
@@ -113,6 +104,7 @@ ext_modules = [
               sources=['jpegio/componentinfo.pyx'],
               include_dirs=incs,
               extra_compile_args=cargs,
+              extra_link_args=largs,
               language="c++"),
     Extension("jpegio.decompressedjpeg",
               sources=srcs_decompressedjpeg,
@@ -134,7 +126,7 @@ package_data = {
 }
 
 setup(name='jpegio',
-      version="0.2.0",
+      version="0.2.1",
       description='A python package for accessing the internal variables of JPEG file format.',
       url='http://github.com/dwgoon/jpegio',
       author='Daewon Lee',
