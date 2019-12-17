@@ -16,6 +16,11 @@ On Windows 10 x64:
 pip install dist/jpegio-x.x.x-cp3x-cp3x-win_amd64.whl
 ```
 
+On macOS x64:
+```
+pip install dist/jpegio-x.x.x-cp3x-cp3x-macosx_<version>_x86_64.whl
+```
+
 If you want to install this package by compiling yourself, use the following command.
 
 ```
