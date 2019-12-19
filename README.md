@@ -29,11 +29,6 @@ On macOS x64:
 pip install dist/jpegio-x.x.x-cp3x-cp3x-macosx_<version>_x86_64.whl
 ```
 
-Compilation requires some dependencies.
-
-- [`Cython`](https://cython.org/)
-- [`NumPy`](http://www.numpy.org/)
-
 ## Making a wheel
 
 You can use the following command for making a wheel for your own architecture such as x64 or ppc64le.
@@ -43,6 +38,14 @@ python setup.py bdist_wheel
 ```
 
 The cooked wheel files are located at `dist` directory.
+
+
+## Dependency
+This package requires other packages.
+
+- [`Cython`](https://cython.org/)
+- [`NumPy`](http://www.numpy.org/)
+
 
 ## Usage example
 
