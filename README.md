@@ -11,8 +11,8 @@ The installation process includes compiling C/C++ source codes.
 python setup.py install
 ```
 
-You can also use the pre-compiled wheels.
-(If some errors occur, try compiling the package using the above command)
+You can also use the pre-compiled wheels
+(If some errors occur, try compiling the package using the above command).
 
 On Linux:
 ```
