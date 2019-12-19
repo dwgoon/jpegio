@@ -4,7 +4,15 @@ A python package for accessing the internal variables of JPEG file format such a
 
 ## Installation
 
-It is recommended to install using wheel, because the installation process includes compiling C/C++ source codes.  
+It is recommended to install by compiling yourself, use the following command.
+The installation process includes compiling C/C++ source codes.
+
+```
+python setup.py install
+```
+
+You can also use the pre-compiled wheels.
+(If some errors occur, try compiling the package using the above command)
 
 On Linux:
 ```
@@ -19,12 +27,6 @@ pip install dist/jpegio-x.x.x-cp3x-cp3x-win_amd64.whl
 On macOS x64:
 ```
 pip install dist/jpegio-x.x.x-cp3x-cp3x-macosx_<version>_x86_64.whl
-```
-
-If you want to install this package by compiling yourself, use the following command.
-
-```
-python setup.py install
 ```
 
 Compilation requires some dependencies.
