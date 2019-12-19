@@ -4,7 +4,7 @@ A python package for accessing the internal variables of JPEG file format such a
 
 ## Installation
 
-It is recommended to install by compiling yourself, use the following command.
+It is recommended to install by compiling yourself.
 The installation process includes compiling C/C++ source codes.
 
 ```
