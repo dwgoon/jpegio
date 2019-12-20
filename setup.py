@@ -23,19 +23,21 @@ dname_libjpeg = None
 
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
 arch, _ = platform.architecture()
-arch = 32 if arch == '32bits' else 64
+arch = 'x86' if arch == '32bit' else 'x64'
 
 if sys.platform == 'win32': # Windows
-    os_arch = "win%d_x%d"%(platform.release(), arch)
+    os_arch = "win%s_%s"%(platform.release(), arch)
     
     DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "include")
     DIR_SIMD_LIB = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "lib")
     incs.append(DIR_SIMD_HEADER)
     lib_dirs.append(DIR_SIMD_LIB)
 
-    if arch == 64:
+    if arch == 'x64':
         libs.append("simd_win10_msvc14_x64")
         libs.append("jpeg-static_win10_msvc14_x64")
+    elif arch == 'x86':
+        libs.append("jpeg-static_win7_msvc15_x86")
     
     dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
 
@@ -48,7 +50,7 @@ if sys.platform == 'win32': # Windows
 elif sys.platform == 'darwin': # macOS
     os_arch = "mac_x%d"%(arch)
 
-    if arch == 64:
+    if arch == 'x64':
         libs.append("jpeg")
     
     dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
@@ -61,12 +63,12 @@ elif sys.platform == 'darwin': # macOS
     largs.append('-stdlib=libc++')
     largs.append('-mmacosx-version-min=10.9')
 
-    if arch == 64:
+    if arch == 'x64':
         cargs.append('-m64')
 elif sys.platform == 'linux':
     cargs.extend(['-w', '-fPIC'])
 
-    if arch == 64:
+    if arch == 'x64':
         cargs.append('-m64')
     dname_libjpeg = 'libjpeg'
 
@@ -97,6 +99,8 @@ if sys.platform is 'linux':
 
 elif sys.platform in ['win32', 'darwin']:
     print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
+    print("DIR_LIBJPEG_HEADER:", DIR_LIBJPEG_HEADER)
+    print("DIR_LIBJPEG_SOURCE:", DIR_LIBJPEG_SOURCE)
 
     
 ext_modules = [
