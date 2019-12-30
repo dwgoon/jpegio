@@ -92,7 +92,7 @@ srcs_decompressedjpeg = []
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jstruct.cpp"))
 
-if sys.platform is 'linux':
+if sys.platform == 'linux':
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
         print("[LIBJPEG]", fpath)
         srcs_decompressedjpeg.append(fpath)
