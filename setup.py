@@ -48,7 +48,7 @@ if sys.platform == 'win32': # Windows
     largs.append("/NODEFAULTLIB:LIBCMT")
 
 elif sys.platform == 'darwin': # macOS
-    os_arch = "mac_x%d"%(arch)
+    os_arch = "mac_x%s"%(arch)
 
     if arch == 'x64':
         libs.append("jpeg")
