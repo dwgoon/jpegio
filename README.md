@@ -68,4 +68,4 @@ The names of member variables have been determined following the convention of l
 - The functionality of libjpeg is borrowed from [IJG](https://www.ijg.org/) and [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo).
 
 ## License
-To be updated...
+Apache License 2.0
