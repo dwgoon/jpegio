@@ -23,7 +23,12 @@ dname_libjpeg = None
 
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
 arch, _ = platform.architecture()
-arch = 'x86' if arch == '32bit' else 'x64'
+if arch == '32bit':
+    arch = 'x86'
+elif arch == '64bit':
+    arch = 'x64'
+else:
+    raise RuntimeError("Unknown system architecture: %s"%(arch))
 
 if sys.platform == 'win32': # Windows
     os_arch = "win%s_%s"%(platform.release(), arch)
@@ -48,7 +53,7 @@ if sys.platform == 'win32': # Windows
     largs.append("/NODEFAULTLIB:LIBCMT")
 
 elif sys.platform == 'darwin': # macOS
-    os_arch = "mac_x%s"%(arch)
+    os_arch = "mac_%s"%(arch)
 
     if arch == 'x64':
         libs.append("jpeg")
