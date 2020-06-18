@@ -33,8 +33,8 @@ else:
 if sys.platform == 'win32': # Windows
     os_arch = "win%s_%s"%(platform.release(), arch)
     
-    DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "include")
-    DIR_SIMD_LIB = pjoin(DIR_ROOT, "jpegio", "simd", os_arch,  "lib")
+    DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", "include")
+    DIR_SIMD_LIB = pjoin(DIR_ROOT, "jpegio", "simd", "lib")
     incs.append(DIR_SIMD_HEADER)
     lib_dirs.append(DIR_SIMD_LIB)
 
