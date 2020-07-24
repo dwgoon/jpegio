@@ -16,7 +16,6 @@ def write(obj, fpath, flag=jpegio.DECOMPRESSED):
     """Write JPEG object to file path.
     """
     if flag is jpegio.DECOMPRESSED:
-        obj = jpegio.DecompressedJpeg()
         obj.write(fpath)
     elif flag == jpegio.ZIGZAG_DCT_1D:
         raise ValueError("ZIGZAG_DCT_1D: not supported yet")
