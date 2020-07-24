@@ -55,6 +55,11 @@ import jpegio as jio
 jpeg = jio.read("image.jpg")
 coef_array = jpeg.coef_arrays[0]  
 quant_tbl = jpeg.quant_tables[0]
+
+# Modifying jpeg.coef_arrays...
+# Modifying jpeg.quant_tables...
+
+jio.write(jpeg, "image_modified.jpg")
 ```
 
 - `coef_arrays` is a list of `numpy.ndarray` objects that represent DCT coefficients of YCbCr channels in JPEG.
