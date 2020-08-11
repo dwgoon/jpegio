@@ -14,6 +14,7 @@ from jpegio.jstruct cimport ptr_struct_ci
 from jpegio.jstruct cimport ptr_struct_ht
 from jpegio.componentinfo cimport ComponentInfo
 
+from libc.stdio cimport printf
 
 cdef class DecompressedJpeg:
     
@@ -86,22 +87,11 @@ cdef class DecompressedJpeg:
         cdef Py_ssize_t n_markers = self._jstruct_obj.markers.size()
         cdef Py_ssize_t i
         cdef bytes py_bytes
+        cdef view.array cy_arr
         if n_markers > 0:
-            # cdef view.array cy_arr
-            # cy_arr = view.array(shape=(n_markers,),
-            #                     itemsize=sizeof(int),
-            #                     format="s",
-            #                     mode="c",
-            #                     allocate_buffer=False)
-            # cy_arr.data = <char *> &(self._jstruct_obj.markers[0])
-            #
-            #
-
-            # self.markers = np.asarray(cy_arr)
-
             for i in range(n_markers):
                 py_bytes = self._jstruct_obj.markers[i]
-                self.markers.append(py_bytes.decode('utf-8'))
+                self.markers.append(py_bytes)
 
     cdef _read_quant_tables(self):
         """Connect the buffer of quantization tables to numpy.ndarray.
