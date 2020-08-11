@@ -195,8 +195,7 @@ cdef class DecompressedJpeg:
 
             self._jstruct_obj.markers.clear()
             for i in range(n_markers):
-                py_bytes = self.markers[i].encode()
-                cstr = <char *> py_bytes
+                cstr = <char *> self.markers[i]
                 self._jstruct_obj.markers.push_back(cstr)
             # end of for
         # end of if
