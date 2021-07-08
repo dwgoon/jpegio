@@ -58,11 +58,12 @@ elif sys.platform == 'darwin': # macOS
     if arch == 'x64':
         libs.append("jpeg")
     
-    dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
+    #dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
+    dname_libjpeg = 'libjpeg'
 
     cargs.extend(['-w', '-fPIC'])
     cargs.append('-march=native')    
-    cargs.append('-std=c++11')
+#    cargs.append('-std=c++11')
     cargs.append('-mmacosx-version-min=10.9')
     
     largs.append('-stdlib=libc++')
@@ -81,6 +82,7 @@ elif sys.platform == 'linux':
 
 DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "include")
 DIR_LIBJPEG_SOURCE = pjoin("jpegio", dname_libjpeg, "src")
+#DIR_LIBJPEG_HEADER = "/usr/local/include/jpeglib.h"
 DIR_JPEGIO_HEADER = pjoin(DIR_ROOT, "jpegio")
 DIR_JPEGIO_SOURCE = pjoin("jpegio")
 
@@ -91,18 +93,20 @@ incs.append(DIR_JPEGIO_HEADER)
 
 
 DIR_LIBJPEG_LIB = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "lib")
+#DIR_LIBJPEG_LIB = "/usr/local/lib"
 lib_dirs.append(DIR_LIBJPEG_LIB)
 
 srcs_decompressedjpeg = []
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jstruct.cpp"))
 
-if sys.platform == 'linux':
+if sys.platform in ['linux','darwin']:
     for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
         print("[LIBJPEG]", fpath)
         srcs_decompressedjpeg.append(fpath)
 
-elif sys.platform in ['win32', 'darwin']:
+#elif sys.platform in ['win32', 'darwin']:
+elif sys.platform == 'win32':
     print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
     print("DIR_LIBJPEG_HEADER:", DIR_LIBJPEG_HEADER)
     print("DIR_LIBJPEG_SOURCE:", DIR_LIBJPEG_SOURCE)
