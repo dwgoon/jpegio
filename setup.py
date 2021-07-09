@@ -129,6 +129,7 @@ ext_modules = [
               language="c++")
 ]
 
+install_requirements = ['cython>=0.29']
 requirements = ['cython>=0.29',
                 'numpy>=1.13',]
 
