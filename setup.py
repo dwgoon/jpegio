@@ -55,8 +55,8 @@ if sys.platform == 'win32': # Windows
 elif sys.platform == 'darwin': # macOS
     os_arch = "mac_%s"%(arch)
 
-    if arch == 'x64':
-        libs.append("jpeg")
+    #if arch == 'x64':
+     #   libs.append("jpeg")
     
     #dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
     dname_libjpeg = 'libjpeg'
