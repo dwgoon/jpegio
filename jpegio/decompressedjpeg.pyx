@@ -29,7 +29,7 @@ cdef class DecompressedJpeg:
         if not os.path.isfile(fpath):
             print("[JPEGIO] Wrong file path: %s" % (fpath))
             return False
-        elif os.stat(fpath) == 0:
+        elif os.path.getsize(fpath) == 0:
             print("[JPEGIO] Empty file: %s" % (fpath))
             return False
 
