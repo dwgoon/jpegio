@@ -54,16 +54,10 @@ if sys.platform == 'win32': # Windows
 
 elif sys.platform == 'darwin': # macOS
     os_arch = "mac_%s"%(arch)
-
-    #if arch == 'x64':
-     #   libs.append("jpeg")
-    
-    #dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
     dname_libjpeg = 'libjpeg'
 
     cargs.extend(['-w', '-fPIC'])
     cargs.append('-march=native')    
-#    cargs.append('-std=c++11')
     cargs.append('-mmacosx-version-min=10.9')
     
     largs.append('-stdlib=libc++')
@@ -82,7 +76,7 @@ elif sys.platform == 'linux':
 
 DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "include")
 DIR_LIBJPEG_SOURCE = pjoin("jpegio", dname_libjpeg, "src")
-#DIR_LIBJPEG_HEADER = "/usr/local/include/jpeglib.h"
+DIR_LIBJPEG_HEADER = pjoin(DIR_LIBJPEG_HEADER, "jpeglib.h") 
 DIR_JPEGIO_HEADER = pjoin(DIR_ROOT, "jpegio")
 DIR_JPEGIO_SOURCE = pjoin("jpegio")
 
@@ -93,7 +87,6 @@ incs.append(DIR_JPEGIO_HEADER)
 
 
 DIR_LIBJPEG_LIB = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "lib")
-#DIR_LIBJPEG_LIB = "/usr/local/lib"
 lib_dirs.append(DIR_LIBJPEG_LIB)
 
 srcs_decompressedjpeg = []
@@ -105,7 +98,6 @@ if sys.platform in ['linux','darwin']:
         print("[LIBJPEG]", fpath)
         srcs_decompressedjpeg.append(fpath)
 
-#elif sys.platform in ['win32', 'darwin']:
 elif sys.platform == 'win32':
     print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
     print("DIR_LIBJPEG_HEADER:", DIR_LIBJPEG_HEADER)
@@ -140,11 +132,11 @@ package_data = {
 }
 
 setup(name='jpegio',
-      version="0.2.2",
+      version="0.2.3",
       description='A python package for accessing the internal variables of JPEG file format.',
-      url='http://github.com/dwgoon/jpegio',
-      author='Daewon Lee',
-      author_email='daewon4you@gmail.com',
+      url='http://github.com/eldritchjs/jpegio',
+      author='EldritchJS',
+      author_email='jschlessman@gmail.com',
       license='MIT',
       packages=find_packages(exclude=['tests']),
       package_data=package_data,
