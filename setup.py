@@ -18,7 +18,6 @@ libs = []
 cargs = []
 lib_dirs = []
 largs = []
-dname_libjpeg = None
 
 
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -30,55 +29,24 @@ elif arch == '64bit':
 else:
     raise RuntimeError("Unknown system architecture: %s"%(arch))
 
-if sys.platform == 'win32': # Windows
-    os_arch = "win%s_%s"%(platform.release(), arch)
-    
-    DIR_SIMD_HEADER = pjoin(DIR_ROOT, "jpegio", "simd", "include")
-    DIR_SIMD_LIB = pjoin(DIR_ROOT, "jpegio", "simd", "lib")
-    incs.append(DIR_SIMD_HEADER)
-    lib_dirs.append(DIR_SIMD_LIB)
+cargs.extend(['-w', '-fPIC'])
 
-    if arch == 'x64':
-        libs.append("simd_win10_msvc14_x64")
-        libs.append("jpeg-static_win10_msvc14_x64")
-    elif arch == 'x86':
-        libs.append("jpeg-static_win7_msvc15_x86")
-    
-    dname_libjpeg = pjoin("libjpeg-turbo", os_arch)
-
-    cargs.append("/DNPY_NO_DEPRECATED_API")
-    cargs.append("/DNPY_1_7_API")
-    cargs.append("/DHAVE_BOOLEAN")
-    
-    largs.append("/NODEFAULTLIB:LIBCMT")
-
-elif sys.platform == 'darwin': # macOS
+if sys.platform == 'darwin': # macOS
     os_arch = "mac_%s"%(arch)
-    dname_libjpeg = 'libjpeg'
 
-    cargs.extend(['-w', '-fPIC'])
     cargs.append('-march=native')    
     cargs.append('-mmacosx-version-min=10.9')
     
     largs.append('-stdlib=libc++')
     largs.append('-mmacosx-version-min=10.9')
 
-    if arch == 'x64':
-        cargs.append('-m64')
-elif sys.platform == 'linux':
-    cargs.extend(['-w', '-fPIC'])
+if arch == 'x64':
+    cargs.append('-m64')
 
-    if arch == 'x64':
-        cargs.append('-m64')
-    dname_libjpeg = 'libjpeg'
-
-# end of if-else
-
-DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "include")
-DIR_LIBJPEG_SOURCE = pjoin("jpegio", dname_libjpeg, "src")
-DIR_LIBJPEG_HEADER = pjoin(DIR_LIBJPEG_HEADER, "jpeglib.h") 
+DIR_LIBJPEG_HEADER = pjoin(DIR_ROOT,"jpegio", "libjpeg", "include")
+DIR_LIBJPEG_SOURCE = pjoin(DIR_ROOT,"jpegio", "libjpeg", "src")
 DIR_JPEGIO_HEADER = pjoin(DIR_ROOT, "jpegio")
-DIR_JPEGIO_SOURCE = pjoin("jpegio")
+DIR_JPEGIO_SOURCE = pjoin(DIR_ROOT,"jpegio")
 
 incs.append(numpy.get_include())
 incs.append(DIR_ROOT)
@@ -86,22 +54,18 @@ incs.append(DIR_LIBJPEG_HEADER)
 incs.append(DIR_JPEGIO_HEADER)
 
 
-DIR_LIBJPEG_LIB = pjoin(DIR_ROOT, "jpegio", dname_libjpeg, "lib")
+DIR_LIBJPEG_LIB = pjoin(DIR_ROOT, "jpegio", "libjpeg", "lib")
 lib_dirs.append(DIR_LIBJPEG_LIB)
 
 srcs_decompressedjpeg = []
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "decompressedjpeg.pyx"))
 srcs_decompressedjpeg.append(pjoin(DIR_JPEGIO_SOURCE, "jstruct.cpp"))
 
-if sys.platform in ['linux','darwin']:
-    for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
-        print("[LIBJPEG]", fpath)
-        srcs_decompressedjpeg.append(fpath)
-
-elif sys.platform == 'win32':
-    print("[LIBJPEG] libjpeg-turbo is used for the functionality of libjpeg.")
-    print("DIR_LIBJPEG_HEADER:", DIR_LIBJPEG_HEADER)
-    print("DIR_LIBJPEG_SOURCE:", DIR_LIBJPEG_SOURCE)
+print("DIR_LIBJPEG_HEADER:", DIR_LIBJPEG_HEADER)
+print("DIR_LIBJPEG_SOURCE:", DIR_LIBJPEG_SOURCE)
+for fpath in glob.glob(pjoin(DIR_LIBJPEG_SOURCE, "*.c")):
+    print("[LIBJPEG]", fpath)
+    srcs_decompressedjpeg.append(fpath)
 
     
 ext_modules = [
@@ -125,14 +89,17 @@ install_requirements = ['cython>=0.29','numpy>=1.13']
 requirements = ['cython>=0.29',
                 'numpy>=1.13',]
 
-file_formats = ['*.pxd', '*.pyx', '*.h', '*.c']
+file_formats = ['*.pxd', '*.pyx', '*.h', '*.c', '*.a']
 package_data = {
     'jpegio':file_formats,
-    'jpegio/libjpeg':file_formats
+    'jpegio/libjpeg':file_formats,
+    'jpegio/libjpeg/src':file_formats,
+    'jpegio/libjpeg/include':file_formats,
+    'jpegio/libjpeg/lib':file_formats
 }
 
 setup(name='jpegio',
-      version="0.2.3",
+      version="0.2.7",
       description='A python package for accessing the internal variables of JPEG file format.',
       url='http://github.com/eldritchjs/jpegio',
       author='EldritchJS',
