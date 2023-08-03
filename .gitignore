@@ -1,3 +1,5 @@
+__pycache__/
+
 *.pyd
 *.obj
 *.exp
@@ -11,3 +13,5 @@ jpegio/decompressedjpeg.c
 jpegio/componentinfo.c
 jpegio/zigzagdctjpeg.c
 examples/.ipynb_checkpoints/
+
+env/
