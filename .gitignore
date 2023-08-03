@@ -9,8 +9,10 @@ __pycache__/
 .eggs/
 jpegio.egg-info/
 build/
-jpegio/decompressedjpeg.c
 jpegio/componentinfo.c
+jpegio/componentinfo.cpp
+jpegio/decompressedjpeg.c
+jpegio/decompressedjpeg.cpp
 jpegio/zigzagdctjpeg.c
 examples/.ipynb_checkpoints/
 
