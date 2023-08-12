@@ -113,11 +113,11 @@ package_data = {
 
 setup(
     name="jpegio",
-    version="0.2.8",
+    version="0.2.3",
     description="A python package for accessing the internal variables of JPEG file format.",
-    url="http://github.com/eldritchjs/jpegio",
-    author="EldritchJS",
-    author_email="jschlessman@gmail.com",
+    url='http://github.com/dwgoon/jpegio',
+    author='Daewon Lee',
+    author_email='daewon4you@gmail.com',
     license="Apache License 2.0",
     packages=find_packages(exclude=["tests"]),
     package_data=package_data,
