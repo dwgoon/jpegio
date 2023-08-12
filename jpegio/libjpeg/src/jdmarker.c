@@ -1069,7 +1069,10 @@ first_marker (j_decompress_ptr cinfo)
   INPUT_BYTE(cinfo, c, return FALSE);
   INPUT_BYTE(cinfo, c2, return FALSE);
   if (c != 0xFF || c2 != (int) M_SOI)
-    ERREXIT2(cinfo, JERR_NO_SOI, c, c2);
+  {
+    return FALSE;
+    //ERREXIT2(cinfo, JERR_NO_SOI, c, c2);
+  }
 
   cinfo->unread_marker = c2;
 
