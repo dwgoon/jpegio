@@ -14,6 +14,7 @@ jpegio/componentinfo.cpp
 jpegio/decompressedjpeg.c
 jpegio/decompressedjpeg.cpp
 jpegio/zigzagdctjpeg.c
+jpegio/*.so
 examples/.ipynb_checkpoints/
 
 env/

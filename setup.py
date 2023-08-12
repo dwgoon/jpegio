@@ -2,6 +2,10 @@
 
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
+from setuptools.dist import Distribution
+
+Distribution(dict(setup_requires='Cython>=3.0.0'))
+import Cython
 from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
@@ -12,6 +16,9 @@ import platform
 import glob
 
 import numpy
+
+if Cython.__version__ < '3.0.0':
+    raise Exception('Please upgrade to Cython 3.0.0 or newer')
 
 incs = ["."]
 libs = []
@@ -130,7 +137,7 @@ ext_modules = [
 ]
 
 requirements = [
-    "cython>=0.29",
+    "Cython>=3.0.0",
     "numpy>=1.13",
 ]
 
@@ -144,10 +151,12 @@ setup(
     url="http://github.com/dwgoon/jpegio",
     author="Daewon Lee",
     author_email="daewon4you@gmail.com",
-    license="MIT",
-    packages=find_packages(exclude=["tests"]),
+    license="Apache License, Version 2.0",
+    packages=find_packages(exclude=["tests", "dist", "examples"]),
     package_data=package_data,
-    setup_requires=requirements,
+    install_requires=requirements,
+    setup_requires=["Cython>=3.0.0"],
+    tests_require=['scipy'],
     ext_modules=cythonize(ext_modules, include_path=incs, language_level="3"),
     cmdclass={"build_ext": build_ext},
     zip_safe=False,
