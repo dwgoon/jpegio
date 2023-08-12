@@ -2,10 +2,6 @@
 
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
-from setuptools.dist import Distribution
-
-Distribution(dict(setup_requires="Cython>=3.0.0"))
-import Cython
 from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
@@ -16,9 +12,6 @@ import platform
 import glob
 
 import numpy
-
-if Cython.__version__ < "3.0.0":
-    raise Exception("Please upgrade to Cython 3.0.0 or newer")
 
 incs = ["."]
 libs = []
