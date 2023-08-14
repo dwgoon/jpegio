@@ -1068,10 +1068,8 @@ first_marker (j_decompress_ptr cinfo)
 
   INPUT_BYTE(cinfo, c, return FALSE);
   INPUT_BYTE(cinfo, c2, return FALSE);
-  if (c != 0xFF || c2 != (int) M_SOI) {
-    // ERREXIT2(cinfo, JERR_NO_SOI, c, c2);
-    return FALSE;
-  }
+  if (c != 0xFF || c2 != (int) M_SOI)
+    ERREXIT2(cinfo, JERR_NO_SOI, c, c2);
 
   cinfo->unread_marker = c2;
 
@@ -1099,6 +1097,7 @@ read_markers (j_decompress_ptr cinfo)
   for (;;) {
     /* Collect the marker proper, unless we already did. */
     /* NB: first_marker() enforces the requirement that SOI appear first. */
+    // printf("[read_markers] unread_marker: %d\n", cinfo->unread_marker);
     if (cinfo->unread_marker == 0) {
       if (! cinfo->marker->saw_SOI) {
 	if (! first_marker(cinfo))
@@ -1163,6 +1162,8 @@ read_markers (j_decompress_ptr cinfo)
       return JPEG_REACHED_SOS;
 
     case M_EOI:
+      //printf("[read_markers] case M_EOI\n");
+      //printf("[read_markers] ***TRACEMS commented***\n");
       TRACEMS(cinfo, 1, JTRC_EOI);
       cinfo->unread_marker = 0;	/* processed the marker */
       return JPEG_REACHED_EOI;
