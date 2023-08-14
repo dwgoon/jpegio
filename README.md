@@ -1,6 +1,7 @@
 # JpegIO
 
-A python package for accessing the internal variables of JPEG file format such as DCT coefficients and quantization tables.
+- A python package for accessing the internal variables of JPEG file format such as DCT coefficients and quantization tables.
+- See also [jpeglib](https://github.com/martinbenes1996/jpeglib), which supports a comprehensive set of JPEG libraries.
 
 ## Installation
 
