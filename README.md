@@ -74,3 +74,11 @@ The names of member variables have been determined following the convention of l
 
 ## License
 [Apache License 2.0](/LICENSE)
+
+
+
+## Contributors
+- [@dwgoon](https://github.com/dwgoon)
+- [@detrin](https://github.com/detrin)
+- [@martinbenes1996](https://github.com/martinbenes1996)
+- [@EldritchJS](https://github.com/EldritchJS)
