@@ -106,7 +106,7 @@ package_data = {
 
 setup(
     name="jpegio",
-    version="0.2.3",
+    version="0.2.4",
     description="A python package for accessing the internal variables of JPEG file format.",
     url='http://github.com/dwgoon/jpegio',
     author='Daewon Lee',
