@@ -106,7 +106,7 @@ libjpeg.
 
 This package bundles and statically links **libjpeg-turbo**, which is
 redistributed under its own permissive (BSD-style) licenses. See
-[THIRD_PARTY_NOTICES.md](/THIRD_PARTY_NOTICES.md) and
+[NOTICE](/NOTICE) and
 [third_party/libjpeg-turbo/LICENSE.md](/third_party/libjpeg-turbo/LICENSE.md) for details.
 
 > This software is based in part on the work of the Independent JPEG Group.

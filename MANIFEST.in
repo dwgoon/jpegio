@@ -6,7 +6,7 @@ graft third_party/libjpeg-turbo
 
 # Metadata, licenses and attribution (required for redistribution).
 include LICENSE
-include THIRD_PARTY_NOTICES.md
+include NOTICE
 include README.md
 include RELEASE.md
 include requirements.txt
