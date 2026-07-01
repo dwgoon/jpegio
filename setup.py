@@ -15,9 +15,12 @@ from os.path import join as pjoin
 
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
-from Cython.Build import cythonize
 
 import numpy
+
+# Binding backend: "capi" (default) is the hand-written CPython C-API extension
+# and needs no Cython; "cython" builds the .pyx sources instead.
+BACKEND = os.environ.get("JPEGIO_BACKEND", "capi").lower()
 
 
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -120,7 +123,6 @@ include_dirs = [
 compile_args = []
 link_args = []
 if sys.platform == "win32":
-    compile_args += ["/DNPY_NO_DEPRECATED_API", "/DNPY_1_7_API"]
     # libjpeg-turbo objects pull in the static CRT (LIBCMT); the extension uses
     # the dynamic CRT, so drop the static one to avoid the LNK4098 conflict.
     link_args += ["/NODEFAULTLIB:LIBCMT"]
@@ -130,32 +132,41 @@ elif sys.platform == "darwin":
 else:  # linux and other unix
     compile_args += ["-w", "-fPIC", "-std=c++11"]
 
-ext_modules = [
-    Extension(
-        "jpegio.componentinfo",
-        sources=["jpegio/componentinfo.pyx"],
+def make_extension(name, sources):
+    return Extension(
+        name,
+        sources=sources,
         include_dirs=include_dirs,
         extra_compile_args=compile_args,
         extra_link_args=link_args,
         language="c++",
-    ),
-    Extension(
-        "jpegio.decompressedjpeg",
-        sources=["jpegio/decompressedjpeg.pyx", "jpegio/jstruct.cpp"],
-        include_dirs=include_dirs,
-        extra_compile_args=compile_args,
-        extra_link_args=link_args,
-        language="c++",
-    ),
-]
+    )
+
+
+if BACKEND == "cython":
+    from Cython.Build import cythonize
+    ext_modules = cythonize(
+        [
+            make_extension("jpegio.componentinfo", ["jpegio/componentinfo.pyx"]),
+            make_extension("jpegio.decompressedjpeg",
+                           ["jpegio/decompressedjpeg.pyx", "jpegio/jstruct.cpp"]),
+        ],
+        include_path=include_dirs,
+        language_level="3",
+    )
+elif BACKEND == "capi":
+    # Hand-written CPython C-API extension -- no Cython required.
+    ext_modules = [
+        make_extension("jpegio.componentinfo", ["jpegio/capi/componentinfo.cpp"]),
+        make_extension("jpegio.decompressedjpeg",
+                       ["jpegio/capi/decompressedjpeg.cpp", "jpegio/jstruct.cpp"]),
+    ]
+else:
+    raise RuntimeError("Unknown JPEGIO_BACKEND %r (use 'capi' or 'cython')" % BACKEND)
 
 setup(
     packages=find_packages(exclude=["tests", "tests.*"]),
-    ext_modules=cythonize(
-        ext_modules,
-        include_path=include_dirs,
-        language_level="3",
-    ),
+    ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
     zip_safe=False,
 )
