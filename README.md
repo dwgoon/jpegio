@@ -7,20 +7,37 @@
 
 ## Installation
 
-The simplest way is to install from source:
+Pick the easiest method that works for you, in order of convenience.
+
+**1. From PyPI:**
+
+```
+pip install jpegio
+```
+
+**2. From GitHub:**
+
+```
+pip install "git+https://github.com/dwgoon/jpegio.git"
+```
+
+**3. From a local source checkout:**
 
 ```
 pip install .
 ```
 
-jpegio compiles a small Cython/C++ extension and builds a bundled copy of
-[libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo) **from source**.
-Requirements:
+Prebuilt wheels for Linux, macOS and Windows (CPython 3.9 through 3.13) are
+produced in CI with [cibuildwheel](https://cibuildwheel.pypa.io/), so method 1
+needs no compiler. Methods 2 and 3 build the bundled
+[libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo) from source and
+require:
 
 - A C/C++ compiler (MSVC on Windows, GCC on Linux, Clang on macOS).
-- `CMake`, `Cython` and `NumPy` — installed automatically as build dependencies.
-- `NASM` is *optional*; when it is available, libjpeg-turbo's SIMD acceleration
-  is enabled automatically.
+- `CMake` and `NumPy`, installed automatically as build dependencies.
+- `NASM` is optional; when present, libjpeg-turbo SIMD acceleration is enabled.
+- `Cython` is not needed for the default (C-API) build; it is only required for
+  the optional `JPEGIO_BACKEND=cython` build.
 
 ## Making a wheel
 
@@ -40,13 +57,16 @@ selected at build time with the `JPEGIO_BACKEND` environment variable:
 
 - `capi` (default): a hand-written CPython C-API extension. **No Cython is
   required to build it.**
-- `cython`: the Cython (`.pyx`) implementation. Requires `Cython`.
+- `cython`: the Cython (`.pyx`) implementation. Requires `Cython` in the build
+  environment (it is intentionally not a default build dependency).
 
 ```
 # default (C-API):
 pip install .
-# or explicitly:
-JPEGIO_BACKEND=cython pip install .   # (set the env var on Windows accordingly)
+
+# Cython backend (needs Cython in the build env):
+pip install cython
+JPEGIO_BACKEND=cython pip install . --no-build-isolation
 ```
 
 Both backends expose the exact same Python API and produce identical results.

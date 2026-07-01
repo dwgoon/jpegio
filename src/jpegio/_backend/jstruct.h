@@ -2,6 +2,7 @@
 #define JSTRUCT_H_
 
 #include <vector>
+#include <string>
 #include "mat2D.h"
 extern "C"
 {
@@ -45,13 +46,21 @@ namespace jpegio {
         unsigned char progressive_mode;
         unsigned char optimize_coding;
 
-        std::vector<char *> markers;
+        // Markers are stored with their exact length (binary-safe), so a NUL
+        // byte in a COM marker no longer truncates it.
+        std::vector<std::string> markers;
         std::vector<mat2D<int> *> coef_arrays;
         std::vector<mat2D<int> *> spatial_arrays;
         std::vector<mat2D<int> *> quant_tables;
         std::vector<struct_huff_tables *> ac_huff_tables;
         std::vector<struct_huff_tables *> dc_huff_tables;
         std::vector<struct_comp_info *> comp_info;
+
+        // Original libjpeg table slot (0..3) for each entry above, so tables
+        // that use sparse/non-contiguous slot numbers round-trip correctly.
+        std::vector<int> quant_tbl_slots;
+        std::vector<int> ac_huff_tbl_slots;
+        std::vector<int> dc_huff_tbl_slots;
 
         jstruct() {}
         jstruct(std::string file_path);

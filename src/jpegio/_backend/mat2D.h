@@ -30,14 +30,16 @@ public:
 	{
 		this->rows = rows;
 		this->cols = cols;
-		this->vect = std::vector<T>(rows*cols);
+		// size_t multiply avoids signed-int overflow for large (e.g. malicious)
+		// JPEG dimensions, which would otherwise under-allocate the buffer.
+		this->vect = std::vector<T>((size_t)rows * (size_t)cols);
 	}
 
 	mat2D(int rows, int cols, T baseVal)
 	{
 		this->rows = rows;
 		this->cols = cols;
-		this->vect = std::vector<T>(rows*cols, baseVal);
+		this->vect = std::vector<T>((size_t)rows * (size_t)cols, baseVal);
 	}
 
 	~mat2D()
@@ -47,7 +49,7 @@ public:
 
 	T Read(int row, int col)
 	{
-		return this->vect[row*cols+col];
+		return this->vect[(size_t)row * cols + col];
 	}
 
 	int valueCount(T val)
@@ -57,7 +59,7 @@ public:
 
 	void Write(int row, int col, T val)
 	{
-		this->vect[row*cols+col] = val;
+		this->vect[(size_t)row * cols + col] = val;
 	}
 
 	void PermuteElements()

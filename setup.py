@@ -153,7 +153,14 @@ def make_extension(name, sources):
 BACKEND_SRC = "src/jpegio/_backend/jstruct.cpp"
 
 if BACKEND == "cython":
-    from Cython.Build import cythonize
+    try:
+        from Cython.Build import cythonize
+    except ImportError:
+        raise RuntimeError(
+            "JPEGIO_BACKEND=cython requires Cython, which is not installed in "
+            "the build environment. Install it (e.g. `pip install cython`) and "
+            "build with `--no-build-isolation`, or add Cython to the build "
+            "requirements. The default 'capi' backend needs no Cython.")
     ext_modules = cythonize(
         [
             make_extension("jpegio.componentinfo",

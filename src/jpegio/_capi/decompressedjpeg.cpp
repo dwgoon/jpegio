@@ -31,7 +31,8 @@ using jpegio::struct_huff_tables;
 
 typedef struct {
     PyObject_HEAD
-    jstruct *obj;
+    jstruct *obj;         /* borrowed pointer into the `owner` capsule */
+    PyObject *owner;      /* PyCapsule that owns the current jstruct */
     PyObject *comp_info;
     PyObject *quant_tables;
     PyObject *coef_arrays;
@@ -43,6 +44,17 @@ typedef struct {
 
 
 /* ------------------------------------------------------------------ helpers */
+
+/* Each exported NumPy array is based on the per-read `owner` capsule (not on the
+   DecompressedJpeg), so the specific jstruct that backs an array stays alive as
+   long as that array does -- even across a re-read() or after the
+   DecompressedJpeg itself is dropped. */
+static void
+jstruct_capsule_destructor(PyObject *capsule)
+{
+    jstruct *p = (jstruct *)PyCapsule_GetPointer(capsule, "jpegio.jstruct");
+    delete p;
+}
 
 /* Cached jpegio.componentinfo.ComponentInfo type (borrowed, kept by the static). */
 static PyObject *
@@ -129,6 +141,7 @@ DecompressedJpeg_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     if (self == NULL)
         return NULL;
     self->obj = NULL;
+    self->owner = NULL;
     self->comp_info = PyList_New(0);
     self->quant_tables = PyList_New(0);
     self->coef_arrays = PyList_New(0);
@@ -148,6 +161,7 @@ DecompressedJpeg_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static int
 DecompressedJpeg_traverse(DecompressedJpegObject *self, visitproc visit, void *arg)
 {
+    Py_VISIT(self->owner);
     Py_VISIT(self->comp_info);
     Py_VISIT(self->quant_tables);
     Py_VISIT(self->coef_arrays);
@@ -161,6 +175,8 @@ DecompressedJpeg_traverse(DecompressedJpegObject *self, visitproc visit, void *a
 static int
 DecompressedJpeg_clear(DecompressedJpegObject *self)
 {
+    self->obj = NULL;             /* borrowed; owned by the capsule below */
+    Py_CLEAR(self->owner);
     Py_CLEAR(self->comp_info);
     Py_CLEAR(self->quant_tables);
     Py_CLEAR(self->coef_arrays);
@@ -175,10 +191,7 @@ static void
 DecompressedJpeg_dealloc(DecompressedJpegObject *self)
 {
     PyObject_GC_UnTrack(self);
-    if (self->obj != NULL) {
-        delete self->obj;
-        self->obj = NULL;
-    }
+    /* The jstruct is owned by self->owner (a capsule); clear() drops it. */
     DecompressedJpeg_clear(self);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
@@ -225,7 +238,8 @@ read_markers(DecompressedJpegObject *self)
     if (lst == NULL)
         return -1;
     for (size_t i = 0; i < self->obj->markers.size(); i++) {
-        PyObject *b = PyBytes_FromString(self->obj->markers[i]);
+        const std::string &m = self->obj->markers[i];
+        PyObject *b = PyBytes_FromStringAndSize(m.data(), (Py_ssize_t)m.size());
         if (b == NULL) { Py_DECREF(lst); return -1; }
         if (PyList_Append(lst, b) < 0) { Py_DECREF(b); Py_DECREF(lst); return -1; }
         Py_DECREF(b);
@@ -263,10 +277,11 @@ read_huff_list(PyObject **slot, std::vector<struct_huff_tables *> &src, PyObject
         if (symbols == NULL) { Py_DECREF(counts); Py_DECREF(lst); return -1; }
         PyObject *d = PyDict_New();
         if (d == NULL) { Py_DECREF(counts); Py_DECREF(symbols); Py_DECREF(lst); return -1; }
-        PyDict_SetItemString(d, "counts", counts);
-        PyDict_SetItemString(d, "symbols", symbols);
+        int rc = PyDict_SetItemString(d, "counts", counts);
+        if (rc == 0) rc = PyDict_SetItemString(d, "symbols", symbols);
         Py_DECREF(counts);
         Py_DECREF(symbols);
+        if (rc < 0) { Py_DECREF(d); Py_DECREF(lst); return -1; }
         if (PyList_Append(lst, d) < 0) { Py_DECREF(d); Py_DECREF(lst); return -1; }
         Py_DECREF(d);
     }
@@ -319,29 +334,33 @@ DecompressedJpeg_read(DecompressedJpegObject *self, PyObject *args, PyObject *kw
         }
     }
 
-    if (self->obj != NULL) {
-        delete self->obj;
-        self->obj = NULL;
-    }
+    jstruct *js = new jstruct();
     try {
-        self->obj = new jstruct();
-        self->obj->jpeg_load(path);
+        js->jpeg_load(path);
     } catch (const std::exception &e) {
-        if (self->obj) { delete self->obj; self->obj = NULL; }
+        delete js;
         PyErr_SetString(PyExc_RuntimeError, e.what());
         return NULL;
     } catch (...) {
-        if (self->obj) { delete self->obj; self->obj = NULL; }
+        delete js;
         PyErr_SetString(PyExc_RuntimeError, "[JSTRUCT] unknown error while reading JPEG");
         return NULL;
     }
 
+    /* Hand the jstruct to a capsule that owns it. Exported arrays are based on
+       this capsule, so they keep *this* jstruct alive even across a later
+       re-read() into the same object or after the object itself is dropped. */
+    PyObject *cap = PyCapsule_New(js, "jpegio.jstruct", jstruct_capsule_destructor);
+    if (cap == NULL) { delete js; return NULL; }
+    Py_XSETREF(self->owner, cap);   /* drops the previous read's owner (if any) */
+    self->obj = js;                 /* borrowed pointer into `cap` */
+
     if (read_comp_info(self) < 0) return NULL;
     if (read_markers(self) < 0) return NULL;
-    if (read_mat2D_list(&self->quant_tables, self->obj->quant_tables, (PyObject *)self) < 0) return NULL;
-    if (read_huff_list(&self->ac_huff_tables, self->obj->ac_huff_tables, (PyObject *)self) < 0) return NULL;
-    if (read_huff_list(&self->dc_huff_tables, self->obj->dc_huff_tables, (PyObject *)self) < 0) return NULL;
-    if (read_mat2D_list(&self->coef_arrays, self->obj->coef_arrays, (PyObject *)self) < 0) return NULL;
+    if (read_mat2D_list(&self->quant_tables, self->obj->quant_tables, self->owner) < 0) return NULL;
+    if (read_huff_list(&self->ac_huff_tables, self->obj->ac_huff_tables, self->owner) < 0) return NULL;
+    if (read_huff_list(&self->dc_huff_tables, self->obj->dc_huff_tables, self->owner) < 0) return NULL;
+    if (read_mat2D_list(&self->coef_arrays, self->obj->coef_arrays, self->owner) < 0) return NULL;
 
     PyObject *empty = PyList_New(0);
     if (empty == NULL) return NULL;
@@ -354,7 +373,7 @@ DecompressedJpeg_read(DecompressedJpegObject *self, PyObject *args, PyObject *kw
             PyErr_SetString(PyExc_RuntimeError, e.what());
             return NULL;
         }
-        if (read_mat2D_list(&self->spatial_arrays, self->obj->spatial_arrays, (PyObject *)self) < 0)
+        if (read_mat2D_list(&self->spatial_arrays, self->obj->spatial_arrays, self->owner) < 0)
             return NULL;
     }
 
@@ -383,12 +402,10 @@ DecompressedJpeg_write(DecompressedJpegObject *self, PyObject *args)
     std::string path(PyBytes_AS_STRING(path_bytes));
     Py_DECREF(path_bytes);
 
-    /* Copy the (possibly modified) markers back into the backend. Heap copies are
-       used so the jstruct destructor can safely delete[] them. */
+    /* Copy the (possibly modified) markers back into the backend, preserving
+       their exact length (binary-safe). */
     Py_ssize_t n_markers = PyList_Size(self->markers);
     if (n_markers > 0) {
-        for (size_t i = 0; i < self->obj->markers.size(); i++)
-            delete[] self->obj->markers[i];
         self->obj->markers.clear();
         for (Py_ssize_t i = 0; i < n_markers; i++) {
             PyObject *item = PyList_GetItem(self->markers, i);   /* borrowed */
@@ -396,10 +413,7 @@ DecompressedJpeg_write(DecompressedJpegObject *self, PyObject *args)
             Py_ssize_t len;
             if (PyBytes_AsStringAndSize(item, &buf, &len) < 0)
                 return NULL;
-            char *copy = new char[len + 1];
-            memcpy(copy, buf, (size_t)len);
-            copy[len] = '\0';
-            self->obj->markers.push_back(copy);
+            self->obj->markers.push_back(std::string(buf, (size_t)len));
         }
     }
 
@@ -452,8 +466,12 @@ DecompressedJpeg_get_coef_block_array_shape(DecompressedJpegObject *self, PyObje
     int c;
     if (!PyArg_ParseTuple(args, "i", &c))
         return NULL;
-    if (PyList_Size(self->coef_arrays) == 0) {
+    if (self->obj == NULL || self->obj->coef_arrays.empty()) {
         PyErr_SetString(PyExc_AttributeError, "coef_arrays has not been created yet.");
+        return NULL;
+    }
+    if (c < 0 || (size_t)c >= self->obj->coef_arrays.size()) {
+        PyErr_SetString(PyExc_IndexError, "coef array index out of range");
         return NULL;
     }
     mat2D<int> *m = self->obj->coef_arrays[c];

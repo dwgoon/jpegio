@@ -54,7 +54,7 @@ cdef extern from "jstruct.h" namespace "jpegio":
         unsigned char progressive_mode
 
         vector[ptr_struct_ci] comp_info
-        vector[char *] markers
+        vector[string] markers
         vector[ptr_mat2D] coef_arrays
         vector[ptr_mat2D] spatial_arrays
         vector[ptr_mat2D] quant_tables

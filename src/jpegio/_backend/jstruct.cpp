@@ -55,8 +55,7 @@ jstruct::jstruct(std::string file_path, bool load_spatial)
 
 jstruct::~jstruct()
 {
-	for (size_t i = 0; i < markers.size(); i++) delete [] markers[i];
-	markers.clear();
+	markers.clear();  // std::string entries free themselves
 	for (size_t i = 0; i < coef_arrays.size(); i++) delete coef_arrays[i];
 	coef_arrays.clear();
 	for (size_t i = 0; i < quant_tables.size(); i++) delete quant_tables[i];
@@ -199,12 +198,10 @@ void jstruct::jpeg_load(std::string file_path)
 	{
 		if (marker_ptr->marker == JPEG_COM)
 		{
-			char* tempMarker = new char[marker_ptr->data_length + 1];
-			tempMarker[marker_ptr->data_length] = '\0';
-			/* copy comment string to char array */
-			for (i = 0; i < (int) marker_ptr->data_length; i++)
-				tempMarker[i] = marker_ptr->data[i];
-			this->markers.push_back(tempMarker);
+			/* store the exact bytes with their length (binary-safe) */
+			this->markers.push_back(std::string(
+				reinterpret_cast<const char*>(marker_ptr->data),
+				marker_ptr->data_length));
 		}
 		marker_ptr = marker_ptr->next;
 	}
@@ -219,6 +216,7 @@ void jstruct::jpeg_load(std::string file_path)
 				for (j = 0; j < DCTSIZE; j++)
 					tempMat->Write(i, j, quant_ptr->quantval[i*DCTSIZE+j]);
 			this->quant_tables.push_back(tempMat);
+			this->quant_tbl_slots.push_back(n);
 		}
 	}
 
@@ -230,6 +228,7 @@ void jstruct::jpeg_load(std::string file_path)
 			for (i = 1; i <= 16; i++) tempStruct->counts.push_back(huff_ptr->bits[i]);
 			for (i = 0; i < 256; i++) tempStruct->symbols.push_back(huff_ptr->huffval[i]);
 			this->ac_huff_tables.push_back(tempStruct);
+			this->ac_huff_tbl_slots.push_back(n);
 		}
 	}
 
@@ -241,6 +240,7 @@ void jstruct::jpeg_load(std::string file_path)
 			for (i = 1; i <= 16; i++) tempStruct->counts.push_back(huff_ptr->bits[i]);
 			for (i = 0; i < 256; i++) tempStruct->symbols.push_back(huff_ptr->huffval[i]);
 			this->dc_huff_tables.push_back(tempStruct);
+			this->dc_huff_tbl_slots.push_back(n);
 		}
 	}
 
@@ -505,75 +505,83 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 		}
 	}
 
-	/* get the quantization tables */
-	for (n = 0; n < (int)this->quant_tables.size(); n++)
+	/* Write the quantization tables back into their original slots. */
 	{
-		if (cinfo.quant_tbl_ptrs[n] == NULL)
-			cinfo.quant_tbl_ptrs[n] = jpeg_alloc_quant_table((j_common_ptr) &cinfo);
-
-		/* Fill the table */
-		for (i = 0; i < DCTSIZE; i++)
-			for (j = 0; j < DCTSIZE; j++)
-			{
-				t = this->quant_tables[n]->Read(i, j);
-				if (t < 1 || t > 65535) {
-					jpeg_destroy_compress(&cinfo);
-					fclose(outfile);
-					throw std::runtime_error("[JSTRUCT] Quantization table entries not in range 1..65535");
+		bool have_slots = (this->quant_tbl_slots.size() == this->quant_tables.size());
+		bool used[NUM_QUANT_TBLS] = { false };
+		for (n = 0; n < (int)this->quant_tables.size(); n++)
+		{
+			int slot = have_slots ? this->quant_tbl_slots[n] : n;
+			if (slot < 0 || slot >= NUM_QUANT_TBLS) continue;
+			used[slot] = true;
+			if (cinfo.quant_tbl_ptrs[slot] == NULL)
+				cinfo.quant_tbl_ptrs[slot] = jpeg_alloc_quant_table((j_common_ptr) &cinfo);
+			for (i = 0; i < DCTSIZE; i++)
+				for (j = 0; j < DCTSIZE; j++)
+				{
+					t = this->quant_tables[n]->Read(i, j);
+					if (t < 1 || t > 65535) {
+						jpeg_destroy_compress(&cinfo);
+						fclose(outfile);
+						throw std::runtime_error("[JSTRUCT] Quantization table entries not in range 1..65535");
+					}
+					cinfo.quant_tbl_ptrs[slot]->quantval[i*DCTSIZE+j] = (UINT16) t;
 				}
-				cinfo.quant_tbl_ptrs[n]->quantval[i*DCTSIZE+j] = (UINT16) t;
-			}
+		}
+		for (n = 0; n < NUM_QUANT_TBLS; n++)
+			if (!used[n]) cinfo.quant_tbl_ptrs[n] = NULL;
 	}
 
-	/* set remaining quantization table slots to null */
-	for (; n < NUM_QUANT_TBLS; n++)
-		cinfo.quant_tbl_ptrs[n] = NULL;
-
-	/* Get the AC and DC huffman tables but check for optimized coding first*/
+	/* Get the AC and DC huffman tables but check for optimized coding first. */
 	if (cinfo.optimize_coding == FALSE)
 	{
 		if (!this->ac_huff_tables.empty())
 		{
+			bool have_slots = (this->ac_huff_tbl_slots.size() == this->ac_huff_tables.size());
+			bool used[NUM_HUFF_TBLS] = { false };
 			for (n = 0; n < (int)this->ac_huff_tables.size(); n++)
 			{
-				if (cinfo.ac_huff_tbl_ptrs[n] == NULL)
-					cinfo.ac_huff_tbl_ptrs[n] = jpeg_alloc_huff_table((j_common_ptr) &cinfo);
-				else
-				{
-					for (i = 1; i <= 16; i++)
-						cinfo.ac_huff_tbl_ptrs[n]->bits[i] = (UINT8) this->ac_huff_tables[n]->counts[i-1];
-					for (i = 0; i < 256; i++)
-						cinfo.ac_huff_tbl_ptrs[n]->huffval[i] = (UINT8) this->ac_huff_tables[n]->symbols[i];
-				}
+				int slot = have_slots ? this->ac_huff_tbl_slots[n] : n;
+				if (slot < 0 || slot >= NUM_HUFF_TBLS) continue;
+				used[slot] = true;
+				if (cinfo.ac_huff_tbl_ptrs[slot] == NULL)
+					cinfo.ac_huff_tbl_ptrs[slot] = jpeg_alloc_huff_table((j_common_ptr) &cinfo);
+				for (i = 1; i <= 16; i++)
+					cinfo.ac_huff_tbl_ptrs[slot]->bits[i] = (UINT8) this->ac_huff_tables[n]->counts[i-1];
+				for (i = 0; i < 256; i++)
+					cinfo.ac_huff_tbl_ptrs[slot]->huffval[i] = (UINT8) this->ac_huff_tables[n]->symbols[i];
 			}
-			for (; n < NUM_HUFF_TBLS; n++) cinfo.ac_huff_tbl_ptrs[n] = NULL;
+			for (n = 0; n < NUM_HUFF_TBLS; n++)
+				if (!used[n]) cinfo.ac_huff_tbl_ptrs[n] = NULL;
 		}
 
 		if (!this->dc_huff_tables.empty())
 		{
+			bool have_slots = (this->dc_huff_tbl_slots.size() == this->dc_huff_tables.size());
+			bool used[NUM_HUFF_TBLS] = { false };
 			for (n = 0; n < (int)this->dc_huff_tables.size(); n++)
 			{
-				if (cinfo.dc_huff_tbl_ptrs[n] == NULL)
-					cinfo.dc_huff_tbl_ptrs[n] = jpeg_alloc_huff_table((j_common_ptr) &cinfo);
-				else
-				{
-					for (i = 1; i <= 16; i++)
-						cinfo.dc_huff_tbl_ptrs[n]->bits[i] = (unsigned char) this->dc_huff_tables[n]->counts[i-1];
-					for (i = 0; i < 256; i++)
-						cinfo.dc_huff_tbl_ptrs[n]->huffval[i] = (unsigned char) this->dc_huff_tables[n]->symbols[i];
-				}
+				int slot = have_slots ? this->dc_huff_tbl_slots[n] : n;
+				if (slot < 0 || slot >= NUM_HUFF_TBLS) continue;
+				used[slot] = true;
+				if (cinfo.dc_huff_tbl_ptrs[slot] == NULL)
+					cinfo.dc_huff_tbl_ptrs[slot] = jpeg_alloc_huff_table((j_common_ptr) &cinfo);
+				for (i = 1; i <= 16; i++)
+					cinfo.dc_huff_tbl_ptrs[slot]->bits[i] = (unsigned char) this->dc_huff_tables[n]->counts[i-1];
+				for (i = 0; i < 256; i++)
+					cinfo.dc_huff_tbl_ptrs[slot]->huffval[i] = (unsigned char) this->dc_huff_tables[n]->symbols[i];
 			}
-			for (; n < NUM_HUFF_TBLS; n++) cinfo.dc_huff_tbl_ptrs[n] = NULL;
+			for (n = 0; n < NUM_HUFF_TBLS; n++)
+				if (!used[n]) cinfo.dc_huff_tbl_ptrs[n] = NULL;
 		}
 	}
 
-	/* copy markers */
+	/* copy markers (length-preserving, binary-safe) */
 	for (i = 0; i < (int)this->markers.size(); i++)
 	{
-		JOCTET * tempMarker = (JOCTET *)this->markers[i];
-		int strlen;
-		for (strlen=0; tempMarker[strlen]!='\0'; strlen++);
-		jpeg_write_marker(&cinfo, JPEG_COM, tempMarker, strlen);
+		jpeg_write_marker(&cinfo, JPEG_COM,
+			reinterpret_cast<const JOCTET*>(this->markers[i].data()),
+			(unsigned int)this->markers[i].size());
 	}
 
 	/* done with cinfo */
