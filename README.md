@@ -33,6 +33,24 @@ The resulting wheel and source distribution are placed in the `dist` directory.
 Cross-platform wheels are built in CI with
 [cibuildwheel](https://cibuildwheel.pypa.io/).
 
+## Binding backend
+
+This branch ships two interchangeable bindings to the same C++ backend,
+selected at build time with the `JPEGIO_BACKEND` environment variable:
+
+- `capi` (default): a hand-written CPython C-API extension. **No Cython is
+  required to build it.**
+- `cython`: the Cython (`.pyx`) implementation. Requires `Cython`.
+
+```
+# default (C-API):
+pip install .
+# or explicitly:
+JPEGIO_BACKEND=cython pip install .   # (set the env var on Windows accordingly)
+```
+
+Both backends expose the exact same Python API and produce identical results.
+
 ## Dependency
 
 At runtime this package only requires:
