@@ -18,10 +18,11 @@ cdef class DecompressedJpeg:
     cdef _read_quant_tables(self)
     cdef _read_huffman_tables(self)
     cdef _read_dct_coefficients(self)
+    cdef _read_spatial_arrays(self)
 
     cdef _write_markers(self)
 
-    cpdef public read(self, fpath)
+    cpdef public read(self, fpath, bint read_spatial=*)
     cpdef public write(self, fpath)
     cpdef get_coef_block(self, c, i, j)
     cpdef get_coef_block_array_shape(self, c)

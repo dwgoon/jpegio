@@ -1,52 +1,47 @@
 # JpegIO
 
-- A python package for accessing the internal variables of JPEG file format such as DCT coefficients and quantization tables.
-- See also [jpeglib](https://github.com/martinbenes1996/jpeglib), which supports a comprehensive set of JPEG libraries.
+- A python package for accessing the internal variables of the JPEG file format
+  such as DCT coefficients and quantization tables.
+- See also [jpeglib](https://github.com/martinbenes1996/jpeglib), which supports
+  a comprehensive set of JPEG libraries.
 
 ## Installation
 
-It is recommended to install by compiling yourself.
-The installation process includes compiling C/C++ source codes.
+The simplest way is to install from source:
 
 ```
-python setup.py install
+pip install .
 ```
 
-You can also use the pre-compiled wheels
-(If some errors occur, try compiling the package using the above command).
+jpegio compiles a small Cython/C++ extension and builds a bundled copy of
+[libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo) **from source**.
+Requirements:
 
-On Linux:
-```
-pip install dist/jpegio-x.x.x-cp3x-cp3x-linux_<your architecture>.whl
-```
-
-On Windows 10 x64:
-```
-pip install dist/jpegio-x.x.x-cp3x-cp3x-win_amd64.whl
-```
-
-On macOS x64:
-```
-pip install dist/jpegio-x.x.x-cp3x-cp3x-macosx_<version>_x86_64.whl
-```
+- A C/C++ compiler (MSVC on Windows, GCC on Linux, Clang on macOS).
+- `CMake`, `Cython` and `NumPy` — installed automatically as build dependencies.
+- `NASM` is *optional*; when it is available, libjpeg-turbo's SIMD acceleration
+  is enabled automatically.
 
 ## Making a wheel
 
-You can use the following command for making a wheel for your own architecture such as x64 or ppc64le.
-
 ```
-python setup.py bdist_wheel
+pip install build
+python -m build
 ```
 
-The cooked wheel files are located at `dist` directory.
-
+The resulting wheel and source distribution are placed in the `dist` directory.
+Cross-platform wheels are built in CI with
+[cibuildwheel](https://cibuildwheel.pypa.io/).
 
 ## Dependency
-This package requires other packages.
 
-- [`Cython`](https://cython.org/)
-- [`NumPy`](http://www.numpy.org/)
+At runtime this package only requires:
 
+- [`NumPy`](https://numpy.org/)
+
+At build time it additionally uses `Cython`, `CMake` and (optionally) `NASM`.
+libjpeg-turbo is bundled and statically linked, so there is no external libjpeg
+runtime dependency.
 
 ## Usage example
 
@@ -54,7 +49,7 @@ This package requires other packages.
 import jpegio as jio
 
 jpeg = jio.read("image.jpg")
-coef_array = jpeg.coef_arrays[0]  
+coef_array = jpeg.coef_arrays[0]
 quant_tbl = jpeg.quant_tables[0]
 
 # Modifying jpeg.coef_arrays...
@@ -63,20 +58,40 @@ quant_tbl = jpeg.quant_tables[0]
 jio.write(jpeg, "image_modified.jpg")
 ```
 
-- `coef_arrays` is a list of `numpy.ndarray` objects that represent DCT coefficients of YCbCr channels in JPEG.
-- `quant_tables` is a list of `numpy.ndarray` objects that represent the quantization tables in JPEG.
+- `coef_arrays` is a list of `numpy.ndarray` objects that represent the DCT
+  coefficients of the YCbCr channels in the JPEG.
+- `quant_tables` is a list of `numpy.ndarray` objects that represent the
+  quantization tables in the JPEG.
 
-You can also utilize other variables (one of the simplest ways for finding them is to use `dir(img)`).
-The names of member variables have been determined following the convention of libjpeg.
+The pixel-domain (spatial) image is not decoded by default. Pass
+`read_spatial=True` to also populate `spatial_arrays`:
+
+```python
+jpeg = jio.read("image.jpg", read_spatial=True)
+red_channel = jpeg.spatial_arrays[0]
+```
+
+You can also utilize other variables (one of the simplest ways to find them is
+to use `dir(jpeg)`). The names of the member variables follow the convention of
+libjpeg.
 
 ## References
-- The core parts of this package, implemented in C/C++, are adopted from the souce codes of [Jessica Fridrich's laboratory](http://dde.binghamton.edu).
-- The functionality of libjpeg is borrowed from [IJG](https://www.ijg.org/) and [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo).
+- The core parts of this package, implemented in C/C++, are adopted from the
+  source code of [Jessica Fridrich's laboratory](http://dde.binghamton.edu).
+- The functionality of libjpeg is provided by
+  [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo), which is in
+  turn based on the work of the [IJG](https://www.ijg.org/).
 
 ## License
+
 [Apache License 2.0](/LICENSE)
 
+This package bundles and statically links **libjpeg-turbo**, which is
+redistributed under its own permissive (BSD-style) licenses. See
+[THIRD_PARTY_NOTICES.md](/THIRD_PARTY_NOTICES.md) and
+[jpegio/libjpeg-turbo/LICENSE.md](/jpegio/libjpeg-turbo/LICENSE.md) for details.
 
+> This software is based in part on the work of the Independent JPEG Group.
 
 ## Contributors
 - [@dwgoon](https://github.com/dwgoon)

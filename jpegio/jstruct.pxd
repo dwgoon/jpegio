@@ -41,7 +41,7 @@ cdef extern from "jstruct.h" namespace "jpegio":
     cdef cppclass jstruct:
         jstruct() except +
         jstruct(string file_path) except +
-        jstruct(file_path, load_spatial) except +
+        jstruct(string file_path, bool load_spatial) except +
 
         bool load_spatial
         unsigned int image_width
@@ -62,8 +62,8 @@ cdef extern from "jstruct.h" namespace "jpegio":
         vector[ptr_struct_ht] dc_huff_tables
 
         void jpeg_load(string file_path) except +
-        void spatial_load(string file_path)
-        void jpeg_write(string file_path, bool optimize_coding)
+        void spatial_load(string file_path) except +
+        void jpeg_write(string file_path, bool optimize_coding) except +
 
 
 

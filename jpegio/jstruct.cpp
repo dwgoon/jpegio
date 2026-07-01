@@ -3,6 +3,8 @@
 #include "jstruct.h"
 #include <cstdio>
 #include <cstdlib>
+#include <string>
+#include <stdexcept>
 extern "C"
 {
 #include "jpeglib.h"
@@ -15,9 +17,33 @@ extern "C"
 namespace jpegio {
 
 
+/* Custom JPEG error handler.
+
+   libjpeg's default error_exit calls exit(), which would terminate the whole
+   host process (e.g. the entire Python interpreter) whenever a corrupt or
+   truncated JPEG is encountered. Instead we longjmp back to the caller and
+   raise a C++ exception, which Cython translates into a Python exception
+   (see the `except +` declarations in jstruct.pxd). */
+struct jpegio_error_mgr {
+	struct jpeg_error_mgr pub;
+	jmp_buf setjmp_buffer;
+	char message[JMSG_LENGTH_MAX];
+};
+
+extern "C" {
+	static void jpegio_error_exit(j_common_ptr cinfo)
+	{
+		jpegio_error_mgr* err = reinterpret_cast<jpegio_error_mgr*>(cinfo->err);
+		(*cinfo->err->format_message)(cinfo, err->message);
+		longjmp(err->setjmp_buffer, 1);
+	}
+}
+
+
 jstruct::jstruct(std::string file_path)
 {
-	jstruct(file_path, false);
+	this->load_spatial = false;
+	jpeg_load(file_path);
 }
 
 jstruct::jstruct(std::string file_path, bool load_spatial)
@@ -29,56 +55,86 @@ jstruct::jstruct(std::string file_path, bool load_spatial)
 
 jstruct::~jstruct()
 {
-	for (int i=0; i<(int)markers.size(); i++) delete [] markers[i]; markers.clear();
-	for (int i=0; i<(int)coef_arrays.size(); i++) delete coef_arrays[i];	coef_arrays.clear();
-	for (int i=0; i<(int)quant_tables.size(); i++) delete quant_tables[i]; quant_tables.clear();
-	for (int i=0; i<(int)ac_huff_tables.size(); i++) delete ac_huff_tables[i]; ac_huff_tables.clear();
-	for (int i=0; i<(int)dc_huff_tables.size(); i++) delete dc_huff_tables[i]; dc_huff_tables.clear();
-	for (int i=0; i<(int)comp_info.size(); i++) delete comp_info[i]; comp_info.clear();
-	for (int i=0; i<(int)spatial_arrays.size(); i++) delete spatial_arrays[i]; spatial_arrays.clear();
+	for (size_t i = 0; i < markers.size(); i++) delete [] markers[i];
+	markers.clear();
+	for (size_t i = 0; i < coef_arrays.size(); i++) delete coef_arrays[i];
+	coef_arrays.clear();
+	for (size_t i = 0; i < quant_tables.size(); i++) delete quant_tables[i];
+	quant_tables.clear();
+	for (size_t i = 0; i < ac_huff_tables.size(); i++) delete ac_huff_tables[i];
+	ac_huff_tables.clear();
+	for (size_t i = 0; i < dc_huff_tables.size(); i++) delete dc_huff_tables[i];
+	dc_huff_tables.clear();
+	for (size_t i = 0; i < comp_info.size(); i++) delete comp_info[i];
+	comp_info.clear();
+	for (size_t i = 0; i < spatial_arrays.size(); i++) delete spatial_arrays[i];
+	spatial_arrays.clear();
 }
 
 void jstruct::jpeg_load(std::string file_path)
 {
-
-	// printf("Size of boolean: %d\n", sizeof(boolean));
 	jpeg_decompress_struct cinfo;
+	jpegio_error_mgr jerr;
+	FILE *infile = NULL;
+	unsigned char *mem_buffer = NULL;
+	bool decompress_created = false;
+
 	jpeg_saved_marker_ptr marker_ptr;
 	jpeg_component_info *compptr;
 	jvirt_barray_ptr *coef_arrays;
-	FILE *infile;
-	JDIMENSION blk_x,blk_y;
+	JDIMENSION blk_x, blk_y;
 	JBLOCKARRAY buffer;
 	JCOEFPTR bufptr;
 	JQUANT_TBL *quant_ptr;
 	JHUFF_TBL *huff_ptr;
 	int c_width, c_height, ci, i, j, n;
 
+	/* Arm the error handler before doing anything that can fail inside
+	   libjpeg, so a fatal error longjmps here and is turned into an
+	   exception instead of killing the process. */
+	cinfo.err = jpeg_std_error(&jerr.pub);
+	jerr.pub.error_exit = jpegio_error_exit;
+	if (setjmp(jerr.setjmp_buffer)) {
+		std::string msg = std::string("[JSTRUCT] ") + jerr.message;
+		if (decompress_created) jpeg_destroy_decompress(&cinfo);
+		if (mem_buffer) free(mem_buffer);
+		if (infile) fclose(infile);
+		throw std::runtime_error(msg);
+	}
+
 	/* open file */
 	if ((infile = fopen(file_path.c_str(), "rb")) == NULL)
-		throw new std::string("[JSTRUCT] Can't open file to read");
+		throw std::runtime_error("[JSTRUCT] Can't open file to read: " + file_path);
 
-	/* set up the normal JPEG error routines, then override error_exit. */
-	cinfo.err = jpeg_std_error(new jpeg_error_mgr());
-
-
-
-	// Get the size of JPEG file
-	fseek(infile, 0, SEEK_END);
-	unsigned long mem_size = ftell(infile);
+	/* Read the whole file into memory. jpeg_mem_src is used instead of
+	   jpeg_stdio_src to avoid some unresolved errors observed in Python. */
+	if (fseek(infile, 0, SEEK_END) != 0) {
+		fclose(infile);
+		throw std::runtime_error("[JSTRUCT] Failed to seek file: " + file_path);
+	}
+	long file_size = ftell(infile);
+	if (file_size <= 0) {
+		fclose(infile);
+		throw std::runtime_error("[JSTRUCT] Empty or unreadable file: " + file_path);
+	}
 	rewind(infile);
 
-	// Allocate memory buffer for the JPEG file.
-	unsigned char* mem_buffer = (unsigned char*) malloc(mem_size + 100);
-	fread(mem_buffer, sizeof(unsigned char), mem_size, infile);
+	unsigned long mem_size = (unsigned long) file_size;
+	mem_buffer = (unsigned char*) malloc(mem_size);
+	if (mem_buffer == NULL) {
+		fclose(infile);
+		throw std::runtime_error("[JSTRUCT] Out of memory reading file: " + file_path);
+	}
+	if (fread(mem_buffer, sizeof(unsigned char), mem_size, infile) != mem_size) {
+		free(mem_buffer);
+		fclose(infile);
+		throw std::runtime_error("[JSTRUCT] Failed to read file: " + file_path);
+	}
 
 	/* initialize JPEG decompression object */
 	jpeg_create_decompress(&cinfo);
+	decompress_created = true;
 
-
-	/* Replace jpeg_stdio_src(cinfo, infile) with jpeg_mem_src
-	   due to some unresolved errors in Python. */
-	// jpeg_stdio_src(&cinfo, infile);
 	jpeg_mem_src(&cinfo, mem_buffer, mem_size);
 
 	/* save contents of markers */
@@ -104,6 +160,8 @@ void jstruct::jpeg_load(std::string file_path)
 			break;
 		case JCS_YCCK:
 			cinfo.out_color_components = 4;
+			break;
+		default:
 			break;
 	}
 
@@ -137,60 +195,53 @@ void jstruct::jpeg_load(std::string file_path)
 	}
 
 	marker_ptr = cinfo.marker_list;
-	while (marker_ptr != NULL) 
+	while (marker_ptr != NULL)
 	{
-		if (marker_ptr->marker == JPEG_COM) 
+		if (marker_ptr->marker == JPEG_COM)
 		{
-			char* tempMarker= new char[marker_ptr->data_length + 1];
+			char* tempMarker = new char[marker_ptr->data_length + 1];
 			tempMarker[marker_ptr->data_length] = '\0';
 			/* copy comment string to char array */
-			for (i = 0; i < (int) marker_ptr->data_length; i++) 
+			for (i = 0; i < (int) marker_ptr->data_length; i++)
 				tempMarker[i] = marker_ptr->data[i];
 			this->markers.push_back(tempMarker);
 		}
 		marker_ptr = marker_ptr->next;
 	}
 
-	for (n = 0; n < NUM_QUANT_TBLS; n++) 
+	for (n = 0; n < NUM_QUANT_TBLS; n++)
 	{
-		mat2D<int> * tempMat = new mat2D<int>(DCTSIZE, DCTSIZE);
-
-		if (cinfo.quant_tbl_ptrs[n] != NULL) 
+		if (cinfo.quant_tbl_ptrs[n] != NULL)
 		{
+			mat2D<int> * tempMat = new mat2D<int>(DCTSIZE, DCTSIZE);
 			quant_ptr = cinfo.quant_tbl_ptrs[n];
-			for (i = 0; i < DCTSIZE; i++) 
-				for (j = 0; j < DCTSIZE; j++) {
+			for (i = 0; i < DCTSIZE; i++)
+				for (j = 0; j < DCTSIZE; j++)
 					tempMat->Write(i, j, quant_ptr->quantval[i*DCTSIZE+j]);
-					// printf("[DEBUG] quant_val: %d\n", quant_ptr->quantval[i*DCTSIZE+j]);
-				}
 			this->quant_tables.push_back(tempMat);
 		}
 	}
 
-	for (n = 0; n < NUM_HUFF_TBLS; n++) 
+	for (n = 0; n < NUM_HUFF_TBLS; n++)
 	{
-		struct_huff_tables * tempStruct = new struct_huff_tables();
 		if (cinfo.ac_huff_tbl_ptrs[n] != NULL) {
+			struct_huff_tables * tempStruct = new struct_huff_tables();
 			huff_ptr = cinfo.ac_huff_tbl_ptrs[n];
-
 			for (i = 1; i <= 16; i++) tempStruct->counts.push_back(huff_ptr->bits[i]);
 			for (i = 0; i < 256; i++) tempStruct->symbols.push_back(huff_ptr->huffval[i]);
 			this->ac_huff_tables.push_back(tempStruct);
 		}
-		// this->ac_huff_tables.push_back(tempStruct);
 	}
 
-	for (n = 0; n < NUM_HUFF_TBLS; n++) 
+	for (n = 0; n < NUM_HUFF_TBLS; n++)
 	{
-		struct_huff_tables * tempStruct = new struct_huff_tables();
 		if (cinfo.dc_huff_tbl_ptrs[n] != NULL) {
+			struct_huff_tables * tempStruct = new struct_huff_tables();
 			huff_ptr = cinfo.dc_huff_tbl_ptrs[n];
-
 			for (i = 1; i <= 16; i++) tempStruct->counts.push_back(huff_ptr->bits[i]);
 			for (i = 0; i < 256; i++) tempStruct->symbols.push_back(huff_ptr->huffval[i]);
 			this->dc_huff_tables.push_back(tempStruct);
 		}
-		// this->dc_huff_tables.push_back(tempStruct);
 	}
 
 	/* creation and population of the DCT coefficient arrays */
@@ -202,10 +253,10 @@ void jstruct::jpeg_load(std::string file_path)
 		mat2D<int> * tempCoeffs = new mat2D<int>(c_height, c_width);
 
 		/* copy coefficients from virtual block arrays */
-		for (blk_y = 0; blk_y < compptr->height_in_blocks; blk_y++) 
+		for (blk_y = 0; blk_y < compptr->height_in_blocks; blk_y++)
 		{
 			buffer = cinfo.mem->access_virt_barray((j_common_ptr) &cinfo, coef_arrays[ci], blk_y, 1, FALSE);
-			for (blk_x = 0; blk_x < compptr->width_in_blocks; blk_x++) 
+			for (blk_x = 0; blk_x < compptr->width_in_blocks; blk_x++)
 			{
 				bufptr = buffer[0][blk_x];
 				for (i = 0; i < DCTSIZE; i++)        /* for each row in block */
@@ -216,17 +267,13 @@ void jstruct::jpeg_load(std::string file_path)
 		this->coef_arrays.push_back(tempCoeffs);
 	}
 
-
-	// Dealloc memory buffer
-	free(mem_buffer);
-
 	/* done with cinfo */
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 
-	/* close input file */
+	/* release resources */
+	free(mem_buffer);
 	fclose(infile);
-
 }
 
 	/*
@@ -348,22 +395,32 @@ void jstruct::jpeg_load(std::string file_path)
 void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 {
 	struct jpeg_compress_struct cinfo;
-	int c_height,c_width,ci,i,j,n,t;
-	FILE *outfile;
+	jpegio_error_mgr jerr;
+	FILE *outfile = NULL;
+	bool compress_created = false;
+	int ci, i, j, n, t;
 	jvirt_barray_ptr *coef_arrays = NULL;
-	JDIMENSION blk_x,blk_y;
+	JDIMENSION blk_x, blk_y;
 	JBLOCKARRAY buffer;
-	JCOEFPTR bufptr;  
+	JCOEFPTR bufptr;
+
+	/* Arm the error handler before any libjpeg call. */
+	cinfo.err = jpeg_std_error(&jerr.pub);
+	jerr.pub.error_exit = jpegio_error_exit;
+	if (setjmp(jerr.setjmp_buffer)) {
+		std::string msg = std::string("[JSTRUCT] ") + jerr.message;
+		if (compress_created) jpeg_destroy_compress(&cinfo);
+		if (outfile) fclose(outfile);
+		throw std::runtime_error(msg);
+	}
 
 	/* open file */
 	if ((outfile = fopen(file_path.c_str(), "wb")) == NULL)
-		throw new std::string("[JSTRUCT] Can't open file to write");
+		throw std::runtime_error("[JSTRUCT] Can't open file to write: " + file_path);
 
-	/* set up the normal JPEG error routines, then override error_exit. */
-	cinfo.err = jpeg_std_error(new jpeg_error_mgr());
-
-	/* initialize JPEG decompression object */
+	/* initialize JPEG compression object */
 	jpeg_create_compress(&cinfo);
+	compress_created = true;
 
 	/* write the output file */
 	jpeg_stdio_dest(&cinfo, outfile);
@@ -394,7 +451,7 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 
 
 	/* basic support for writing progressive mode JPEG */
-	if (this->progressive_mode) 
+	if (this->progressive_mode)
 		jpeg_simple_progression(&cinfo);
 
 	/* copy component information into cinfo from jpeg_obj*/
@@ -433,11 +490,6 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 	/* populate the array with the DCT coefficients */
 	for (ci = 0; ci < cinfo.num_components; ci++)
 	{
-		/* Get a pointer to the mx coefficient array */
-
-		c_height = this->coef_arrays[ci]->rows;
-		c_width = this->coef_arrays[ci]->cols;
-
 		/* Copy coefficients to virtual block arrays */
 		for (blk_y = 0; blk_y < cinfo.comp_info[ci].height_in_blocks; blk_y++)
 		{
@@ -460,13 +512,15 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 			cinfo.quant_tbl_ptrs[n] = jpeg_alloc_quant_table((j_common_ptr) &cinfo);
 
 		/* Fill the table */
-		for (i = 0; i < DCTSIZE; i++) 
-			for (j = 0; j < DCTSIZE; j++) 
+		for (i = 0; i < DCTSIZE; i++)
+			for (j = 0; j < DCTSIZE; j++)
 			{
 				t = this->quant_tables[n]->Read(i, j);
-				if (t<1 || t>65535)
-					throw new std::string("[JSTRUCT] Quantization table entries not in range 1..65535");
-
+				if (t < 1 || t > 65535) {
+					jpeg_destroy_compress(&cinfo);
+					fclose(outfile);
+					throw std::runtime_error("[JSTRUCT] Quantization table entries not in range 1..65535");
+				}
 				cinfo.quant_tbl_ptrs[n]->quantval[i*DCTSIZE+j] = (UINT16) t;
 			}
 	}
@@ -519,7 +573,7 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 		JOCTET * tempMarker = (JOCTET *)this->markers[i];
 		int strlen;
 		for (strlen=0; tempMarker[strlen]!='\0'; strlen++);
-		jpeg_write_marker(&cinfo, JPEG_COM, tempMarker, strlen);   
+		jpeg_write_marker(&cinfo, JPEG_COM, tempMarker, strlen);
 	}
 
 	/* done with cinfo */
@@ -532,47 +586,74 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 
 void jstruct::spatial_load(std::string file_path)
 {
-	/* open file */
-	FILE * infile;
-	if ((infile = fopen(file_path.c_str(), "rb")) == NULL)
-		throw new std::string("[JSTRUCT] Can't open file to read");
-
 	struct jpeg_decompress_struct cinfo;
-	cinfo.err = jpeg_std_error(new jpeg_error_mgr());
-	jpeg_create_decompress(&cinfo);
+	jpegio_error_mgr jerr;
+	FILE *infile = NULL;
+	unsigned char *mem_buffer = NULL;
+	bool decompress_created = false;
 
-	// Prepare buffer
-	fseek(infile, 0, SEEK_END);
-	unsigned long mem_size = ftell(infile);
+	/* Arm the error handler before any libjpeg call. */
+	cinfo.err = jpeg_std_error(&jerr.pub);
+	jerr.pub.error_exit = jpegio_error_exit;
+	if (setjmp(jerr.setjmp_buffer)) {
+		std::string msg = std::string("[JSTRUCT] ") + jerr.message;
+		if (decompress_created) jpeg_destroy_decompress(&cinfo);
+		if (mem_buffer) free(mem_buffer);
+		if (infile) fclose(infile);
+		throw std::runtime_error(msg);
+	}
+
+	/* open file */
+	if ((infile = fopen(file_path.c_str(), "rb")) == NULL)
+		throw std::runtime_error("[JSTRUCT] Can't open file to read: " + file_path);
+
+	/* Read the whole file into memory. */
+	if (fseek(infile, 0, SEEK_END) != 0) {
+		fclose(infile);
+		throw std::runtime_error("[JSTRUCT] Failed to seek file: " + file_path);
+	}
+	long file_size = ftell(infile);
+	if (file_size <= 0) {
+		fclose(infile);
+		throw std::runtime_error("[JSTRUCT] Empty or unreadable file: " + file_path);
+	}
 	rewind(infile);
-	unsigned char* mem_buffer = (unsigned char*) malloc(mem_size + 100);
-	fread(mem_buffer, sizeof(unsigned char), mem_size, infile);
+
+	unsigned long mem_size = (unsigned long) file_size;
+	mem_buffer = (unsigned char*) malloc(mem_size);
+	if (mem_buffer == NULL) {
+		fclose(infile);
+		throw std::runtime_error("[JSTRUCT] Out of memory reading file: " + file_path);
+	}
+	if (fread(mem_buffer, sizeof(unsigned char), mem_size, infile) != mem_size) {
+		free(mem_buffer);
+		fclose(infile);
+		throw std::runtime_error("[JSTRUCT] Failed to read file: " + file_path);
+	}
 
 	jpeg_create_decompress(&cinfo);
+	decompress_created = true;
 	jpeg_mem_src(&cinfo, mem_buffer, mem_size);
 
-	// jpeg_stdio_src(&cinfo, infile);
-
 	jpeg_read_header(&cinfo, TRUE);
-	//jpeg_start_decompress(&cinfo);
-
 	(void) jpeg_start_decompress(&cinfo);
 
-	bool grayscale = (cinfo.out_color_space == JCS_GRAYSCALE);
-	int colors = 3;	if (grayscale) colors = 1;
-	for (int i=0; i < (int)colors; i++)
+	/* Use output_components (1 for grayscale, 3 for RGB/YCbCr, 4 for CMYK/YCCK)
+	   so the channel count and row stride always agree. */
+	int colors = cinfo.output_components;
+	for (int i = 0; i < colors; i++)
 		this->spatial_arrays.push_back(new mat2D<int>(cinfo.output_height, cinfo.output_width));
 
-	int row_stride = cinfo.output_width * cinfo.output_components ;
+	int row_stride = cinfo.output_width * cinfo.output_components;
 	JSAMPARRAY pJpegBuffer = (*cinfo.mem->alloc_sarray)((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
-	for (int row=0; row < (int)cinfo.output_height; row++) 
+	for (int row = 0; row < (int)cinfo.output_height; row++)
 	{
 		jpeg_read_scanlines(&cinfo, pJpegBuffer, 1);
-		for (int col=0; col < (int)cinfo.output_width; col++)
+		for (int col = 0; col < (int)cinfo.output_width; col++)
 		{
 			for (int clr = 0; clr < colors; clr++)
 			{
-				unsigned int val = (unsigned int)pJpegBuffer[0][colors * col + clr]; 
+				unsigned int val = (unsigned int)pJpegBuffer[0][colors * col + clr];
 				spatial_arrays[clr]->Write(row, col, (int)val);
 			}
 		}

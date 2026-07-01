@@ -8,7 +8,10 @@ __pycache__/
 .idea/
 .eggs/
 jpegio.egg-info/
+*.egg-info/
 build/
+dist/
+wheelhouse/
 jpegio/componentinfo.c
 jpegio/componentinfo.cpp
 jpegio/decompressedjpeg.c

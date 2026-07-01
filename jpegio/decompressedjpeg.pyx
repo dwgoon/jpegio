@@ -27,31 +27,36 @@ cdef class DecompressedJpeg:
     
     cdef _is_valid_fpath(self, fpath):
         if not os.path.isfile(fpath):
-            print("[JPEGIO] Wrong file path: %s" % (fpath))
-            return False
-        elif os.path.getsize(fpath) == 0:
-            print("[JPEGIO] Empty file: %s" % (fpath))
-            return False
-
+            raise FileNotFoundError("[JPEGIO] No such file: %s" % (fpath,))
+        if os.path.getsize(fpath) == 0:
+            raise ValueError("[JPEGIO] Empty file: %s" % (fpath,))
         return True
 
-    cpdef read(self, fpath):
-        if not self._is_valid_fpath(fpath):
-            return
+    cpdef read(self, fpath, bint read_spatial=False):
+        fpath = os.fspath(fpath)
+        self._is_valid_fpath(fpath)
 
         if self._jstruct_obj != NULL:
             del self._jstruct_obj
+            self._jstruct_obj = NULL
 
         self._jstruct_obj = new jstruct()
         self._jstruct_obj.jpeg_load(fpath.encode())
-        self._jstruct_obj.spatial_load(fpath.encode())
-        self._jstruct_obj.load_spatial = True
 
         self._read_comp_info()
         self._read_markers()
         self._read_quant_tables()
         self._read_huffman_tables()
         self._read_dct_coefficients()
+
+        # Spatial (pixel-domain) decoding is optional: it fully decompresses
+        # the image, which is wasted work when only the DCT-domain data is
+        # needed. It is loaded and exposed via ``spatial_arrays`` on request.
+        self.spatial_arrays = list()
+        if read_spatial:
+            self._jstruct_obj.spatial_load(fpath.encode())
+            self._jstruct_obj.load_spatial = True
+            self._read_spatial_arrays()
 
 
     cdef _read_comp_info(self):
@@ -184,6 +189,24 @@ cdef class DecompressedJpeg:
             cy_arr.data = <char *> ptr_mat2D_obj.GetBuffer()
             self.coef_arrays.append(np.asarray(cy_arr))
 
+    cdef _read_spatial_arrays(self):
+        """Connect the buffer of spatial (pixel-domain) arrays to numpy.ndarray.
+        """
+        self.spatial_arrays = list()
+        cdef ptr_mat2D ptr_mat2D_obj
+        cdef view.array cy_arr
+        cdef Py_ssize_t i
+        for i in range(self._jstruct_obj.spatial_arrays.size()):
+            ptr_mat2D_obj = self._jstruct_obj.spatial_arrays[i]
+            shape = (ptr_mat2D_obj.rows, ptr_mat2D_obj.cols)
+            cy_arr = view.array(shape=shape,
+                                itemsize=sizeof(int),
+                                format="i",
+                                mode="c",
+                                allocate_buffer=False)
+            cy_arr.data = <char *> ptr_mat2D_obj.GetBuffer()
+            self.spatial_arrays.append(np.asarray(cy_arr))
+
 
     cpdef write(self, fpath):
         self._write_markers()
@@ -219,26 +242,15 @@ cdef class DecompressedJpeg:
                 int(self.coef_arrays[c].shape[1] / DCTSIZE))
 
     cpdef are_channel_sizes_same(self):
-        cdef ComponentInfo ci
-        cdef set set_nrows = set()
-        cdef set set_ncols = set()
-
-        for ci in self.comp_info:
-            if len(set_nrows) == 1 and ci.downsampled_height not in set_nrows:
-                return False
-            set_nrows.add(ci.downsampled_height)
-
-            if len(set_ncols) == 1 and ci.downsampled_width not in set_ncols:
-                return False
-            set_ncols.add(ci.downsampled_width)
-
-        return True
+        heights = {ci.downsampled_height for ci in self.comp_info}
+        widths = {ci.downsampled_width for ci in self.comp_info}
+        return len(heights) <= 1 and len(widths) <= 1
 
     cpdef count_nnz_ac(self):
         num_nnz_ac = 0
         for i in range(self.num_components):
             coef = self.coef_arrays[i]
-            num_nnz_ac += (cnt_nnz(coef) - cnt_nnz(coef[0::8, 0::8]))
+            num_nnz_ac += (cnt_nnz(coef) - cnt_nnz(coef[0::DCTSIZE, 0::DCTSIZE]))
         return num_nnz_ac
 
     @property
