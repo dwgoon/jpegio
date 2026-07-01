@@ -12,12 +12,12 @@ jpegio.egg-info/
 build/
 dist/
 wheelhouse/
-jpegio/componentinfo.c
-jpegio/componentinfo.cpp
-jpegio/decompressedjpeg.c
-jpegio/decompressedjpeg.cpp
-jpegio/zigzagdctjpeg.c
-jpegio/*.so
+# Cython-generated sources (emitted next to the .pyx) and built extensions.
+src/jpegio/componentinfo.c
+src/jpegio/componentinfo.cpp
+src/jpegio/decompressedjpeg.c
+src/jpegio/decompressedjpeg.cpp
+src/jpegio/*.so
 examples/.ipynb_checkpoints/
 
 env/

@@ -1,3 +1,3 @@
-Cython
-numpy
-# brew install jpeg
+# Runtime dependency. Build dependencies are declared in pyproject.toml, and
+# libjpeg-turbo is bundled and built from source (no external libjpeg needed).
+numpy>=1.23

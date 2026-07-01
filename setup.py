@@ -1,10 +1,13 @@
 # setup.py
 #
 # jpegio builds the vendored libjpeg-turbo (as a static library) from source
-# with CMake, then compiles the Cython extensions against it. This keeps the
+# with CMake, then compiles the binding extension against it. This keeps the
 # package free of platform-specific prebuilt binaries and lets it build on any
 # platform / Python version that has a C/C++ compiler (plus CMake, which is
 # declared as a build dependency in pyproject.toml).
+#
+# Only the extension build is expressed here; all metadata lives in
+# pyproject.toml.
 
 import os
 import sys
@@ -13,7 +16,7 @@ import shutil
 import subprocess
 from os.path import join as pjoin
 
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 
 import numpy
@@ -22,13 +25,15 @@ import numpy
 # and needs no Cython; "cython" builds the .pyx sources instead.
 BACKEND = os.environ.get("JPEGIO_BACKEND", "capi").lower()
 
-
 DIR_ROOT = os.path.dirname(os.path.abspath(__file__))
-DIR_JPEGIO = pjoin(DIR_ROOT, "jpegio")
+DIR_SRC = pjoin(DIR_ROOT, "src")
+DIR_JPEGIO = pjoin(DIR_SRC, "jpegio")
+DIR_BACKEND = pjoin(DIR_JPEGIO, "_backend")
 
 # Vendored libjpeg-turbo source tree. Overridable for development so the build
 # can be pointed at an external checkout without re-vendoring.
-TURBO_SRC = os.environ.get("JPEGIO_TURBO_SRC", pjoin(DIR_JPEGIO, "libjpeg-turbo"))
+TURBO_SRC = os.environ.get(
+    "JPEGIO_TURBO_SRC", pjoin(DIR_ROOT, "third_party", "libjpeg-turbo"))
 
 
 def _find_static_lib(build_dir):
@@ -45,15 +50,15 @@ def _find_static_lib(build_dir):
 
 
 class build_ext(_build_ext):
-    """Build vendored libjpeg-turbo with CMake, then the Cython extensions."""
+    """Build vendored libjpeg-turbo with CMake, then the binding extension."""
 
     def run(self):
         turbo_build = pjoin(os.path.abspath(self.build_temp), "libjpeg-turbo")
         turbo_lib, gen_include = self._build_libjpeg_turbo(turbo_build)
 
-        # Every extension pulls in <jpeglib.h> (via the clibjpeg cimport), so
-        # all of them need the turbo headers; only decompressedjpeg calls into
-        # libjpeg, so only it needs to link the static library.
+        # Every extension pulls in <jpeglib.h>, so all of them need the turbo
+        # headers; only decompressedjpeg calls into libjpeg, so only it needs
+        # to link the static library.
         turbo_includes = [pjoin(TURBO_SRC, "src"), gen_include]
         for ext in self.extensions:
             ext.include_dirs = turbo_includes + list(ext.include_dirs)
@@ -98,6 +103,7 @@ class build_ext(_build_ext):
                 config.append("-DCMAKE_OSX_ARCHITECTURES=" + ";".join(arches))
             target = os.environ.get("MACOSX_DEPLOYMENT_TARGET", "10.13")
             config.append("-DCMAKE_OSX_DEPLOYMENT_TARGET=" + target)
+
         # Use Ninja when it is available. On Windows, Ninja needs the MSVC
         # compiler on PATH; if it isn't (e.g. a plain `pip install`), fall back
         # to the default generator, which locates Visual Studio on its own.
@@ -116,8 +122,8 @@ class build_ext(_build_ext):
 
 include_dirs = [
     numpy.get_include(),
-    DIR_ROOT,
-    DIR_JPEGIO,
+    DIR_JPEGIO,    # componentinfo.pxd / jstruct.pxd targets
+    DIR_BACKEND,   # jstruct.h, mat2D.h
 ]
 
 compile_args = []
@@ -132,6 +138,7 @@ elif sys.platform == "darwin":
 else:  # linux and other unix
     compile_args += ["-w", "-fPIC", "-std=c++11"]
 
+
 def make_extension(name, sources):
     return Extension(
         name,
@@ -143,29 +150,33 @@ def make_extension(name, sources):
     )
 
 
+BACKEND_SRC = "src/jpegio/_backend/jstruct.cpp"
+
 if BACKEND == "cython":
     from Cython.Build import cythonize
     ext_modules = cythonize(
         [
-            make_extension("jpegio.componentinfo", ["jpegio/componentinfo.pyx"]),
+            make_extension("jpegio.componentinfo",
+                           ["src/jpegio/componentinfo.pyx"]),
             make_extension("jpegio.decompressedjpeg",
-                           ["jpegio/decompressedjpeg.pyx", "jpegio/jstruct.cpp"]),
+                           ["src/jpegio/decompressedjpeg.pyx", BACKEND_SRC]),
         ],
-        include_path=include_dirs,
+        include_path=[DIR_SRC, DIR_JPEGIO],
         language_level="3",
     )
 elif BACKEND == "capi":
     # Hand-written CPython C-API extension -- no Cython required.
     ext_modules = [
-        make_extension("jpegio.componentinfo", ["jpegio/capi/componentinfo.cpp"]),
+        make_extension("jpegio.componentinfo",
+                       ["src/jpegio/_capi/componentinfo.cpp"]),
         make_extension("jpegio.decompressedjpeg",
-                       ["jpegio/capi/decompressedjpeg.cpp", "jpegio/jstruct.cpp"]),
+                       ["src/jpegio/_capi/decompressedjpeg.cpp", BACKEND_SRC]),
     ]
 else:
-    raise RuntimeError("Unknown JPEGIO_BACKEND %r (use 'capi' or 'cython')" % BACKEND)
+    raise RuntimeError(
+        "Unknown JPEGIO_BACKEND %r (use 'capi' or 'cython')" % BACKEND)
 
 setup(
-    packages=find_packages(exclude=["tests", "tests.*"]),
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
     zip_safe=False,

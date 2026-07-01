@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jpegio"
-version = "0.3.0.dev0"
+version = "0.3.0"
 description = "A python package for accessing the internal variables of the JPEG file format."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -48,19 +48,17 @@ Repository = "https://github.com/dwgoon/jpegio"
 Issues = "https://github.com/dwgoon/jpegio/issues"
 
 [tool.setuptools]
+package-dir = { "" = "src" }
 packages = ["jpegio"]
+# The wheel statically links libjpeg-turbo, so its license text is bundled into
+# the wheel metadata (.dist-info/licenses/). The turbo *source* ships only in
+# the sdist, via MANIFEST.in.
 license-files = [
     "LICENSE",
     "THIRD_PARTY_NOTICES.md",
-    "jpegio/libjpeg-turbo/LICENSE.md",
-    "jpegio/libjpeg-turbo/README.ijg",
+    "third_party/libjpeg-turbo/LICENSE.md",
+    "third_party/libjpeg-turbo/README.ijg",
 ]
-
-# Ship the libjpeg-turbo license/attribution alongside the installed package
-# (the wheel statically links libjpeg-turbo). The turbo *source* is shipped in
-# the sdist via MANIFEST.in, not in the wheel.
-[tool.setuptools.package-data]
-jpegio = ["libjpeg-turbo/LICENSE.md", "libjpeg-turbo/README.ijg"]
 
 [tool.cibuildwheel]
 # Build CPython wheels for 3.9–3.13; skip 32-bit and musl for now.

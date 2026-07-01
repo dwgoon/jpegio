@@ -1,3 +1,29 @@
+# Release 0.3.0
+
+## Major Features and Improvements
+* **libjpeg-turbo 3.2.0** is now bundled and built from source with CMake on all
+  platforms (Windows/macOS/Linux); the old per-platform prebuilt libjpeg /
+  libjpeg-turbo binaries are removed. SIMD is enabled automatically when NASM is
+  available.
+* Reading a **corrupt or truncated JPEG now raises a Python exception** instead
+  of terminating the interpreter (the previous behaviour called `exit()`).
+  Several memory and correctness bugs in the C++ backend were fixed.
+* A **hand-written CPython C-API binding** was added as an alternative to the
+  Cython binding, selectable with the `JPEGIO_BACKEND` environment variable
+  (`capi` default, `cython` optional). Cython is no longer required to build.
+* Spatial (pixel-domain) decoding is now **opt-in** via `read_spatial=True` and
+  exposed through `spatial_arrays`.
+* **Python 3.9–3.13** are supported; cross-platform wheels are built in CI with
+  [cibuildwheel](https://cibuildwheel.pypa.io/).
+* The project moved to a `src/` layout, and the vendored library to
+  `third_party/`.
+
+## Breaking Changes
+* `jpegio.read()` now raises `FileNotFoundError` / `ValueError` on a missing or
+  empty path, instead of printing a message and returning a broken object.
+* The pixel-domain image is no longer decoded by default; pass
+  `read_spatial=True` to populate `spatial_arrays`.
+
 # Release 0.2.2
 
 ## Major Features and Improvements

@@ -1,1 +1,3 @@
+# Extra packages for running the test suite.
+pytest
 scipy

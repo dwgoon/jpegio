@@ -4,7 +4,7 @@
 
 It bundles and statically links **libjpeg-turbo**, which is redistributed here
 under its own permissive licenses. The libjpeg-turbo source is included,
-unmodified, under [`jpegio/libjpeg-turbo/`](jpegio/libjpeg-turbo/).
+unmodified, under [`third_party/libjpeg-turbo/`](third_party/libjpeg-turbo/).
 
 ## libjpeg-turbo
 
@@ -14,8 +14,8 @@ unmodified, under [`jpegio/libjpeg-turbo/`](jpegio/libjpeg-turbo/).
 - Licenses: the IJG (Independent JPEG Group) License and the Modified (3-clause)
   BSD License; the SIMD code is additionally covered by the zlib License.
   Full terms:
-  - [`jpegio/libjpeg-turbo/LICENSE.md`](jpegio/libjpeg-turbo/LICENSE.md)
-  - [`jpegio/libjpeg-turbo/README.ijg`](jpegio/libjpeg-turbo/README.ijg)
+  - [`third_party/libjpeg-turbo/LICENSE.md`](third_party/libjpeg-turbo/LICENSE.md)
+  - [`third_party/libjpeg-turbo/README.ijg`](third_party/libjpeg-turbo/README.ijg)
 
 As required by the IJG License, and because `jpegio`'s binary wheels statically
 link libjpeg-turbo:

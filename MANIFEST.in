@@ -1,8 +1,8 @@
 # Source files needed to build from an sdist.
-recursive-include jpegio *.pyx *.pxd *.py *.h *.cpp
+recursive-include src/jpegio *.pyx *.pxd *.py *.h *.cpp
 
 # Vendored libjpeg-turbo source (compiled from source at build time).
-graft jpegio/libjpeg-turbo
+graft third_party/libjpeg-turbo
 
 # Metadata, licenses and attribution (required for redistribution).
 include LICENSE
