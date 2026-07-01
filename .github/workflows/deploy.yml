@@ -5,13 +5,17 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - main
       - "0.3.0dev0"
     tags:
       - "v*"
   release:
     types:
       - published
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # Fast cross-platform build + test (one Python per OS) for quick feedback.
