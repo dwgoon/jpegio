@@ -73,6 +73,9 @@ test-command = "pytest {project}/tests/test_coefficients.py {project}/tests/test
 before-all = "yum install -y nasm || apt-get update && apt-get install -y nasm || true"
 
 [tool.cibuildwheel.macos]
+# Build Intel and Apple-Silicon wheels on the macos-14 runner (x86_64 is
+# cross-compiled; cibuildwheel skips running its tests on the other arch).
+archs = ["x86_64", "arm64"]
 before-all = "brew install nasm || true"
 
 # On Windows the extension statically links libjpeg-turbo, so there are no
