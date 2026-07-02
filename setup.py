@@ -101,8 +101,11 @@ class build_ext(_build_ext):
                       if t == "-arch" and i + 1 < len(toks)]
             if arches:
                 config.append("-DCMAKE_OSX_ARCHITECTURES=" + ";".join(arches))
-            target = os.environ.get("MACOSX_DEPLOYMENT_TARGET", "10.13")
-            config.append("-DCMAKE_OSX_DEPLOYMENT_TARGET=" + target)
+            # Match the extension's deployment target (driven by the env) so the
+            # static lib and the .so agree on the minimum macOS version.
+            target = os.environ.get("MACOSX_DEPLOYMENT_TARGET")
+            if target:
+                config.append("-DCMAKE_OSX_DEPLOYMENT_TARGET=" + target)
 
         # Use Ninja when it is available. On Windows, Ninja needs the MSVC
         # compiler on PATH; if it isn't (e.g. a plain `pip install`), fall back
@@ -133,8 +136,11 @@ if sys.platform == "win32":
     # the dynamic CRT, so drop the static one to avoid the LNK4098 conflict.
     link_args += ["/NODEFAULTLIB:LIBCMT"]
 elif sys.platform == "darwin":
-    compile_args += ["-w", "-fPIC", "-std=c++11", "-mmacosx-version-min=10.13"]
-    link_args += ["-stdlib=libc++", "-mmacosx-version-min=10.13"]
+    # Let MACOSX_DEPLOYMENT_TARGET (set by the environment / cibuildwheel) drive
+    # the deployment target so the .so matches the wheel's platform tag and
+    # passes delocate. Do not hardcode -mmacosx-version-min here.
+    compile_args += ["-w", "-fPIC", "-std=c++11"]
+    link_args += ["-stdlib=libc++"]
 else:  # linux and other unix
     compile_args += ["-w", "-fPIC", "-std=c++11"]
 
