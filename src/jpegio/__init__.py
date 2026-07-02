@@ -7,6 +7,14 @@ from .io import read, write
 from .componentinfo import ComponentInfo
 from .decompressedjpeg import DecompressedJpeg
 
+from . import tools
+from .tools import (
+    zigzag_order, to_zigzag, from_zigzag, blocks_view, coefficients_zigzag,
+    dct_histogram, nnz_ac_per_component, embedding_capacity,
+    get_coefficient, set_coefficient,
+    com_markers, app_markers, MARKER_COM, MARKER_APP0,
+)
+
 try:
     from importlib.metadata import version, PackageNotFoundError
     try:
@@ -24,5 +32,10 @@ __all__ = [
     "write",
     "ComponentInfo",
     "DecompressedJpeg",
+    "tools",
+    "zigzag_order", "to_zigzag", "from_zigzag", "blocks_view",
+    "coefficients_zigzag", "dct_histogram", "nnz_ac_per_component",
+    "embedding_capacity", "get_coefficient", "set_coefficient",
+    "com_markers", "app_markers", "MARKER_COM", "MARKER_APP0",
     "__version__",
 ]

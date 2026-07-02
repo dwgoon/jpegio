@@ -18,6 +18,19 @@
 * The project moved to a `src/` layout, and the vendored library to
   `third_party/`.
 
+## Steganography-oriented features (0.3.0)
+* **All markers are preserved**, not just COM. `markers` is now a list of
+  `{"type": int, "data": bytes}` (APP0..APP15 and COM), so EXIF/JFIF/ICC/Adobe
+  metadata round-trips and markers can be read/written for embedding.
+* More JPEG properties are exposed, and the encoding-relevant ones are
+  **read/write**: `restart_interval`, `arith_code`, `optimize_coding`,
+  `progressive_mode`, color-space and dimension fields, plus read-only
+  `data_precision`, JFIF density and Adobe transform. `comp_info` edits (table
+  assignments, sampling factors) are honoured on write.
+* A `jpegio.tools` module adds zigzag ordering (`to_zigzag`/`coefficients_zigzag`),
+  DCT coefficient histograms (`dct_histogram`), per-component nnz / embedding
+  capacity, absolute coefficient get/set, and marker filters.
+
 ## Breaking Changes
 * `jpegio.read()` now raises `FileNotFoundError` / `ValueError` on a missing or
   empty path, instead of printing a message and returning a broken object.

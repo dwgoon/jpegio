@@ -12,6 +12,7 @@ from jpegio.jstruct cimport jstruct
 from jpegio.jstruct cimport ptr_mat2D
 from jpegio.jstruct cimport ptr_struct_ci
 from jpegio.jstruct cimport ptr_struct_ht
+from jpegio.jstruct cimport struct_marker
 from jpegio.componentinfo cimport ComponentInfo
 
 from libc.stdio cimport printf
@@ -125,8 +126,9 @@ cdef class DecompressedJpeg:
         cdef bytes py_bytes
         for i in range(n_markers):
             # std::string -> bytes preserves the length (binary-safe)
-            py_bytes = self._jstruct_obj.markers[i]
-            self.markers.append(py_bytes)
+            py_bytes = self._jstruct_obj.markers[i].data
+            self.markers.append({"type": self._jstruct_obj.markers[i].marker,
+                                 "data": py_bytes})
 
     cdef _read_quant_tables(self):
         """Connect the buffer of quantization tables to numpy.ndarray.
@@ -183,19 +185,46 @@ cdef class DecompressedJpeg:
 
 
     cpdef write(self, fpath):
+        self._write_comp_info()
         self._write_markers()
         self._jstruct_obj.jpeg_write(fpath.encode(), self.optimize_coding)
 
+    cdef _write_comp_info(self):
+        # Sync (possibly modified) comp_info back so table-slot / sampling edits
+        # are honoured on write.
+        cdef Py_ssize_t nci = len(self.comp_info)
+        cdef Py_ssize_t ncb = self._jstruct_obj.comp_info.size()
+        cdef Py_ssize_t n = nci if nci < ncb else ncb
+        cdef Py_ssize_t i
+        cdef ptr_struct_ci ci
+        for i in range(n):
+            ci = self._jstruct_obj.comp_info[i]
+            comp = self.comp_info[i]
+            ci.component_id = comp.component_id
+            ci.h_samp_factor = comp.h_samp_factor
+            ci.v_samp_factor = comp.v_samp_factor
+            ci.quant_tbl_no = comp.quant_tbl_no
+            ci.ac_tbl_no = comp.ac_tbl_no
+            ci.dc_tbl_no = comp.dc_tbl_no
+
     cdef _write_markers(self):
+        # Each item is a dict {"type": int, "data": bytes}; a bare bytes object
+        # is accepted as a COM marker for convenience.
         cdef Py_ssize_t n_markers = len(self.markers)
         cdef Py_ssize_t i
         cdef bytes py_bytes
-        if n_markers > 0:
-            self._jstruct_obj.markers.clear()
-            for i in range(n_markers):
-                # bytes -> std::string preserves the length (binary-safe)
-                py_bytes = bytes(self.markers[i])
-                self._jstruct_obj.markers.push_back(<string> py_bytes)
+        cdef struct_marker sm
+        self._jstruct_obj.markers.clear()
+        for i in range(n_markers):
+            item = self.markers[i]
+            if isinstance(item, dict):
+                sm.marker = item.get("type", 0xFE)
+                py_bytes = bytes(item["data"])
+            else:
+                sm.marker = 0xFE
+                py_bytes = bytes(item)
+            sm.data = <string> py_bytes
+            self._jstruct_obj.markers.push_back(sm)
 
     cpdef get_coef_block(self, c, i, j):
         if not self.coef_arrays:
@@ -224,34 +253,118 @@ cdef class DecompressedJpeg:
             num_nnz_ac += (cnt_nnz(coef) - cnt_nnz(coef[0::DCTSIZE, 0::DCTSIZE]))
         return num_nnz_ac
 
+    # -- read/write (encoding / steganography-relevant) --------------------
     @property
     def image_width(self):
         return self._jstruct_obj.image_width
+    @image_width.setter
+    def image_width(self, value):
+        self._jstruct_obj.image_width = value
 
     @property
     def image_height(self):
         return self._jstruct_obj.image_height
+    @image_height.setter
+    def image_height(self, value):
+        self._jstruct_obj.image_height = value
 
     @property
     def image_components(self):
         return self._jstruct_obj.image_components
+    @image_components.setter
+    def image_components(self, value):
+        self._jstruct_obj.image_components = value
 
     @property
     def image_color_space(self):
         return self._jstruct_obj.image_color_space
+    @image_color_space.setter
+    def image_color_space(self, value):
+        self._jstruct_obj.image_color_space = value
 
     @property
     def num_components(self):
         return self._jstruct_obj.num_components
+    @num_components.setter
+    def num_components(self, value):
+        self._jstruct_obj.num_components = value
 
     @property
     def jpeg_color_space(self):
         return self._jstruct_obj.jpeg_color_space
+    @jpeg_color_space.setter
+    def jpeg_color_space(self, value):
+        self._jstruct_obj.jpeg_color_space = value
 
     @property
     def optimize_coding(self):
         return self._jstruct_obj.optimize_coding
+    @optimize_coding.setter
+    def optimize_coding(self, value):
+        self._jstruct_obj.optimize_coding = value
 
     @property
     def progressive_mode(self):
         return self._jstruct_obj.progressive_mode
+    @progressive_mode.setter
+    def progressive_mode(self, value):
+        self._jstruct_obj.progressive_mode = value
+
+    @property
+    def restart_interval(self):
+        return self._jstruct_obj.restart_interval
+    @restart_interval.setter
+    def restart_interval(self, value):
+        self._jstruct_obj.restart_interval = value
+
+    @property
+    def arith_code(self):
+        return self._jstruct_obj.arith_code
+    @arith_code.setter
+    def arith_code(self, value):
+        self._jstruct_obj.arith_code = value
+
+    # -- read-only (structural / marker-derived) ---------------------------
+    @property
+    def data_precision(self):
+        return self._jstruct_obj.data_precision
+
+    @property
+    def max_h_samp_factor(self):
+        return self._jstruct_obj.max_h_samp_factor
+
+    @property
+    def max_v_samp_factor(self):
+        return self._jstruct_obj.max_v_samp_factor
+
+    @property
+    def saw_jfif_marker(self):
+        return bool(self._jstruct_obj.saw_jfif_marker)
+
+    @property
+    def jfif_major_version(self):
+        return self._jstruct_obj.jfif_major_version
+
+    @property
+    def jfif_minor_version(self):
+        return self._jstruct_obj.jfif_minor_version
+
+    @property
+    def density_unit(self):
+        return self._jstruct_obj.density_unit
+
+    @property
+    def x_density(self):
+        return self._jstruct_obj.x_density
+
+    @property
+    def y_density(self):
+        return self._jstruct_obj.y_density
+
+    @property
+    def saw_adobe_marker(self):
+        return bool(self._jstruct_obj.saw_adobe_marker)
+
+    @property
+    def adobe_transform(self):
+        return self._jstruct_obj.adobe_transform

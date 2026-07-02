@@ -113,6 +113,35 @@ You can also utilize other variables (one of the simplest ways to find them is
 to use `dir(jpeg)`). The names of the member variables follow the convention of
 libjpeg.
 
+## Steganography helpers
+
+jpegio exposes the JPEG internals that matter for JPEG steganography and
+steganalysis, with read/write access to the embedding-relevant attributes.
+
+- **All markers** are preserved (not just COM). `jpeg.markers` is a list of
+  `{"type": int, "data": bytes}` for APP0..APP15 and COM, so EXIF/JFIF/ICC/Adobe
+  round-trip and you can hide/read data in markers.
+- Read/write JPEG properties: `restart_interval`, `arith_code`,
+  `optimize_coding`, `progressive_mode`, color-space and dimension fields; plus
+  read-only `data_precision`, JFIF density, Adobe transform. `comp_info` edits
+  are honoured on write.
+- The `jpegio.tools` module:
+
+```python
+import jpegio as jio
+from jpegio import tools
+
+jpeg = jio.read("image.jpg")
+
+z = tools.coefficients_zigzag(jpeg.coef_arrays[0])   # (H, W, 64) zigzag blocks
+vals, cnts = tools.dct_histogram(jpeg.coef_arrays[0], mode=1)  # per-mode histogram
+capacity = tools.embedding_capacity(jpeg)            # nzAC capacity
+tools.set_coefficient(jpeg, 0, 1, 2, 3, 4, 7)  # component, block row/col, (u, v), value
+
+jpeg.markers.append({"type": jio.MARKER_COM, "data": b"payload"})
+jio.write(jpeg, "stego.jpg")
+```
+
 ## References
 - The core parts of this package, implemented in C/C++, are adopted from the
   source code of [Jessica Fridrich's laboratory](http://dde.binghamton.edu).

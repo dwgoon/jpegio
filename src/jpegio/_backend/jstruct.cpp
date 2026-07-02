@@ -136,8 +136,10 @@ void jstruct::jpeg_load(std::string file_path)
 
 	jpeg_mem_src(&cinfo, mem_buffer, mem_size);
 
-	/* save contents of markers */
+	/* save all markers (COM and APP0..APP15) */
 	jpeg_save_markers(&cinfo, JPEG_COM, 0xFFFF);
+	for (int m = 0; m < 16; m++)
+		jpeg_save_markers(&cinfo, JPEG_APP0 + m, 0xFFFF);
 
 	/* read header and coefficients */
 	jpeg_read_header(&cinfo, TRUE);
@@ -173,6 +175,20 @@ void jstruct::jpeg_load(std::string file_path)
 	this->progressive_mode = cinfo.progressive_mode;
 	this->optimize_coding = 0;
 
+	this->data_precision = cinfo.data_precision;
+	this->restart_interval = cinfo.restart_interval;
+	this->arith_code = cinfo.arith_code;
+	this->max_h_samp_factor = cinfo.max_h_samp_factor;
+	this->max_v_samp_factor = cinfo.max_v_samp_factor;
+	this->saw_jfif_marker = cinfo.saw_JFIF_marker;
+	this->jfif_major_version = cinfo.JFIF_major_version;
+	this->jfif_minor_version = cinfo.JFIF_minor_version;
+	this->density_unit = cinfo.density_unit;
+	this->x_density = cinfo.X_density;
+	this->y_density = cinfo.Y_density;
+	this->saw_adobe_marker = cinfo.saw_Adobe_marker;
+	this->adobe_transform = cinfo.Adobe_transform;
+
 	for (ci = 0; ci < this->num_components; ci++)
 	{
 		struct_comp_info * temp = new struct_comp_info();
@@ -196,13 +212,13 @@ void jstruct::jpeg_load(std::string file_path)
 	marker_ptr = cinfo.marker_list;
 	while (marker_ptr != NULL)
 	{
-		if (marker_ptr->marker == JPEG_COM)
-		{
-			/* store the exact bytes with their length (binary-safe) */
-			this->markers.push_back(std::string(
-				reinterpret_cast<const char*>(marker_ptr->data),
-				marker_ptr->data_length));
-		}
+		/* store every marker (COM and APP0..15) with its type and exact,
+		   length-preserving (binary-safe) payload */
+		struct_marker sm;
+		sm.marker = marker_ptr->marker;
+		sm.data.assign(reinterpret_cast<const char*>(marker_ptr->data),
+		               marker_ptr->data_length);
+		this->markers.push_back(sm);
 		marker_ptr = marker_ptr->next;
 	}
 
@@ -449,6 +465,15 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 	cinfo.num_components = this->num_components;
 	cinfo.jpeg_color_space = (J_COLOR_SPACE)this->jpeg_color_space;
 
+	/* Honour the additional coding properties. */
+	cinfo.restart_interval = this->restart_interval;
+	cinfo.arith_code = this->arith_code ? (boolean) TRUE : (boolean) FALSE;
+
+	/* We re-emit the exact saved markers below (JFIF/Adobe included, if they
+	   were present), so turn off libjpeg's automatic ones to avoid duplicates. */
+	cinfo.write_JFIF_header = (boolean) FALSE;
+	cinfo.write_Adobe_marker = (boolean) FALSE;
+
 
 	/* basic support for writing progressive mode JPEG */
 	if (this->progressive_mode)
@@ -576,12 +601,12 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 		}
 	}
 
-	/* copy markers (length-preserving, binary-safe) */
+	/* re-emit every saved marker with its original type (binary-safe) */
 	for (i = 0; i < (int)this->markers.size(); i++)
 	{
-		jpeg_write_marker(&cinfo, JPEG_COM,
-			reinterpret_cast<const JOCTET*>(this->markers[i].data()),
-			(unsigned int)this->markers[i].size());
+		jpeg_write_marker(&cinfo, this->markers[i].marker,
+			reinterpret_cast<const JOCTET*>(this->markers[i].data.data()),
+			(unsigned int)this->markers[i].data.size());
 	}
 
 	/* done with cinfo */

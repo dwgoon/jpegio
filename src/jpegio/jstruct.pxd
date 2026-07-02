@@ -32,6 +32,10 @@ cdef extern from "jstruct.h" namespace "jpegio":
         JDIMENSION height_in_blocks
         JDIMENSION width_in_blocks
 
+    cdef struct struct_marker:
+        int marker
+        string data
+
 ctypedef struct_huff_tables* ptr_struct_ht
 ctypedef struct_comp_info* ptr_struct_ci
 
@@ -53,8 +57,22 @@ cdef extern from "jstruct.h" namespace "jpegio":
         unsigned char optimize_coding
         unsigned char progressive_mode
 
+        int data_precision
+        unsigned int restart_interval
+        unsigned char arith_code
+        unsigned char saw_jfif_marker
+        unsigned char jfif_major_version
+        unsigned char jfif_minor_version
+        unsigned char density_unit
+        unsigned int x_density
+        unsigned int y_density
+        unsigned char saw_adobe_marker
+        unsigned char adobe_transform
+        int max_h_samp_factor
+        int max_v_samp_factor
+
         vector[ptr_struct_ci] comp_info
-        vector[string] markers
+        vector[struct_marker] markers
         vector[ptr_mat2D] coef_arrays
         vector[ptr_mat2D] spatial_arrays
         vector[ptr_mat2D] quant_tables

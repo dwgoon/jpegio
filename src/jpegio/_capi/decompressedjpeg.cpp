@@ -26,6 +26,7 @@ using jpegio::jstruct;
 using jpegio::mat2D;
 using jpegio::struct_comp_info;
 using jpegio::struct_huff_tables;
+using jpegio::struct_marker;
 
 #define DCTSIZE 8
 
@@ -238,11 +239,14 @@ read_markers(DecompressedJpegObject *self)
     if (lst == NULL)
         return -1;
     for (size_t i = 0; i < self->obj->markers.size(); i++) {
-        const std::string &m = self->obj->markers[i];
-        PyObject *b = PyBytes_FromStringAndSize(m.data(), (Py_ssize_t)m.size());
+        const struct_marker &m = self->obj->markers[i];
+        PyObject *b = PyBytes_FromStringAndSize(m.data.data(), (Py_ssize_t)m.data.size());
         if (b == NULL) { Py_DECREF(lst); return -1; }
-        if (PyList_Append(lst, b) < 0) { Py_DECREF(b); Py_DECREF(lst); return -1; }
+        PyObject *d = Py_BuildValue("{s:i,s:O}", "type", m.marker, "data", b);
         Py_DECREF(b);
+        if (d == NULL) { Py_DECREF(lst); return -1; }
+        if (PyList_Append(lst, d) < 0) { Py_DECREF(d); Py_DECREF(lst); return -1; }
+        Py_DECREF(d);
     }
     Py_SETREF(self->markers, lst);
     return 0;
@@ -402,18 +406,60 @@ DecompressedJpeg_write(DecompressedJpegObject *self, PyObject *args)
     std::string path(PyBytes_AS_STRING(path_bytes));
     Py_DECREF(path_bytes);
 
-    /* Copy the (possibly modified) markers back into the backend, preserving
-       their exact length (binary-safe). */
-    Py_ssize_t n_markers = PyList_Size(self->markers);
-    if (n_markers > 0) {
+    /* Sync (possibly modified) comp_info back so table-slot / sampling-factor
+       edits are honoured on write. */
+    {
+        Py_ssize_t nci = PyList_Size(self->comp_info);
+        Py_ssize_t ncb = (Py_ssize_t)self->obj->comp_info.size();
+        for (Py_ssize_t i = 0; i < nci && i < ncb; i++) {
+            PyObject *o = PyList_GetItem(self->comp_info, i);   /* borrowed */
+            struct_comp_info *ci = self->obj->comp_info[i];
+            const char *names[] = {"component_id", "h_samp_factor",
+                "v_samp_factor", "quant_tbl_no", "ac_tbl_no", "dc_tbl_no"};
+            int *fields[] = {&ci->component_id, &ci->h_samp_factor,
+                &ci->v_samp_factor, &ci->quant_tbl_no, &ci->ac_tbl_no, &ci->dc_tbl_no};
+            for (int k = 0; k < 6; k++) {
+                PyObject *v = PyObject_GetAttrString(o, names[k]);
+                if (v == NULL) return NULL;
+                long x = PyLong_AsLong(v);
+                Py_DECREF(v);
+                if (x == -1 && PyErr_Occurred()) return NULL;
+                *fields[k] = (int)x;
+            }
+        }
+    }
+
+    /* Sync (possibly modified) markers back, preserving type and exact length.
+       Each item is a dict {"type": int, "data": bytes}; a bare bytes object is
+       accepted as a COM marker for convenience. */
+    {
+        Py_ssize_t n_markers = PyList_Size(self->markers);
         self->obj->markers.clear();
         for (Py_ssize_t i = 0; i < n_markers; i++) {
             PyObject *item = PyList_GetItem(self->markers, i);   /* borrowed */
+            int mtype = JPEG_COM;
+            PyObject *data_obj = item;
+            if (PyDict_Check(item)) {
+                PyObject *t = PyDict_GetItemString(item, "type");   /* borrowed */
+                if (t != NULL) {
+                    long tv = PyLong_AsLong(t);
+                    if (tv == -1 && PyErr_Occurred()) return NULL;
+                    mtype = (int)tv;
+                }
+                data_obj = PyDict_GetItemString(item, "data");   /* borrowed */
+                if (data_obj == NULL) {
+                    PyErr_SetString(PyExc_ValueError, "marker dict missing 'data'");
+                    return NULL;
+                }
+            }
             char *buf;
             Py_ssize_t len;
-            if (PyBytes_AsStringAndSize(item, &buf, &len) < 0)
+            if (PyBytes_AsStringAndSize(data_obj, &buf, &len) < 0)
                 return NULL;
-            self->obj->markers.push_back(std::string(buf, (size_t)len));
+            struct_marker sm;
+            sm.marker = mtype;
+            sm.data.assign(buf, (size_t)len);
+            self->obj->markers.push_back(sm);
         }
     }
 
@@ -526,34 +572,66 @@ DecompressedJpeg_count_nnz_ac(DecompressedJpegObject *self, PyObject *Py_UNUSED(
 
 /* ------------------------------------------------------------- properties */
 
-#define UINT_GETTER(name, field) \
-static PyObject *DecompressedJpeg_get_##name(DecompressedJpegObject *self, void *closure) { \
+#define DJ_RO_UINT(name, field) \
+static PyObject *DJ_get_##name(DecompressedJpegObject *self, void *closure) { \
     if (self->obj == NULL) { PyErr_SetString(PyExc_AttributeError, "no JPEG loaded"); return NULL; } \
     return PyLong_FromUnsignedLong((unsigned long)self->obj->field); }
 
-#define INT_GETTER(name, field) \
-static PyObject *DecompressedJpeg_get_##name(DecompressedJpegObject *self, void *closure) { \
+#define DJ_RO_INT(name, field) \
+static PyObject *DJ_get_##name(DecompressedJpegObject *self, void *closure) { \
     if (self->obj == NULL) { PyErr_SetString(PyExc_AttributeError, "no JPEG loaded"); return NULL; } \
     return PyLong_FromLong((long)self->obj->field); }
 
-UINT_GETTER(image_width, image_width)
-UINT_GETTER(image_height, image_height)
-INT_GETTER(image_components, image_components)
-UINT_GETTER(image_color_space, image_color_space)
-INT_GETTER(num_components, num_components)
-UINT_GETTER(jpeg_color_space, jpeg_color_space)
-INT_GETTER(optimize_coding, optimize_coding)
-INT_GETTER(progressive_mode, progressive_mode)
+#define DJ_RW_UINT(name, field) DJ_RO_UINT(name, field) \
+static int DJ_set_##name(DecompressedJpegObject *self, PyObject *v, void *closure) { \
+    if (self->obj == NULL) { PyErr_SetString(PyExc_AttributeError, "no JPEG loaded"); return -1; } \
+    unsigned long x = PyLong_AsUnsignedLong(v); \
+    if (x == (unsigned long)-1 && PyErr_Occurred()) return -1; \
+    self->obj->field = (decltype(self->obj->field))x; return 0; }
+
+#define DJ_RW_INT(name, field) DJ_RO_INT(name, field) \
+static int DJ_set_##name(DecompressedJpegObject *self, PyObject *v, void *closure) { \
+    if (self->obj == NULL) { PyErr_SetString(PyExc_AttributeError, "no JPEG loaded"); return -1; } \
+    long x = PyLong_AsLong(v); \
+    if (x == -1 && PyErr_Occurred()) return -1; \
+    self->obj->field = (decltype(self->obj->field))x; return 0; }
+
+/* read-write (encoding / steganography-relevant) */
+DJ_RW_UINT(image_width, image_width)
+DJ_RW_UINT(image_height, image_height)
+DJ_RW_INT(image_components, image_components)
+DJ_RW_UINT(image_color_space, image_color_space)
+DJ_RW_INT(num_components, num_components)
+DJ_RW_UINT(jpeg_color_space, jpeg_color_space)
+DJ_RW_INT(optimize_coding, optimize_coding)
+DJ_RW_INT(progressive_mode, progressive_mode)
+DJ_RW_UINT(restart_interval, restart_interval)
+DJ_RW_INT(arith_code, arith_code)
+/* read-only (structural / marker-derived) */
+DJ_RO_INT(data_precision, data_precision)
+DJ_RO_INT(max_h_samp_factor, max_h_samp_factor)
+DJ_RO_INT(max_v_samp_factor, max_v_samp_factor)
+DJ_RO_INT(saw_jfif_marker, saw_jfif_marker)
+DJ_RO_INT(jfif_major_version, jfif_major_version)
+DJ_RO_INT(jfif_minor_version, jfif_minor_version)
+DJ_RO_INT(density_unit, density_unit)
+DJ_RO_UINT(x_density, x_density)
+DJ_RO_UINT(y_density, y_density)
+DJ_RO_INT(saw_adobe_marker, saw_adobe_marker)
+DJ_RO_INT(adobe_transform, adobe_transform)
+
+#define GS_RW(nm) {(char *)#nm, (getter)DJ_get_##nm, (setter)DJ_set_##nm, NULL, NULL}
+#define GS_RO(nm) {(char *)#nm, (getter)DJ_get_##nm, NULL, NULL, NULL}
 
 static PyGetSetDef DecompressedJpeg_getset[] = {
-    {(char *)"image_width", (getter)DecompressedJpeg_get_image_width, NULL, NULL, NULL},
-    {(char *)"image_height", (getter)DecompressedJpeg_get_image_height, NULL, NULL, NULL},
-    {(char *)"image_components", (getter)DecompressedJpeg_get_image_components, NULL, NULL, NULL},
-    {(char *)"image_color_space", (getter)DecompressedJpeg_get_image_color_space, NULL, NULL, NULL},
-    {(char *)"num_components", (getter)DecompressedJpeg_get_num_components, NULL, NULL, NULL},
-    {(char *)"jpeg_color_space", (getter)DecompressedJpeg_get_jpeg_color_space, NULL, NULL, NULL},
-    {(char *)"optimize_coding", (getter)DecompressedJpeg_get_optimize_coding, NULL, NULL, NULL},
-    {(char *)"progressive_mode", (getter)DecompressedJpeg_get_progressive_mode, NULL, NULL, NULL},
+    GS_RW(image_width), GS_RW(image_height), GS_RW(image_components),
+    GS_RW(image_color_space), GS_RW(num_components), GS_RW(jpeg_color_space),
+    GS_RW(optimize_coding), GS_RW(progressive_mode),
+    GS_RW(restart_interval), GS_RW(arith_code),
+    GS_RO(data_precision), GS_RO(max_h_samp_factor), GS_RO(max_v_samp_factor),
+    GS_RO(saw_jfif_marker), GS_RO(jfif_major_version), GS_RO(jfif_minor_version),
+    GS_RO(density_unit), GS_RO(x_density), GS_RO(y_density),
+    GS_RO(saw_adobe_marker), GS_RO(adobe_transform),
     {NULL}
 };
 

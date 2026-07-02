@@ -21,6 +21,7 @@ cdef class DecompressedJpeg:
     cdef _read_spatial_arrays(self)
 
     cdef _write_markers(self)
+    cdef _write_comp_info(self)
 
     cpdef public read(self, fpath, bint read_spatial=*)
     cpdef public write(self, fpath)
