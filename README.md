@@ -15,7 +15,10 @@ Pick the easiest method that works for you, in order of convenience.
 pip install pyjpegio
 ```
 
-(The distribution is published as `pyjpegio`; the import name stays `jpegio`, i.e. `import jpegio`.)
+> [!NOTE]
+> The distribution name on PyPI is `pyjpegio`, but the import name is still
+> `jpegio`. Install with `pip install pyjpegio`, then use `import jpegio` in
+> your code.
 
 **2. From GitHub:**
 
