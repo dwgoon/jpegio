@@ -17,9 +17,22 @@ from jpegio.componentinfo cimport ComponentInfo
 
 from libc.stdio cimport printf
 from libcpp.string cimport string
-from cpython.ref cimport Py_INCREF
+from cpython.ref cimport Py_INCREF, Py_DECREF
 
 cnp.import_array()
+
+
+cdef class _JstructOwner:
+    """Owns one read()'s jstruct and deletes it when the last reference (the
+    DecompressedJpeg and every NumPy array based on it) is gone. See the note in
+    decompressedjpeg.pxd."""
+    def __cinit__(self):
+        self.ptr = NULL
+
+    def __dealloc__(self):
+        if self.ptr != NULL:
+            del self.ptr
+            self.ptr = NULL
 
 
 cdef cnp.ndarray _own_mat2d(object owner, ptr_mat2D m):
@@ -31,7 +44,9 @@ cdef cnp.ndarray _own_mat2d(object owner, ptr_mat2D m):
     cdef cnp.ndarray arr = cnp.PyArray_SimpleNewFromData(
         2, dims, cnp.NPY_INT, <void *> m.GetBuffer())
     Py_INCREF(owner)
-    cnp.PyArray_SetBaseObject(arr, owner)
+    if cnp.PyArray_SetBaseObject(arr, owner) < 0:
+        Py_DECREF(owner)
+        raise RuntimeError("[JPEGIO] failed to set NumPy array base object")
     return arr
 
 
@@ -41,19 +56,22 @@ cdef cnp.ndarray _own_ivec(object owner, int* data, Py_ssize_t n):
     cdef cnp.ndarray arr = cnp.PyArray_SimpleNewFromData(
         1, &dim, cnp.NPY_INT, <void *> data if n > 0 else NULL)
     Py_INCREF(owner)
-    cnp.PyArray_SetBaseObject(arr, owner)
+    if cnp.PyArray_SetBaseObject(arr, owner) < 0:
+        Py_DECREF(owner)
+        raise RuntimeError("[JPEGIO] failed to set NumPy array base object")
     return arr
 
 
 cdef class DecompressedJpeg:
     
     def __cinit__(self):
-        self._jstruct_obj = NULL  # new jstruct()
+        self._jstruct_obj = NULL  # borrowed pointer into self._owner.ptr
+        self._owner = None
 
-    def __dealloc__(self):
-        if self._jstruct_obj != NULL:
-            del self._jstruct_obj
-    
+    # No __dealloc__: the jstruct is owned by self._owner (a _JstructOwner) and
+    # freed when the last reference to it (this object and any arrays based on
+    # it) is dropped, so there is nothing to free here.
+
     cdef _is_valid_fpath(self, fpath):
         if not os.path.isfile(fpath):
             raise FileNotFoundError("[JPEGIO] No such file: %s" % (fpath,))
@@ -65,12 +83,15 @@ cdef class DecompressedJpeg:
         fpath = os.fspath(fpath)
         self._is_valid_fpath(fpath)
 
-        if self._jstruct_obj != NULL:
-            del self._jstruct_obj
-            self._jstruct_obj = NULL
+        # Hand the fresh jstruct to a per-read owner. Arrays from any previous
+        # read() stay based on the previous owner, so they keep their own jstruct
+        # alive and never dangle after this reassignment (or after re-read()).
+        cdef _JstructOwner owner = _JstructOwner()
+        owner.ptr = new jstruct()
+        owner.ptr.jpeg_load(fpath.encode())  # on failure, owner frees ptr; self is untouched
 
-        self._jstruct_obj = new jstruct()
-        self._jstruct_obj.jpeg_load(fpath.encode())
+        self._owner = owner
+        self._jstruct_obj = owner.ptr        # borrowed pointer into owner
 
         self._read_comp_info()
         self._read_markers()
@@ -139,7 +160,7 @@ cdef class DecompressedJpeg:
         cdef Py_ssize_t i
         for i in range(self._jstruct_obj.quant_tables.size()):
             ptr_mat2D_obj = self._jstruct_obj.quant_tables[i]
-            self.quant_tables.append(_own_mat2d(self, ptr_mat2D_obj))
+            self.quant_tables.append(_own_mat2d(self._owner, ptr_mat2D_obj))
 
     cdef _read_huffman_tables(self):
         """Connect the buffer of Huffman tables to numpy.ndarray.
@@ -154,14 +175,14 @@ cdef class DecompressedJpeg:
         for i in range(self._jstruct_obj.ac_huff_tables.size()):
             ptr_ht = self._jstruct_obj.ac_huff_tables[i]
             self.ac_huff_tables.append(
-                {"counts": _own_ivec(self, &ptr_ht.counts[0], ptr_ht.counts.size()),
-                 "symbols": _own_ivec(self, &ptr_ht.symbols[0], ptr_ht.symbols.size())})
+                {"counts": _own_ivec(self._owner, &ptr_ht.counts[0], ptr_ht.counts.size()),
+                 "symbols": _own_ivec(self._owner, &ptr_ht.symbols[0], ptr_ht.symbols.size())})
 
         for i in range(self._jstruct_obj.dc_huff_tables.size()):
             ptr_ht = self._jstruct_obj.dc_huff_tables[i]
             self.dc_huff_tables.append(
-                {"counts": _own_ivec(self, &ptr_ht.counts[0], ptr_ht.counts.size()),
-                 "symbols": _own_ivec(self, &ptr_ht.symbols[0], ptr_ht.symbols.size())})
+                {"counts": _own_ivec(self._owner, &ptr_ht.counts[0], ptr_ht.counts.size()),
+                 "symbols": _own_ivec(self._owner, &ptr_ht.symbols[0], ptr_ht.symbols.size())})
 
     cdef _read_dct_coefficients(self):
         """Connect the buffer of DCT coefficients to numpy.ndarray.
@@ -171,7 +192,7 @@ cdef class DecompressedJpeg:
         cdef Py_ssize_t i
         for i in range(self._jstruct_obj.coef_arrays.size()):
             ptr_mat2D_obj = self._jstruct_obj.coef_arrays[i]
-            self.coef_arrays.append(_own_mat2d(self, ptr_mat2D_obj))
+            self.coef_arrays.append(_own_mat2d(self._owner, ptr_mat2D_obj))
 
     cdef _read_spatial_arrays(self):
         """Connect the buffer of spatial (pixel-domain) arrays to numpy.ndarray.
@@ -181,10 +202,12 @@ cdef class DecompressedJpeg:
         cdef Py_ssize_t i
         for i in range(self._jstruct_obj.spatial_arrays.size()):
             ptr_mat2D_obj = self._jstruct_obj.spatial_arrays[i]
-            self.spatial_arrays.append(_own_mat2d(self, ptr_mat2D_obj))
+            self.spatial_arrays.append(_own_mat2d(self._owner, ptr_mat2D_obj))
 
 
     cpdef write(self, fpath):
+        if self._jstruct_obj == NULL:
+            raise RuntimeError("[JPEGIO] no JPEG has been read yet")
         self._write_comp_info()
         self._write_markers()
         self._jstruct_obj.jpeg_write(fpath.encode(), self.optimize_coding)

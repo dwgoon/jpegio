@@ -420,6 +420,23 @@ void jstruct::jpeg_write(std::string file_path, bool optimize_coding)
 	JBLOCKARRAY buffer;
 	JCOEFPTR bufptr;
 
+	/* Validate num_components before it drives any loop below. It is exposed as
+	   a writable property, so an out-of-range value would otherwise index past
+	   the ends of comp_info / coef_arrays and past libjpeg's fixed-size
+	   cinfo.comp_info[MAX_COMPONENTS], causing out-of-bounds reads and writes.
+	   Done up front, before any libjpeg/file resource is allocated. */
+	if (this->num_components < 1 || this->num_components > MAX_COMPONENTS ||
+	    (size_t)this->num_components > this->comp_info.size() ||
+	    (size_t)this->num_components > this->coef_arrays.size())
+	{
+		throw std::runtime_error(
+			"[JSTRUCT] num_components (" + std::to_string(this->num_components) +
+			") is out of range: it must be in [1, " + std::to_string(MAX_COMPONENTS) +
+			"] and not exceed the number of comp_info (" +
+			std::to_string(this->comp_info.size()) + ") or coef_arrays (" +
+			std::to_string(this->coef_arrays.size()) + ") entries.");
+	}
+
 	/* Arm the error handler before any libjpeg call. */
 	cinfo.err = jpeg_std_error(&jerr.pub);
 	jerr.pub.error_exit = jpegio_error_exit;
