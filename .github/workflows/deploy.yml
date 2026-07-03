@@ -6,39 +6,91 @@ on:
   push:
     branches:
       - main
+      - "0.3.0"
+    tags:
+      - "v*"
   release:
     types:
       - published
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+  # Fast cross-platform build + test (one Python per OS) for quick feedback.
+  smoke:
+    name: Smoke build+test (py3.12) on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-11]
+        os: [ubuntu-latest, windows-latest, macos-14]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install NASM (Linux, for SIMD)
+        if: runner.os == 'Linux'
+        continue-on-error: true
+        run: sudo apt-get update && sudo apt-get install -y nasm
+
+      - name: Install NASM (macOS, for SIMD)
+        if: runner.os == 'macOS'
+        continue-on-error: true
+        run: brew install nasm
+
+      - name: Install NASM (Windows, for SIMD)
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        run: choco install nasm -y
+
+      - name: Build and install (default C-API backend)
+        run: pip install -v .
+
+      - name: Run tests
+        run: |
+          pip install pytest scipy
+          pytest tests/test_coefficients.py tests/test_decompressedjpeg.py
+
+  build_wheels:
+    name: Wheels on ${{ matrix.os }}
+    needs: [smoke]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # macos-14 is Apple Silicon; Intel macOS wheels are cross-compiled there
+        # (macos-13 Intel runners are being retired and queue indefinitely).
+        os: [ubuntu-latest, windows-latest, macos-14]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.15.0
+        uses: pypa/cibuildwheel@v2.23.3
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
   build_sdist:
-    name: Build source distribution
+    name: Source distribution
+    needs: [smoke]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build sdist
         run: pipx run build --sdist
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: cibw-sdist
           path: dist/*.tar.gz
 
   upload_pypi:
@@ -48,14 +100,31 @@ jobs:
     permissions:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'
-    # or, alternatively, upload to PyPI on every tag starting with 'v' (remove on: release above to use this)
-    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          # unpacks default artifact into dist/
-          # if `name: artifact` is omitted, the action will create extra parent dir
-          name: artifact
+          pattern: cibw-*
+          merge-multiple: true
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  # Manual dry-run publish to TestPyPI. Trigger via the Actions tab
+  # ("Run workflow") to validate the release flow before a real PyPI release.
+  upload_testpypi:
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cibw-*
+          merge-multiple: true
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/

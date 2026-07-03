@@ -1,0 +1,22 @@
+# Source files needed to build from an sdist.
+recursive-include src/jpegio *.pyx *.pxd *.py *.h *.cpp
+
+# Vendored libjpeg-turbo source (compiled from source at build time).
+graft third_party/libjpeg-turbo
+
+# Metadata, licenses and attribution (required for redistribution).
+include LICENSE
+include NOTICE
+include README.md
+include RELEASE.md
+include requirements.txt
+include requirements_dev.txt
+
+# Tests (data files are intentionally excluded to keep the sdist small).
+recursive-include tests *.py
+
+# Never ship build artifacts or caches.
+prune build
+prune dist
+prune examples/.ipynb_checkpoints
+global-exclude __pycache__ *.pyc *.pyo *.so *.pyd *.o *.obj

@@ -1,3 +1,85 @@
 [build-system]
-requires = ["setuptools", "wheel", "Cython","numpy"]
+requires = [
+    "setuptools>=64",
+    "wheel",
+    "numpy>=2.0",
+    "cmake>=3.15",
+    "ninja; platform_system!='Windows'",
+    # Cython is only needed for the optional `JPEGIO_BACKEND=cython` build:
+    # "Cython>=3.0",
+]
+build-backend = "setuptools.build_meta"
 
+[project]
+name = "jpegio"
+version = "0.3.0"
+description = "A python package for accessing the internal variables of the JPEG file format."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Daewon Lee", email = "daewon4you@gmail.com" },
+]
+keywords = ["jpeg", "dct", "coefficient", "quantization", "libjpeg", "steganography"]
+dependencies = [
+    "numpy>=1.23",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: C++",
+    "Programming Language :: Cython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+[project.urls]
+Homepage = "https://github.com/dwgoon/jpegio"
+Repository = "https://github.com/dwgoon/jpegio"
+Issues = "https://github.com/dwgoon/jpegio/issues"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+packages = ["jpegio"]
+# The wheel statically links libjpeg-turbo, so its license text is bundled into
+# the wheel metadata (.dist-info/licenses/). The turbo *source* ships only in
+# the sdist, via MANIFEST.in.
+license-files = [
+    "LICENSE",
+    "NOTICE",
+    "third_party/libjpeg-turbo/LICENSE.md",
+    "third_party/libjpeg-turbo/README.ijg",
+]
+
+[tool.cibuildwheel]
+# Build CPython wheels for 3.9–3.13; skip 32-bit and musl for now.
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+skip = "*-win32 *-manylinux_i686 *-musllinux_*"
+build-frontend = "build"
+# The self-contained tests need only pytest. test_decompressedjpeg additionally
+# needs scipy + the MATLAB .mat references and is run locally, not in CI (recent
+# scipy has no manylinux2014 wheel, which would force a from-source build here).
+test-requires = ["pytest"]
+test-command = "pytest {project}/tests/test_coefficients.py {project}/tests/test_steg.py"
+
+[tool.cibuildwheel.linux]
+# NASM enables libjpeg-turbo SIMD; CMake/Ninja come from the build deps.
+before-all = "yum install -y nasm || apt-get update && apt-get install -y nasm || true"
+
+[tool.cibuildwheel.macos]
+# Build Intel and Apple-Silicon wheels on the macos-14 runner (x86_64 is
+# cross-compiled; cibuildwheel skips running its tests on the other arch).
+archs = ["x86_64", "arm64"]
+before-all = "brew install nasm || true"
+
+# On Windows the extension statically links libjpeg-turbo, so there are no
+# external DLLs to bundle and no wheel-repair step is required.
