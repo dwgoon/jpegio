@@ -11,7 +11,10 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "jpegio"
+# Distribution name on PyPI (`pip install pyjpegio`); the import package stays
+# `jpegio` (`import jpegio`). The plain `jpegio` name on PyPI is held by an
+# abandoned 2021 fork, so this project publishes under `pyjpegio`.
+name = "pyjpegio"
 version = "0.3.0"
 description = "A python package for accessing the internal variables of the JPEG file format."
 readme = "README.md"
