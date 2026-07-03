@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - main
-      - "0.3.0dev0"
+      - "0.3.0"
     tags:
       - "v*"
   release:
