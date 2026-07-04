@@ -13,8 +13,12 @@ on:
     types:
       - published
 
+# Include the event name in the group so the two runs a release fires (the tag
+# push and the `release: published` event share the same ref) don't cancel each
+# other -- otherwise the publishing `release` run can be killed by the tag-push
+# run, which does not publish.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -108,6 +112,10 @@ jobs:
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Re-releasing an already-published version skips its existing files
+          # instead of failing the job.
+          skip-existing: true
 
   # Manual dry-run publish to TestPyPI. Trigger via the Actions tab
   # ("Run workflow") to validate the release flow before a real PyPI release.
@@ -128,3 +136,4 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
